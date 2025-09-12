@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chocolat Chat</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f2f5; }
+
+/* Header + menu */
+header { background:#1e1e2f; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; }
+nav ul { list-style:none; margin:0; padding:0; display:flex; gap:20px; }
+nav ul li { position:relative; }
+nav ul li a { color:white; text-decoration:none; }
+nav ul li ul { display:none; position:absolute; top:30px; left:0; background:#333; padding:10px; border-radius:5px; }
+nav ul li:hover ul { display:block; }
+nav ul li ul li { margin:0; }
+nav ul li ul li a { color:white; }
+
+/* Layout */
+.container { display:flex; height: calc(100vh - 120px); }
+.sidebar { width:220px; background:#fff; padding:10px; border-right:1px solid #ccc; overflow-y:auto; }
+.sidebar h3 { margin-top:0; }
+.group { padding:6px; margin-bottom:5px; border-radius:5px; cursor:pointer; background:#f0f0f0; display:flex; justify-content:space-between; align-items:center; }
+.group.active { background:#1e1e2f; color:white; }
+
+/* Chat */
+.chat { flex:1; display:flex; flex-direction:column; padding:10px; }
+#chatMessages { flex:1; overflow-y:auto; padding:10px; background:#f9f9f9; border-radius:5px; margin-bottom:10px; }
+.message { background:white; padding:8px; margin-bottom:8px; border-radius:5px; position:relative; }
+.message .meta { font-size:12px; color:#666; margin-bottom:3px; }
+.message img, .message video { max-width:100%; border-radius:5px; margin-top:5px; }
+.actions { position:absolute; top:4px; right:4px; display:flex; gap:4px; }
+.actions button { border:0; background:transparent; cursor:pointer; font-size:14px; }
+
+/* Input */
+.chat-input { display:flex; gap:8px; }
+.chat-input input { flex:1; padding:8px; border-radius:5px; border:1px solid #ccc; }
+.chat-input button { padding:8px 12px; border:none; border-radius:5px; background:#1e1e2f; color:white; cursor:pointer; }
+
+/* Admin */
+.admin-panel { margin-top:15px; padding:10px; background:#e0e0e0; border-radius:5px; }
+.admin-panel input { padding:5px; margin-bottom:5px; }
+.admin-panel button { padding:5px 10px; margin:3px 0; }
+
+/* Announcement */
+.announcement-bar { background:#fff2cc; color:#333; padding:5px 10px; border-radius:5px; margin-bottom:10px; overflow:hidden; white-space:nowrap; }
+.announcement-bar span { display:inline-block; padding-left:100%; animation:scroll 15s linear infinite; }
+@keyframes scroll { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
+
+/* Footer */
+footer { background:#1e1e2f; color:white; text-align:center; padding:10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chocolat Chat</h1>
+  <nav>
+    <ul>
+      <li><a href="#">Menu</a>
+        <ul>
+          <li><a href="#" onclick="showGroups()">Groupes</a></li>
+          <li><a href="#" onclick="showChat()">Chat</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<div class="container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>Groupes</h3>
+    <div id="groupList"></div>
+    <input type="text" id="newGroup" placeholder="Nom du nouveau groupe">
+    <button onclick="createGroup()">Créer</button>
+
+    <div id="adminPanel" class="admin-panel" style="display:none;">
+      <h4>Admin - Utilisateurs</h4>
+      <input type="text" id="targetUserId" placeholder="ID utilisateur">
+      <button onclick="blockUser()">Bloquer</button>
+      <button onclick="unblockUser()">Débloquer</button>
+      <div id="blockedList"></div>
+
+      <h4>Annonce</h4>
+      <input type="text" id="announcementInput" placeholder="Texte annonce">
+      <button onclick="postAnnouncement()">Publier</button>
+      <button onclick="deleteAnnouncement()">Supprimer</button>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat">
+    <div id="announcementDisplay" class="announcement-bar" style="display:none;">
+      <span id="announcementText"></span>
+    </div>
+    <h3 id="currentGroupTitle">Sélectionnez un groupe</h3>
+    <div id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Écrire un message...">
+      <button onclick="sendMessage()">Envoyer</button>
+      <button onclick="addMedia()">📎</button>
+      <input type="file" id="mediaInput" style="display:none;" accept="image/*,video/*" onchange="sendMedia(event)">
+    </div>
+  </div>
+</div>
+
+<footer>
+&copy; 2025 Chocolat Chat. Tous droits réservés.
+</footer>
+
+<script>
+// ---------------- Variables ----------------
+let userId = localStorage.getItem('userId') || 'User'+Math.floor(Math.random()*10000);
+localStorage.setItem('userId', userId);
+const adminId = 'admin123';
+let blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
+let groups = JSON.parse(localStorage.getItem('groups') || '[]');
+let currentGroupIndex = null;
+let globalAnnouncement = localStorage.getItem('globalAnnouncement') || '';
+
+const groupListEl = document.getElementById('groupList');
+const chatMessagesEl = document.getElementById('chatMessages');
+const currentGroupTitleEl = document.getElementById('currentGroupTitle');
+
+// ---------------- Helpers ----------------
+function isAdmin(){ return userId===adminId; }
+function isBlocked(uid){ return blockedUsers.includes(uid); }
+function saveAll(){ localStorage.setItem('groups',JSON.stringify(groups)); }
+function formatTime(ts){ const d=new Date(ts); return d.toLocaleTimeString(); }
+
+// ---------------- Groupes ----------------
+function renderGroups(){
+  groupListEl.innerHTML='';
+  groups.forEach((g,i)=>{
+    const div=document.createElement('div');
+    div.className='group'+(currentGroupIndex===i?' active':'');
+    div.innerHTML=`<span>${g.name}</span> <button onclick="deleteGroup(${i})">❌</button>`;
+    div.onclick=(e)=>{ if(e.target.tagName!=='BUTTON'){ currentGroupIndex=i; renderChat(); renderGroups(); }};
+    groupListEl.appendChild(div);
+  });
+  if(isAdmin()) document.getElementById('adminPanel').style.display='block';
+  updateBlockedList();
+}
+function createGroup(){
+  const name=document.getElementById('newGroup').value.trim();
+  if(!name) return;
+  groups.push({name, messages:[]});
+  saveAll();
+  document.getElementById('newGroup').value='';
+  renderGroups();
+}
+function deleteGroup(i){
+  if(!confirm("Supprimer ce groupe ?")) return;
+  groups.splice(i,1);
+  saveAll();
+  if(currentGroupIndex===i) currentGroupIndex=null;
+  renderGroups(); renderChat();
+}
+
+// ---------------- Chat ----------------
+function renderChat(){
+  if(currentGroupIndex===null || groups.length===0){
+    currentGroupTitleEl.textContent='Aucun groupe';
+    chatMessagesEl.innerHTML='<div style="color:#666">Crée un groupe pour commencer.</div>';
+    return;
+  }
+  const group=groups[currentGroupIndex];
+  currentGroupTitleEl.textContent=group.name;
+
+  chatMessagesEl.innerHTML='';
+  group.messages.forEach((m,idx)=>{
+    const div=document.createElement('div'); div.className='message';
+    const meta=document.createElement('div'); meta.className='meta';
+    meta.textContent=`${m.user} • ${formatTime(m.timestamp)}`;
+    div.appendChild(meta);
+
+    if(m.text){ div.appendChild(document.createTextNode(m.text)); }
+    if(m.media){
+      if(m.media.type.startsWith('image')){
+        const img=document.createElement('img'); img.src=m.media.url; div.appendChild(img);
+      } else if(m.media.type.startsWith('video')){
+        const vid=document.createElement('video'); vid.src=m.media.url; vid.controls=true; div.appendChild(vid);
+      }
+    }
+
+    // Boutons éditer/supprimer
+    if(isAdmin() || m.user===userId){
+      const actions=document.createElement('div'); actions.className='actions';
+      if(m.text){
+        const editBtn=document.createElement('button'); editBtn.textContent='✏️'; editBtn.onclick=()=>editMessage(idx); actions.appendChild(editBtn);
+      }
+      const delBtn=document.createElement('button'); delBtn.textContent='🗑️'; delBtn.onclick=()=>deleteMessage(idx); actions.appendChild(delBtn);
+      div.appendChild(actions);
+    }
+    chatMessagesEl.appendChild(div);
+  });
+  chatMessagesEl.scrollTop=chatMessagesEl.scrollHeight;
+  renderAnnouncement();
+}
+function sendMessage(){
+  if(currentGroupIndex===null || isBlocked(userId)) return;
+  const txt=document.getElementById('chatInput').value.trim();
+  if(!txt) return;
+  groups[currentGroupIndex].messages.push({id:Date.now(), user:userId, text:txt, media:null, timestamp:Date.now()});
+  saveAll();
+  document.getElementById('chatInput').value='';
+  renderChat();
+}
+function addMedia(){ document.getElementById('mediaInput').click(); }
+function sendMedia(e){
+  if(currentGroupIndex===null || isBlocked(userId)) return;
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    groups[currentGroupIndex].messages.push({id:Date.now(), user:userId, text:'', media:{url:ev.target.result, type:file.type}, timestamp:Date.now()});
+    saveAll(); renderChat();
+  }
+  reader.readAsDataURL(file);
+}
+
+// ---------------- Edit / Delete messages ----------------
+function editMessage(idx){
+  const msg=groups[currentGroupIndex].messages[idx];
+  const newText=prompt("Modifier le message :", msg.text);
+  if(newText!==null){ msg.text=newText.trim(); saveAll(); renderChat(); }
+}
+function deleteMessage(idx){
+  if(!confirm("Supprimer ce message ?")) return;
+  groups[currentGroupIndex].messages.splice(idx,1); saveAll(); renderChat();
+}
+
+// ---------------- Admin ----------------
+function updateBlockedList(){ document.getElementById('blockedList').textContent='Bloqués : '+blockedUsers.join(', '); }
+function blockUser(){ const t=document.getElementById('targetUserId').value.trim(); if(!t) return; if(!blockedUsers.includes(t)){ blockedUsers.push(t); localStorage.setItem('blockedUsers',JSON.stringify(blockedUsers)); updateBlockedList(); } }
+function unblockUser(){ const t=document.getElementById('targetUserId').value.trim(); if(!t) return; blockedUsers=blockedUsers.filter(u=>u!==t); localStorage.setItem('blockedUsers',JSON.stringify(blockedUsers)); updateBlockedList(); }
+
+// ---------------- Annonce ----------------
+function renderAnnouncement(){
+  const bar=document.getElementById('announcementDisplay');
+  const span=document.getElementById('announcementText');
+  if(globalAnnouncement){ span.textContent=globalAnnouncement; bar.style.display='block'; }
+  else bar.style.display='none';
+}
+function postAnnouncement(){ if(!isAdmin()) return; const txt=document.getElementById('announcementInput').value.trim(); if(!txt) return; globalAnnouncement=txt; localStorage.setItem('globalAnnouncement',txt); renderAnnouncement(); }
+function deleteAnnouncement(){ if(!isAdmin()) return; globalAnnouncement=''; localStorage.removeItem('globalAnnouncement'); renderAnnouncement(); }
+
+// ---------------- Navigation ----------------
+function showGroups(){ document.querySelector('.sidebar').style.display='block'; document.querySelector('.chat').style.display='none'; }
+function showChat(){ document.querySelector('.sidebar').style.display='block'; document.querySelector('.chat').style.display='flex'; }
+
+// ---------------- Init ----------------
+renderGroups(); renderChat();
+</script>
+
+</body>
+</html>
