@@ -3,183 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>chocolat</title>
+<title>Mini Messenger Supabase</title>
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f2f5; }
-header { background:#1e1e2f; color:white; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; position:relative; }
-header .left-section { display:flex; align-items:center; gap:15px; }
-header .time-display { margin-right:15px; cursor:pointer; }
+header { background:#1e1e2f; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; }
+nav { display:flex; gap:20px; }
 nav ul { list-style:none; display:flex; gap:20px; margin:0; padding:0; }
 nav ul li { position:relative; }
-nav ul li a { color:white; text-decoration:none; cursor:pointer; }
+nav ul li a { color:white; text-decoration:none; cursor:pointer; padding:5px 10px; display:block; }
 nav ul li ul { display:none; position:absolute; top:30px; left:0; background-color:#333; padding:10px; border-radius:5px; max-height:200px; overflow-y:auto; }
 nav ul li:hover ul { display:block; }
-nav ul li ul li { margin:0; }
-nav ul li ul li a { color:white; }
-.right-menu { display:flex; gap:10px; overflow-x:auto; max-width:300px; }
-.right-menu a { background:#444; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; white-space:nowrap; }
 footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
-.announcement-bar, .announcement-bar2 { color:#000; padding:10px; overflow:hidden; white-space:nowrap; }
-.announcement-bar { background:#ffcc00; }
-.announcement-bar2 { background:#00ccff; }
-.announcement-text, .announcement-text2 { display:inline-block; padding-left:100%; animation: marquee 15s linear infinite; }
+.announcement-bar { background:#ffcc00; color:#000; padding:10px; overflow:hidden; white-space:nowrap; }
+.announcement-bar.second { background:#00ccff; }
+.announcement-text { display:inline-block; padding-left:100%; animation: marquee 15s linear infinite; }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 .chat-container { padding:20px; }
-.chat-message { background:white; padding:10px; margin-bottom:10px; border-radius:5px; position:relative; }
-.chat-message .actions { position:absolute; top:5px; right:5px; display:flex; gap:5px; }
+.chat-message { background:white; padding:10px; margin-bottom:10px; border-radius:5px; position:relative; word-break:break-word; }
+.chat-message .actions { position:absolute; top:0; right:0; display:flex; gap:5px; }
 .chat-message img, .chat-message video, .chat-message audio, .chat-message iframe { max-width:100%; border-radius:5px; margin-top:5px; }
 .chat-input { display:flex; gap:10px; margin-top:10px; }
 .chat-input input { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
 .chat-input button { padding:10px 15px; border:none; border-radius:5px; background:#1e1e2f; color:white; cursor:pointer; }
-.group-list { margin-bottom:20px; }
-.group { background:white; padding:10px; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; }
-.admin-panel { margin:20px; padding:10px; background:#e0e0e0; border-radius:5px; overflow:auto; max-height:400px; }
+.group-list { margin-bottom:20px; display:flex; flex-direction:column; gap:5px; }
+.group { background:white; padding:10px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; }
+.admin-panel { margin:20px; padding:10px; background:#e0e0e0; border-radius:5px; }
 .admin-panel input, .admin-panel button { margin:5px 0; }
 .like-button { background:#eee; border:none; padding:2px 5px; border-radius:3px; cursor:pointer; }
 .like-button.liked { background:#ffcc00; }
-.right-menu-container { overflow-x:auto; max-width:400px; display:flex; gap:5px; }
-.user-id { cursor:pointer; color:blue; }
-.time-menu { position:absolute; top:40px; left:0; background:#333; color:white; border-radius:5px; display:none; max-height:200px; overflow-y:auto; }
-.time-menu div { padding:5px; cursor:pointer; }
-.time-menu div:hover { background:#444; }
-.counter { font-weight:bold; margin-left:5px; color:#555; }
-.search-input { margin-bottom:10px; padding:5px; width:100%; border-radius:5px; border:1px solid #ccc; }
+.menu-scroll { display:flex; overflow-x:auto; gap:10px; padding:5px 0; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
 
 <header>
-<div class="left-section">
-<div class="time-display" id="timeDisplay">Heure</div>
-<div class="time-menu" id="timeMenu"></div>
-<h1>chocolat </h1>
+<div>
+<h1>Mini Messenger</h1>
+<div id="timeDisplay">Heure locale: --:--:--</div>
 </div>
 <nav>
 <ul>
-<li><a href="#">Menu</a>
+<li><a>Navigation</a>
 <ul>
 <li><a onclick="showSection('groups')">Groupes</a></li>
 <li><a onclick="showSection('chat')">Chat</a></li>
-<li><a onclick="showSection('private')">Chat Privé</a></li>
+<li><a onclick="showSection('private')">Privé</a></li>
 </ul>
+</li>
+<li><a>Liens</a>
+<ul class="menu-scroll" id="externalLinks"></ul>
 </li>
 </ul>
 </nav>
-<div class="right-menu-container" id="rightMenu"></div>
 </header>
 
 <div id="announcementBar" class="announcement-bar" style="display:none;"><span id="announcementText" class="announcement-text"></span></div>
-<div id="announcementBar2" class="announcement-bar2" style="display:none;"><span id="announcementText2" class="announcement-text2"></span></div>
+<div id="announcementBar2" class="announcement-bar second" style="display:none;"><span id="announcementText2" class="announcement-text"></span></div>
 
 <section id="groups" class="chat-container">
-<h2>Mes Groupes</h2>
-<input class="search-input" type="text" id="searchGroup" placeholder="Rechercher un groupe..." onkeyup="searchGroups()">
+<h2>Mes Groupes <input type="text" id="searchGroup" placeholder="Rechercher un groupe..." onkeyup="searchGroups()"></h2>
 <div class="group-list" id="groupList"></div>
 <input type="text" id="newGroup" placeholder="Nom du nouveau groupe">
 <button onclick="createGroup()">Créer Groupe</button>
 </section>
 
-<section id="chat" class="chat-container" style="display:none;">
-<h2 id="currentGroupTitle">Chat de Groupe</h2>
+<section id="chat" class="chat-container" style="display:none">
+<h2 id="currentGroupTitle">Chat</h2>
 <div id="chatMessages"></div>
 <div class="chat-input">
 <input type="text" id="chatInput" placeholder="Écrire un message...">
 <button onclick="sendMessage()">Envoyer</button>
-<button onclick="addMedia('chat')">📎</button>
-<input type="file" id="mediaInput" style="display:none;" accept="image/*,video/*,audio/*,.pdf" onchange="sendMedia(event,'chat')">
+<button onclick="addMedia()">📎</button>
+<input type="file" id="mediaInput" style="display:none" onchange="sendMedia(event)" accept="image/*,video/*,audio/*,.pdf">
 </div>
 </section>
 
-<section id="private" class="chat-container" style="display:none;">
-<h2 id="privateChatTitle">Chat Privé</h2>
-<div class="search-input" id="searchPrivate"></div>
+<section id="private" class="chat-container" style="display:none">
+<h2 id="currentPrivateTitle">Chat Privé</h2>
 <div id="privateMessages"></div>
 <div class="chat-input">
 <input type="text" id="privateInput" placeholder="Écrire un message...">
-<button onclick="sendPrivateMessage()">Envoyer</button>
-<button onclick="addMedia('private')">📎</button>
-<input type="file" id="privateMediaInput" style="display:none;" accept="image/*,video/*,audio/*,.pdf" onchange="sendMedia(event,'private')">
-<button onclick="closePrivateChat()">Fermer</button>
+<button onclick="sendPrivate()">Envoyer</button>
+<input type="file" id="privateMediaInput" style="display:none" onchange="sendPrivateMedia(event)" accept="image/*,video/*,audio/*,.pdf">
 </div>
 </section>
 
-<div id="adminPanel" class="admin-panel" style="display:none;">
-<h3>Admin - Tableau de bord</h3>
-<input type="text" id="targetUserId" placeholder="User ID à bloquer/débloquer">
+<div class="admin-panel" id="adminPanel" style="display:none">
+<h3>Admin</h3>
+<input type="text" id="targetUser" placeholder="ID utilisateur à bloquer/débloquer">
 <button onclick="blockUser()">Bloquer</button>
 <button onclick="unblockUser()">Débloquer</button>
 <div id="blockedList"></div>
 <hr>
-<input type="text" id="announcementInput" placeholder="Texte annonce 1">
-<button onclick="setAnnouncement()">Publier</button>
-<button onclick="clearAnnouncement()">Supprimer</button>
-<input type="text" id="announcementInput2" placeholder="Texte annonce 2">
-<button onclick="setAnnouncement2()">Publier</button>
-<button onclick="clearAnnouncement2()">Supprimer</button>
+<input type="text" id="announcementInput" placeholder="Annonce 1">
+<input type="color" id="announcementColor" value="#ffcc00">
+<button onclick="setAnnouncement(1)">Publier</button>
+<button onclick="clearAnnouncement(1)">Supprimer</button>
+<br>
+<input type="text" id="announcementInput2" placeholder="Annonce 2">
+<input type="color" id="announcementColor2" value="#00ccff">
+<button onclick="setAnnouncement(2)">Publier</button>
+<button onclick="clearAnnouncement(2)">Supprimer</button>
 <hr>
-<h4>Menu droit</h4>
-<input type="text" id="menuRightInput" placeholder="Nom du lien">
-<input type="text" id="menuRightLink" placeholder="URL">
-<button onclick="addRightMenu()">Ajouter</button>
-<div id="menuRightList"></div>
+<h4>Gérer liens menu droit</h4>
+<input type="text" id="linkName" placeholder="Nom du lien">
+<input type="text" id="linkURL" placeholder="URL du lien">
+<button onclick="addLink()">Ajouter</button>
+<div id="linkList" class="menu-scroll"></div>
 </div>
 
 <div class="admin-panel">
-<input type="text" id="adminCodeInput" placeholder="Entrer code admin">
-<button onclick="checkAdmin()">Valider code admin</button>
+<input type="text" id="adminCodeInput" placeholder="Code admin">
+<button onclick="checkAdmin()">Valider</button>
 </div>
 
-<footer>&copy; 2025 Lesfacilitateurs. Tous droits réservés.</footer>
+<footer>&copy; 2025 Mini Messenger</footer>
 
 <script>
-let userId = localStorage.getItem('userId'); if(!userId){ userId='User'+Math.floor(Math.random()*10000); localStorage.setItem('userId',userId);}
-const adminCode='233233'; let isUserAdmin=false; let blockedUsers=JSON.parse(localStorage.getItem('blockedUsers')||'[]');
-let groups=JSON.parse(localStorage.getItem('groups')||'[]');
-let rightMenu=JSON.parse(localStorage.getItem('rightMenu')||'[]');
-let currentGroup=null; let privateTarget=null;
-let privateMessages=JSON.parse(localStorage.getItem('privateMessages')||'{}');
-let globalAnnouncement=localStorage.getItem('announcement')||'';
-let globalAnnouncement2=localStorage.getItem('announcement2')||'';
+const SUPABASE_URL="TA_SUPABASE_URL"; 
+const SUPABASE_ANON_KEY="TA_SUPABASE_ANON_KEY"; 
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const countries=[{name:'France',zone:'Europe/Paris'},{name:'USA',zone:'America/New_York'},{name:'Japon',zone:'Asia/Tokyo'},{name:'Brésil',zone:'America/Sao_Paulo'}];
-let selectedZone='Europe/Paris';
+let userId=null;
+let isAdmin=false;
+let currentGroup=null;
+let currentPrivate=null;
+let blocked=[];
 
-function isAdmin(){ return isUserAdmin; }
-function isBlocked(uid){ return blockedUsers.includes(uid); }
-function showSection(id){ document.getElementById('groups').style.display=id==='groups'?'block':'none'; document.getElementById('chat').style.display=id==='chat'?'block':'none'; document.getElementById('private').style.display=id==='private'?'block':'none'; }
-function checkAdmin(){ const code=document.getElementById('adminCodeInput').value.trim(); if(code===adminCode){isUserAdmin=true; alert("Vous êtes admin !"); document.getElementById('adminPanel').style.display='block'; renderGroups(); renderRightMenu(); renderAnnouncement(); renderAnnouncement2();} else alert("Code incorrect."); document.getElementById('adminCodeInput').value=''; }
-function updateBlockedList(){ document.getElementById('blockedList').textContent=blockedUsers.length?"Bloqués: "+blockedUsers.join(', '):"Aucun utilisateur bloqué"; }
-function blockUser(){ const t=document.getElementById('targetUserId').value.trim(); if(t&&!blockedUsers.includes(t)){blockedUsers.push(t); localStorage.setItem('blockedUsers',JSON.stringify(blockedUsers)); updateBlockedList();} }
-function unblockUser(){ const t=document.getElementById('targetUserId').value.trim(); blockedUsers=blockedUsers.filter(x=>x!==t); localStorage.setItem('blockedUsers',JSON.stringify(blockedUsers)); updateBlockedList(); }
-function renderAnnouncement(){ const bar=document.getElementById('announcementBar'); const text=document.getElementById('announcementText'); if(globalAnnouncement){ text.textContent=globalAnnouncement; bar.style.display='block';} else bar.style.display='none'; }
-function renderAnnouncement2(){ const bar=document.getElementById('announcementBar2'); const text=document.getElementById('announcementText2'); if(globalAnnouncement2){ text.textContent=globalAnnouncement2; bar.style.display='block';} else bar.style.display='none'; }
-function setAnnouncement(){ if(!isAdmin()) return; const a=document.getElementById('announcementInput').value.trim(); if(!a) return; globalAnnouncement=a; localStorage.setItem('announcement',a); renderAnnouncement(); document.getElementById('announcementInput').value=''; }
-function clearAnnouncement(){ globalAnnouncement=''; localStorage.removeItem('announcement'); renderAnnouncement(); }
-function setAnnouncement2(){ if(!isAdmin()) return; const a=document.getElementById('announcementInput2').value.trim(); if(!a) return; globalAnnouncement2=a; localStorage.setItem('announcement2',a); renderAnnouncement2(); document.getElementById('announcementInput2').value=''; }
-function clearAnnouncement2(){ globalAnnouncement2=''; localStorage.removeItem('announcement2'); renderAnnouncement2(); }
-function renderRightMenu(){ const container=document.getElementById('rightMenu'); container.innerHTML=''; rightMenu.forEach((item,index)=>{ const a=document.createElement('a'); a.textContent=item.name; a.href=item.link; a.target="_blank"; container.appendChild(a); }); if(isAdmin()){ const listDiv=document.getElementById('menuRightList'); listDiv.innerHTML=''; rightMenu.forEach((item,index)=>{ const div=document.createElement('div'); div.textContent=item.name+' -> '+item.link; const del=document.createElement('button'); del.textContent='Supprimer'; del.onclick=()=>{ rightMenu.splice(index,1); localStorage.setItem('rightMenu',JSON.stringify(rightMenu)); renderRightMenu(); }; div.appendChild(del); listDiv.appendChild(div); }); } }
-function addRightMenu(){ if(!isAdmin()) return; const name=document.getElementById('menuRightInput').value.trim(); const link=document.getElementById('menuRightLink').value.trim(); if(!name||!link) return; rightMenu.push({name,link}); localStorage.setItem('rightMenu',JSON.stringify(rightMenu)); renderRightMenu(); document.getElementById('menuRightInput').value=''; document.getElementById('menuRightLink').value=''; }
-function renderGroups(filter=''){ const list=document.getElementById('groupList'); list.innerHTML=''; groups.forEach((g,index)=>{ if(filter && !g.name.toLowerCase().includes(filter.toLowerCase())) return; const div=document.createElement('div'); div.className='group'; div.innerHTML=`<span onclick="openGroup(${index})" style="cursor:pointer">${g.name}</span><span class="counter">(${g.members.length})</span>`; if(isAdmin()){ const del=document.createElement('button'); del.textContent='Supprimer'; del.onclick=()=>{ groups.splice(index,1); localStorage.setItem('groups',JSON.stringify(groups)); renderGroups(); }; div.appendChild(del); } list.appendChild(div); }); }
-function createGroup(){ const name=document.getElementById('newGroup').value.trim(); if(!name) return; groups.push({name,messages:[],members:[userId]}); localStorage.setItem('groups',JSON.stringify(groups)); document.getElementById('newGroup').value=''; renderGroups(); }
-function searchGroups(){ const val=document.getElementById('searchGroup').value.trim().toLowerCase(); renderGroups(val); }
-function openGroup(index){ currentGroup=index; if(!groups[index].members.includes(userId)) groups[index].members.push(userId); localStorage.setItem('groups',JSON.stringify(groups)); document.getElementById('currentGroupTitle').textContent=groups[index].name; showSection('chat'); cleanOldMessages(); renderMessages(); }
-function sendMessage(){ if(currentGroup===null||isBlocked(userId)) return; const input=document.getElementById('chatInput'); if(!input.value.trim()) return; groups[currentGroup].messages.push({id:Date.now(),user:userId,text:input.value,media:null,likes:0,likedBy:[],timestamp:Date.now()}); localStorage.setItem('groups',JSON.stringify(groups)); input.value=''; renderMessages(); }
-function renderMessages(){ if(currentGroup===null) return; const container=document.getElementById('chatMessages'); container.innerHTML=''; groups[currentGroup].messages.forEach((m,index)=>{ const div=document.createElement('div'); div.className='chat-message'; let mediaHtml=''; if(m.media){ if(m.media.type.startsWith('image')) mediaHtml=`<img src="${m.media.url}">`; else if(m.media.type.startsWith('video')) mediaHtml=`<video src="${m.media.url}" controls></video>`; else if(m.media.type.startsWith('audio')) mediaHtml=`<audio src="${m.media.url}" controls></audio>`; else if(m.media.type==='pdf') mediaHtml=`<iframe src="${m.media.url}" width="100%" height="200"></iframe>`; } div.innerHTML=`<span class="user-id" onclick="startPrivateChat('${m.user}')">${m.user}</span>: ${m.text||''} ${mediaHtml} <button class="like-button ${m.likedBy.includes(userId)?'liked':''}" onclick="likeMessage(${index})">❤ ${m.likes}</button>`; if(m.user===userId || isAdmin()){ const actions=document.createElement('div'); actions.className='actions'; const edit=document.createElement('button'); edit.textContent='✏️'; edit.onclick=()=>{ const t=prompt('Modifier message:',m.text); if(t!==null){ m.text=t; localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); } }; const del=document.createElement('button'); del.textContent='🗑️'; del.onclick=()=>{ groups[currentGroup].messages=groups[currentGroup].messages.filter(x=>x.id!==m.id); localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); }; actions.appendChild(edit); actions.appendChild(del); div.appendChild(actions); } container.appendChild(div); }); container.scrollTop=container.scrollHeight; }
-function likeMessage(index){ const msg=groups[currentGroup].messages[index]; if(!msg.likedBy.includes(userId)){ msg.likes++; msg.likedBy.push(userId);} else{ msg.likes--; msg.likedBy=msg.likedBy.filter(u=>u!==userId);} localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); }
-function addMedia(target){ document.getElementById(target==='chat'?'mediaInput':'privateMediaInput').click(); }
-function sendMedia(event,target){ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=e=>{ const msg={id:Date.now(),user:userId,text:'',media:{url:e.target.result,type:file.type},likes:0,likedBy:[],timestamp:Date.now()}; if(target==='chat'){ groups[currentGroup].messages.push(msg); localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); } else if(target==='private'){ if(!privateMessages[privateTarget]) privateMessages[privateTarget]=[]; privateMessages[privateTarget].push(msg); localStorage.setItem('privateMessages',JSON.stringify(privateMessages)); renderPrivateMessages(); } }; reader.readAsDataURL(file); }
-function startPrivateChat(uid){ privateTarget=uid; showSection('private'); renderPrivateMessages(); document.getElementById
-('privateChatTitle').textContent='Chat privé avec '+uid; document.getElementById('privateInput').value=''; }
-function renderPrivateMessages(){ const container=document.getElementById('privateMessages'); container.innerHTML=''; if(!privateTarget || !privateMessages[privateTarget]) return; privateMessages[privateTarget].forEach((m,index)=>{ const div=document.createElement('div'); div.className='chat-message'; let mediaHtml=''; if(m.media){ if(m.media.type.startsWith('image')) mediaHtml=`<img src="${m.media.url}">`; else if(m.media.type.startsWith('video')) mediaHtml=`<video src="${m.media.url}" controls></video>`; else if(m.media.type.startsWith('audio')) mediaHtml=`<audio src="${m.media.url}" controls></audio>`; else if(m.media.type==='pdf') mediaHtml=`<iframe src="${m.media.url}" width="100%" height="200"></iframe>`; } div.innerHTML=`<span class="user-id" onclick="startPrivateChat('${m.user}')">${m.user}</span>: ${m.text||''} ${mediaHtml} <button class="like-button ${m.likedBy.includes(userId)?'liked':''}" onclick="likePrivateMessage(${index})">❤ ${m.likes}</button>`; if(m.user===userId || isAdmin()){ const actions=document.createElement('div'); actions.className='actions'; const edit=document.createElement('button'); edit.textContent='✏️'; edit.onclick=()=>{ const t=prompt('Modifier message:',m.text); if(t!==null){ m.text=t; localStorage.setItem('privateMessages',JSON.stringify(privateMessages)); renderPrivateMessages(); } }; const del=document.createElement('button'); del.textContent='🗑️'; del.onclick=()=>{ privateMessages[privateTarget]=privateMessages[privateTarget].filter(x=>x.id!==m.id); localStorage.setItem('privateMessages',JSON.stringify(privateMessages)); renderPrivateMessages(); }; actions.appendChild(edit); actions.appendChild(del); div.appendChild(actions); } container.appendChild(div); }); container.scrollTop=container.scrollHeight; }
-function likePrivateMessage(index){ const msg=privateMessages[privateTarget][index]; if(!msg.likedBy.includes(userId)){ msg.likes++; msg.likedBy.push(userId);} else{ msg.likes--; msg.likedBy=msg.likedBy.filter(u=>u!==userId);} localStorage.setItem('privateMessages',JSON.stringify(privateMessages)); renderPrivateMessages(); }
-function sendPrivateMessage(){ if(!privateTarget || isBlocked(userId)) return; const input=document.getElementById('privateInput'); if(!input.value.trim()) return; if(!privateMessages[privateTarget]) privateMessages[privateTarget]=[]; privateMessages[privateTarget].push({id:Date.now(),user:userId,text:input.value,media:null,likes:0,likedBy:[],timestamp:Date.now()}); localStorage.setItem('privateMessages',JSON.stringify(privateMessages)); input.value=''; renderPrivateMessages(); }
-function closePrivateChat(){ privateTarget=null; showSection('groups'); }
-function cleanOldMessages(){ const now=Date.now(); const limit=24*60*60*1000; groups.forEach(group=>{ group.messages=group.messages.filter(msg=>now-msg.timestamp<limit); }); Object.keys(privateMessages).forEach(uid=>{ privateMessages[uid]=privateMessages[uid].filter(msg=>now-msg.timestamp<limit); }); localStorage.setItem('groups',JSON.stringify(groups)); localStorage.setItem('privateMessages',JSON.stringify(privateMessages)); }
-function updateTime(){ const display=document.getElementById('timeDisplay'); const dt=new Date().toLocaleTimeString('fr-FR',{timeZone:selectedZone,hour:'2-digit',minute:'2-digit',second:'2-digit'}); display.textContent=dt; }
-function populateTimeMenu(){ const menu=document.getElementById('timeMenu'); countries.forEach(c=>{ const div=document.createElement('div'); div.textContent=c.name; div.onclick=()=>{ selectedZone=c.zone; document.getElementById('timeMenu').style.display='none'; updateTime(); }; menu.appendChild(div); }); }
-document.getElementById('timeDisplay').onclick=()=>{ const menu=document.getElementById('timeMenu'); menu.style.display=menu.style.display==='block'?'none':'block'; };
-setInterval(updateTime,1000); populateTimeMenu();
-cleanOldMessages(); renderGroups(); renderRightMenu(); renderAnnouncement(); renderAnnouncement2(); updateBlockedList();
-</script>
-</body>
-</html>
+async function init(){
+  const { data, error } = await supabase.auth.signInWithOtp({ email: Math.random()+"@test.com" }).catch(()=>supabase.auth.signInAnonymously());
+  userId = supabase.auth.user()?.id || crypto.randomUUID();
+  updateTime();
+  setInterval(updateTime,1000);
+  renderGroups();
+  renderLinks();
+  renderAnnouncements();
+}
+init();
+
+function updateTime(){
+  const now=new Date();
+  document.getElementById('timeDisplay').textContent="Heure locale: "+now.toLocaleTimeString();
+}
+
+function showSection(id){
+  document.getElementById('groups').style.display=id==='groups'?'block':'none';
+  document.getElementById('chat').style.display=id==='chat'?'block':'none';
+  document.getElementById('private').style.display=id==='private'?'block':'none';
+}
+
+async function checkAdmin(){
+  const code=document.getElementById('adminCodeInput').value.trim();
+  if(code==='233233'){isAdmin=true; document.getElementById('adminPanel').style.display='block'; alert("Admin activé");} else alert("Code incorrect");
+}
+
+async function createGroup(){
+  const name=document.getElementById('newGroup').value.trim();
+  if(!name) return;
+  await supabase.from('groups').insert({name,created_by:userId});
+  document.getElementById('newGroup').value='';
+  renderGroups();
+}
+
+async function renderGroups(){
+  let { data:groupsData } = await supabase.from('groups').select('*');
+  const container=document.getElementById('groupList');
+  container.innerHTML='';
+  for(let g of groupsData){
+    const div=document.createElement('div');
+    div.className='group';
+    const memberCount = await supabase.from('group_members').select('*',{count:'exact'}).eq('group_id',g.id);
+    div.innerHTML=`<span style="cursor:pointer" onclick="openGroup('${g.id}','${g.name}')">${g.name} (${memberCount.count||0})</span>`;
+    container.appendChild(div);
+  }
+}
+
+async function openGroup(id,name){
+  currentGroup=id;
+  document.getElementById('currentGroupTitle').textContent=name;
+  showSection('chat');
+  renderMessages();
+}
+
+async function sendMessage(){
+  if(!currentGroup) return;
+  const text=document.getElementById('chatInput').value.trim();
+  if(!text) return;
+  await supabase.from('messages').insert({group_id:currentGroup,sender_id:userId,text,type:'text'});
+  document.getElementById('chatInput').value='';
+  renderMessages();
+}
+
+async function renderMessages(){
+  if(!currentGroup) return;
+  const { data:msgs } = await supabase.from('messages').select('*').eq('group_id',currentGroup).order('created_at',{ascending:true});
+  const container=document.getElementById('chatMessages');
+  container.innerHTML='';
+  for(let m of msgs){
+    const div=document.createElement('div');
+    div.className='chat-message';
+    let media='';
+    if(m.media_url){
+      if(m.type==='image') media=`<img src="${m.media_url}">`;
+      else if(m.type==='video') media=`<video src="${m.media_url
