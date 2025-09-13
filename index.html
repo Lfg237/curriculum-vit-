@@ -55,6 +55,7 @@ footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
 
 <section id="groups" class="chat-container">
 <h2>Mes Groupes</h2>
+<input type="text" id="searchGroup" placeholder="Rechercher un groupe..." onkeyup="searchGroups()">
 <div class="group-list" id="groupList"></div>
 <input type="text" id="newGroup" placeholder="Nom du nouveau groupe">
 <button onclick="createGroup()">Créer Groupe</button>
@@ -117,97 +118,139 @@ function setAnnouncement(){ if(!isAdmin()) return; const a=document.getElementBy
 function clearAnnouncement(){ if(!isAdmin()) return; globalAnnouncement=''; localStorage.removeItem('announcement'); renderAnnouncement(); }
 function renderAnnouncement(){ const bar=document.getElementById('announcementBar'); const text=document.getElementById('announcementText'); if(globalAnnouncement){ text.textContent=globalAnnouncement; bar.style.display='block'; } else bar.style.display='none'; }
 
-function renderGroups(){ const list=document.getElementById('groupList'); list.innerHTML=''; groups.forEach((g,index)=>{ const div=document.createElement('div'); div.className='group'; div.innerHTML=`<span style="cursor:pointer">${g.name}</span>`; div.querySelector('span').onclick=()=>openGroup(index); const del=document.createElement('button'); del.textContent="Supprimer"; del.onclick=()=>{ groups.splice(index,1); localStorage.setItem('groups',JSON.stringify(groups)); renderGroups(); }; div.appendChild(del); list.appendChild(div); }); if(isAdmin()) document.getElementById('adminPanel').style.display='block'; }
-function createGroup(){ const name=document.getElementById('newGroup').value.trim(); if(!name) return; groups.push({name,messages:[]}); localStorage.setItem('groups',JSON.stringify(groups)); document.getElementById('newGroup').value=''; renderGroups(); }
-function openGroup(index){ currentGroup=index; document.getElementById('currentGroupTitle').textContent=groups[index].name; showSection('chat'); cleanOldMessages(); renderMessages(); }
-
-function cleanOldMessages(){ const now=Date.now(); const limit=24*60*60*1000; groups.forEach(group=>{ group.messages=group.messages.filter(msg=>now-msg.timestamp<limit); }); localStorage.setItem('groups',JSON.stringify(groups)); }
-
-function sendMessage(){ if(currentGroup===null||isBlocked(userId)) return; const input=document.getElementById('chatInput'); if(!input.value.trim()) return; groups[currentGroup].messages.push({id:Date.now(), user:userId, text:input.value, media:null, likes:0, likedBy:[], timestamp:Date.now()}); localStorage.setItem('groups',JSON.stringify(groups)); input.value=''; renderMessages(); }
-function renderMessages(){ if(currentGroup===null) return; const container=document.getElementById('chatMessages'); container.innerHTML=''; groups[currentGroup].messages.forEach((m,index)=>{ const div=document.createElement('div'); div.className='chat-message'; let mediaHtml=''; if(m.media){ if(m.media.type.startsWith('image')) mediaHtml=`<img src="${m.media.url}">`; else if(m.media.type.startsWith('video')) mediaHtml=`<video src="${m.media.url}" controls></video>`; else if(m.media.type.startsWith('audio')) mediaHtml=`<audio controls src="${m.media.url}"></audio>`; } div.innerHTML=`<strong>${m.user}</strong>: ${m.text||''} ${mediaHtml} <button class="like-button ${m.likedBy?.includes(userId
-)?'liked':''}" onclick="likeMessage(${index})">❤ ${m.likes||0}</button>`;
-
-// Actions pour l'auteur ou admin
-if(m.user===userId || isAdmin()){
-  const actions=document.createElement('div');
-  actions.className='actions';
-
-  const editBtn=document.createElement('button');
-  editBtn.textContent='✏️';
-  editBtn.onclick=()=>{
-    const newText=prompt('Modifier message:',m.text);
-    if(newText!==null){ m.text=newText; localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); }
-  };
-
-  const delBtn=document.createElement('button');
-  delBtn.textContent='🗑️';
-  delBtn.onclick=()=>{
-    groups[currentGroup].messages=groups[currentGroup].messages.filter(x=>x.id!==m.id);
-    localStorage.setItem('groups',JSON.stringify(groups));
-    renderMessages();
-  };
-
-  actions.appendChild(editBtn);
-  actions.appendChild(delBtn);
-  div.appendChild(actions);
+/* ---------- Groupes ---------- */
+function renderGroups(list=groups){
+  const listEl=document.getElementById('groupList');
+  listEl.innerHTML='';
+  list.forEach((g,index)=>{
+    if(!g.members) g.members=[];
+    const div=document.createElement('div');
+    div.className='group';
+    div.innerHTML=`<span style="cursor:pointer">${g.name} (👥 ${g.members.length})</span>`;
+    div.querySelector('span').onclick=()=>joinGroup(index);
+    if(isAdmin()){
+      const del=document.createElement('button');
+      del.textContent="Supprimer";
+      del.onclick=()=>{ groups.splice(index,1); localStorage.setItem('groups',JSON.stringify(groups)); renderGroups(); };
+      div.appendChild(del);
+    }
+    listEl.appendChild(div);
+  });
+  if(isAdmin()) document.getElementById('adminPanel').style.display='block';
 }
 
-container.appendChild(div);
-});
-container.scrollTop=container.scrollHeight;
+function createGroup(){
+  const name=document.getElementById('newGroup').value.trim();
+  if(!name) return;
+  const newGroup={name,messages:[],members:[userId]};
+  groups.push(newGroup);
+  localStorage.setItem('groups',JSON.stringify(groups));
+  document.getElementById('newGroup').value='';
+  renderGroups();
+}
+
+function joinGroup(index){
+  if(!groups[index].members) groups[index].members=[];
+  if(!groups[index].members.includes(userId)){
+    groups[index].members.push(userId);
+    localStorage.setItem('groups',JSON.stringify(groups));
+    alert("✅ Vous avez rejoint le groupe: "+groups[index].name);
+  }
+  openGroup(index);
+}
+
+function searchGroups(){
+  const input=document.getElementById('searchGroup').value.toLowerCase();
+  const filtered=groups.filter(g=>g.name.toLowerCase().includes(input));
+  renderGroups(filtered);
+}
+
+function openGroup(index){
+  currentGroup=index;
+  document.getElementById('currentGroupTitle').textContent=groups[index].name+" (👥 "+groups[index].members.length+")";
+  showSection('chat');
+  cleanOldMessages();
+  renderMessages();
+}
+
+/* ---------- Messages ---------- */
+function cleanOldMessages(){ const now=Date.now(); const limit=24*60*60*1000; groups.forEach(group=>{ group.messages=group.messages.filter(msg=>now-msg.timestamp<limit); }); localStorage.setItem('groups',JSON.stringify(groups)); }
+
+function sendMessage(){
+  if(currentGroup===null||isBlocked(userId)) return;
+  const input=document.getElementById('chatInput');
+  if(!input.value.trim()) return;
+  groups[currentGroup].messages.push({id:Date.now(), user:userId, text:input.value, media:null, likes:0, likedBy:[], timestamp:Date.now()});
+  localStorage.setItem('groups',JSON.stringify(groups));
+  input.value='';
+  renderMessages();
+}
+
+function renderMessages(){
+  if(currentGroup===null) return;
+  const container=document.getElementById('chatMessages');
+  container.innerHTML='';
+  groups[currentGroup].messages.forEach((m,index)=>{
+    const div=document.createElement('div');
+    div.className='chat-message';
+    let mediaHtml='';
+    if(m.media){
+      if(m.media.type.startsWith('image')) mediaHtml=`<img src="${m.media.url}">`;
+      else if(m.media.type.startsWith('video')) mediaHtml=`<video src="${m.media.url}" controls></video>`;
+      else if(m.media.type.startsWith('audio')) mediaHtml=`<audio controls src="${m.media.url}"></audio>`;
+    }
+    div.innerHTML=`<strong>${m.user}</strong>: ${m.text||''} ${mediaHtml} <button class="like-button ${m.likedBy?.includes(userId)?'liked':''}" onclick="likeMessage(${index})">❤ ${m.likes||0}</button>`;
+    if(m.user===userId || isAdmin()){
+      const actions=document.createElement('div');
+      actions.className='actions';
+      const editBtn=document.createElement('button');
+      editBtn.textContent='✏️';
+      editBtn.onclick=()=>{
+        const newText=prompt('Modifier message:',m.text);
+        if(newText!==null){ m.text=newText; localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); }
+      };
+      const delBtn=document.createElement('button');
+      delBtn.textContent='🗑️';
+      delBtn.onclick=()=>{
+        groups[currentGroup].messages=groups[currentGroup].messages.filter(x=>x.id!==m.id);
+        localStorage.setItem('groups',JSON.stringify(groups));
+        renderMessages();
+      };
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      div.appendChild(actions);
+    }
+    container.appendChild(div);
+  });
+  container.scrollTop=container.scrollHeight;
 }
 
 function likeMessage(index){
-const msg=groups[currentGroup].messages[index];
-msg.likedBy=msg.likedBy||[];
-if(!msg.likedBy.includes(userId)){
-  msg.likes=(msg.likes||0)+1;
-  msg.likedBy.push(userId);
-} else {
-  msg.likes=(msg.likes||1)-1;
-  msg.likedBy=msg.likedBy.filter(u=>u!==userId);
-}
-localStorage.setItem('groups',JSON.stringify(groups));
-renderMessages();
+  const msg=groups[currentGroup].messages[index];
+  msg.likedBy=msg.likedBy||[];
+  if(!msg.likedBy.includes(userId)){
+    msg.likes=(msg.likes||0)+1;
+    msg.likedBy.push(userId);
+  } else {
+    msg.likes=(msg.likes||1)-1;
+    msg.likedBy=msg.likedBy.filter(u=>u!==userId);
+  }
+  localStorage.setItem('groups',JSON.stringify(groups));
+  renderMessages();
 }
 
 /* ---------- Médias ---------- */
 function addMedia(){ document.getElementById('mediaInput').click(); }
 function sendMedia(event){
-const file=event.target.files[0];
-if(!file||currentGroup===null||isBlocked(userId)) return;
-const reader=new FileReader();
-reader.onload=e=>{
-  groups[currentGroup].messages.push({
-    id:Date.now(),
-    user:userId,
-    text:'',
-    media:{url:e.target.result,type:file.type},
-    likes:0,
-    likedBy:[],
-    timestamp:Date.now()
-  });
-  localStorage.setItem('groups',JSON.stringify(groups));
-  renderMessages();
-};
-reader.readAsDataURL(file);
-}
-
-/* ---------- Message vocal ---------- */
-function recordVoice(){
-if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ alert("Microphone non disponible"); return; }
-navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-  const mediaRecorder=new MediaRecorder(stream);
-  let chunks=[];
-  mediaRecorder.ondataavailable=e=>chunks.push(e.data);
-  mediaRecorder.onstop=e=>{
-    const blob=new Blob(chunks,{type:'audio/webm'});
-    const url=URL.createObjectURL(blob);
+  const file=event.target.files[0];
+  if(!file||currentGroup===null||isBlocked(userId)) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
     groups[currentGroup].messages.push({
       id:Date.now(),
       user:userId,
       text:'',
-      media:{url,type:'audio/webm'},
+      media:{url:e.target.result,type:file.type},
       likes:0,
       likedBy:[],
       timestamp:Date.now()
@@ -215,10 +258,35 @@ navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     localStorage.setItem('groups',JSON.stringify(groups));
     renderMessages();
   };
-  mediaRecorder.start();
-  setTimeout(()=>mediaRecorder.stop(),5000);
-  alert("Enregistrement vocal démarré pendant 5 secondes...");
-}).catch(err=>alert("Erreur microphone: "+err));
+  reader.readAsDataURL(file);
+}
+
+/* ---------- Message vocal ---------- */
+function recordVoice(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ alert("Microphone non disponible"); return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    const mediaRecorder=new MediaRecorder(stream);
+    let chunks=[];
+    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
+    mediaRecorder.onstop=e=>{
+      const blob=new Blob(chunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      groups[currentGroup].messages.push({
+        id:Date.now(),
+        user:userId,
+        text:'',
+        media:{url,type:'audio/webm'},
+        likes:0,
+        likedBy:[],
+        timestamp:Date.now()
+      });
+      localStorage.setItem('groups',JSON.stringify(groups));
+      renderMessages();
+    };
+    mediaRecorder.start();
+    setTimeout(()=>mediaRecorder.stop(),5000);
+    alert("Enregistrement vocal démarré pendant 5 secondes...");
+  }).catch(err=>alert("Erreur microphone: "+err));
 }
 
 /* ---------- Initialisation ---------- */
