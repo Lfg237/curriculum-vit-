@@ -178,4 +178,8 @@ function cleanOldMessages(){ const now=Date.now(); const limit=24*60*60*1000; gr
 function updateTime(){ const display=document.getElementById('timeDisplay'); const dt=new Date().toLocaleTimeString('fr-FR',{timeZone:selectedZone,hour:'2-digit',minute:'2-digit',second:'2-digit'}); display.textContent=dt; }
 function populateTimeMenu(){ const menu=document.getElementById('timeMenu'); countries.forEach(c=>{ const div=document.createElement('div'); div.textContent=c.name; div.onclick=()=>{ selectedZone=c.zone; document.getElementById('timeMenu').style.display='none'; updateTime(); }; menu.appendChild(div); }); }
 document.getElementById('timeDisplay').onclick=()=>{ const menu=document.getElementById('timeMenu'); menu.style.display=menu.style.display==='block'?'none':'block'; };
-setInterval(updateTime,100
+setInterval(updateTime,1000); populateTimeMenu();
+cleanOldMessages(); renderGroups(); renderRightMenu(); renderAnnouncement(); renderAnnouncement2(); updateBlockedList();
+</script>
+</body>
+</html>
