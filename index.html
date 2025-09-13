@@ -3,306 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Messenger Supabase</title>
+<title>Mini Messenger en ligne</title>
 <style>
-body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f0f2f5;}
-header{background:#1e1e2f;color:white;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-header h1{margin:0;font-size:1.5em;}
-nav ul{list-style:none;display:flex;gap:15px;margin:0;padding:0;align-items:center;}
-nav ul li{position:relative;overflow-x:auto;}
-nav ul li a{color:white;text-decoration:none;cursor:pointer;padding:5px 10px;display:block;}
-nav ul li ul{display:none;position:absolute;top:30px;left:0;background:#333;padding:10px;border-radius:5px;max-height:200px;overflow-y:auto;white-space:nowrap;}
-nav ul li:hover ul{display:block;}
-nav ul li ul li a{padding:5px 10px;white-space:nowrap;}
-.group-list{margin:20px 0;}
-.group{background:white;padding:10px;margin-bottom:5px;border-radius:5px;display:flex;justify-content:space-between;align-items:center;}
-.chat-message{background:white;padding:10px;margin-bottom:10px;border-radius:5px;position:relative;word-break:break-word;}
-.chat-message .actions{position:absolute;top:0;right:0;display:flex;gap:5px;}
-#chatMessages,#privateMessages{max-height:400px;overflow-y:auto;}
-input[type=text],button{padding:8px;border-radius:5px;border:1px solid #ccc;}
-button{background:#1e1e2f;color:white;cursor:pointer;margin:2px;}
-.announcement-bar-container{display:flex;gap:10px;margin:10px 20px;}
-.announcement-bar{flex:1;background:#ffcc00;color:#000;padding:10px;overflow:hidden;white-space:nowrap;border-radius:5px;}
-.announcement-bar:nth-child(2){background:#00ccff;color:#000;}
-.announcement-text{display:inline-block;padding-left:100%;animation:marquee 15s linear infinite;}
-@keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
-#privateChat{display:none;padding:20px;background:#f9f9f9;margin:20px;border-radius:5px;}
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+header { display: flex; justify-content: space-between; align-items: center; background:#333; color:white; padding:5px 10px; flex-wrap: wrap; }
+.menu-container { display: flex; gap:10px; overflow-x:auto; }
+.menu { position: relative; }
+.menu button { background:#444; color:white; border:none; padding:6px 10px; cursor:pointer; border-radius:5px; white-space:nowrap; }
+.menu-content { display:none; position:absolute; background:#f9f9f9; min-width:200px; max-height:200px; overflow-y:auto; overflow-x:hidden; border:1px solid #ccc; z-index:10; }
+.menu-content a { display:block; padding:6px; color:black; text-decoration:none; white-space:nowrap; }
+.menu-content a:hover { background:#eee; }
+.menu:hover .menu-content { display:block; }
+
+#worldClock { display:flex; align-items:center; gap:5px; }
+select { padding:3px; }
+
+.annonces { display:flex; flex-direction:column; margin-top:5px; }
+.annonce { background:#ff9800; color:white; padding:6px; overflow:hidden; white-space:nowrap; }
+.annonce:nth-child(2) { background:#2196F3; margin-top:2px; }
+.annonce span { display:inline-block; padding-left:100%; animation: scroll 15s linear infinite; }
+@keyframes scroll { 0% { transform:translateX(0); } 100% { transform:translateX(-100%); } }
+
+main { padding:10px; }
+#groupList .group { padding:6px; border:1px solid #ccc; margin-top:5px; border-radius:5px; cursor:pointer; display:flex; justify-content:space-between; }
+#groupList .group:hover { background:#f2f2f2; }
+#chatBox { border:1px solid #ccc; padding:8px; height:250px; overflow-y:auto; margin-top:10px; }
+.message { padding:4px; border-bottom:1px solid #eee; position:relative; word-break:break-word; }
+.message .actions { font-size:11px; position:absolute; bottom:2px; right:2px; }
+.message .actions button { margin-left:3px; }
+
+footer { background:#333; color:white; text-align:center; padding:6px; margin-top:10px; font-size:12px; }
+
+#adminPanel { display:none; padding:10px; background:#f4f4f4; border-top:2px solid #333; font-size:14px; }
+#adminPanel h2,h3 { margin:5px 0; }
+#adminPanel textarea, #adminPanel input { width:100%; margin-bottom:6px; padding:6px; font-size:14px; }
+#adminPanel button { padding:5px 10px; margin-right:5px; font-size:14px; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
 <header>
-<h1>Mini Messenger</h1>
-<nav>
-<ul>
-<li><a>Navigation</a>
-<ul>
-<li><a onclick="showSection('groups')">Groupes</a></li>
-<li><a onclick="showSection('chat')">Chat</a></li>
-</ul></li>
-<li style="max-width:200px;"><a>Liens</a>
-<ul id="externalLinks"></ul></li>
-<li><a>Fuseau Horaire</a>
-<ul id="timeZones"></ul></li>
-<li id="currentTime" style="margin-left:10px;font-weight:bold;"></li>
-</ul>
-</nav>
+  <div class="menu-container">
+    <div class="menu">
+      <button>📂 Groupes & Privé</button>
+      <div class="menu-content" id="menuGroups"></div>
+    </div>
+    <div class="menu">
+      <button>🔗 Liens</button>
+      <div class="menu-content" id="menuLinks"></div>
+    </div>
+  </div>
+  <div id="worldClock">
+    <select id="countrySelect">
+      <option value="Africa/Dakar">Sénégal</option>
+      <option value="Africa/Douala">Cameroun</option>
+      <option value="Europe/Paris">France</option>
+      <option value="America/New_York">New York</option>
+      <option value="Asia/Tokyo">Tokyo</option>
+    </select>
+    <span id="currentTime"></span>
+  </div>
 </header>
 
-<div class="announcement-bar-container">
-<div class="announcement-bar"><span class="announcement-text" id="announcementText1"></span></div>
-<div class="announcement-bar"><span class="announcement-text" id="announcementText2"></span></div>
+<div class="annonces">
+  <div class="annonce"><span id="annonce1">Annonce 1 défile ici...</span></div>
+  <div class="annonce"><span id="annonce2">Annonce 2 défile ici...</span></div>
 </div>
 
-<section id="groups" style="padding:20px;">
-<h2>Mes Groupes <input type="text" id="searchGroup" placeholder="Rechercher" onkeyup="searchGroups()"></h2>
-<div class="group-list" id="groupList"></div>
-<input type="text" id="newGroup" placeholder="Nom du groupe"><button onclick="createGroup()">Créer</button>
-</section>
+<main>
+  <h2>Créer un Groupe</h2>
+  <input type="text" id="groupName" placeholder="Nom du groupe">
+  <button onclick="createGroup()">Créer</button>
 
-<section id="chat" style="display:none;padding:20px;">
-<h2 id="currentGroupTitle">Chat</h2>
-<div id="chatMessages"></div>
-<input type="text" id="chatInput" placeholder="Écrire un message...">
-<input type="file" id="mediaInput" style="display:none;" onchange="sendMedia(event)">
-<button onclick="sendMessage()">Envoyer</button>
-<button onclick="addMedia()">📎</button>
-</section>
+  <h2>Rechercher un Groupe</h2>
+  <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="searchGroups()">
 
-<section id="privateChat">
-<h2 id="privateTitle">Conversation privée</h2>
-<div id="privateMessages"></div>
-<input type="text" id="privateInput" placeholder="Écrire un message...">
-<input type="file" id="privateMedia" style="display:none;" onchange="sendPrivateMedia(event)">
-<button onclick="sendPrivateMessage()">Envoyer</button>
-<button onclick="addPrivateMedia()">📎</button>
-</section>
+  <div id="groupList"></div>
 
-<section id="adminPanel" style="display:none;padding:10px;background:#eee;margin:20px;border-radius:5px;">
-<h3>Admin</h3>
-<input type="text" id="targetUserId" placeholder="ID utilisateur à bloquer/débloquer">
-<button onclick="blockUser()">Bloquer</button>
-<button onclick="unblockUser()">Débloquer</button>
-<div id="blockedList"></div>
-<hr>
-<input type="text" id="announcementInput" placeholder="Texte de l’annonce">
-<button onclick="setAnnouncement()">Publier</button>
-<button onclick="clearAnnouncement()">Supprimer</button>
-<hr>
-<input type="text" id="linkInput" placeholder="Lien externe">
-<button onclick="addExternalLink()">Ajouter</button>
-</section>
+  <h2 id="chatTitle">Chat</h2>
+  <div id="chatBox"></div>
+  <input type="text" id="messageInput" placeholder="Écrire un message...">
+  <input type="file" id="mediaInput" multiple>
+  <button onclick="sendMessage()">Envoyer</button>
+</main>
 
-<div style="margin:20px;">
-<input type="text" id="adminCodeInput" placeholder="Code admin">
-<button onclick="checkAdmin()">Valider</button>
+<div id="adminPanel">
+  <h2>Panneau Administrateur</h2>
+  <h3>Annonces</h3>
+  <textarea id="adminAnnonce1" placeholder="Texte annonce 1"></textarea>
+  <textarea id="adminAnnonce2" placeholder="Texte annonce 2"></textarea>
+  <button onclick="updateAnnonces()">Mettre à jour</button>
+
+  <h3>Liens</h3>
+  <input type="text" id="newLink" placeholder="Nouveau lien">
+  <button onclick="addLink()">Ajouter</button>
+  <ul id="linkList"></ul>
+
+  <h3>Blocage utilisateurs</h3>
+  <input type="text" id="blockUserId" placeholder="ID utilisateur">
+  <button onclick="blockUser()">Bloquer</button>
+  <button onclick="unblockUser()">Débloquer</button>
 </div>
 
+<footer>
+  Mini Messenger © 2025 - Supabase
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const supabaseUrl = 'https://chgyzvowfsblodxbagfa.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoZ3l6dm93ZnNibG9keGJhZ2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjA2MjQsImV4cCI6MjA3MzMzNjYyNH0.JEg_WFTJlB3gNBI8-oaP35N68tu9p6TGl6vM3sYPL4Y';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = "https://chgyzvowfsblodxbagfa.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoZ3l6dm93ZnNibG9keGJhZ2ZhIiwicm9sZSI6ImF0IjoxNzU3NzYwNjI0LCJleHAiOjIwNzMzMzY2MjR9.JEg_WFTJlB3gNBI8-oaP35N68tu9p6TGl6vM3sYPL4Y";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let userId=localStorage.getItem('userId')||crypto.randomUUID(); localStorage.setItem('userId',userId);
-let isAdmin=false,blockedUsers=[],groups=[],currentGroup=null,privateUser=null,externalLinks=[],announcement1='',announcement2='';
+let userId = "user_" + Math.floor(Math.random()*100000);
+let groups = [], links = ["https://google.com","https://vercel.com"], blockedUsers = [];
+let currentChat = null;
 
-// Fuseaux horaires
-const zones=["Europe/Paris","America/New_York","Asia/Tokyo","Africa/Douala"];
-function updateTime(zone){ const time=new Date().toLocaleString('fr-FR',{timeZone:zone}); document.getElementById('currentTime').textContent=time;}
-zones.forEach(zone=>{ const li=document.createElement('li'); li.innerHTML=`<a onclick="updateTime('${zone}')">${zone}</a>`; document.getElementById('timeZones').appendChild(li); });
+let adminCode = prompt("Entrez le code admin (laisser vide si non admin):");
+if(adminCode==="233233") document.getElementById("adminPanel").style.display="block";
 
-// Admin
-const adminCode='233233';
-function checkAdmin(){ if(document.getElementById('adminCodeInput').value===adminCode){isAdmin=true; document.getElementById('adminPanel').style.display='block'; renderGroups();} else alert("Code incorrect");}
-
-// Annonces
-function setAnnouncement(){ if(!isAdmin) return; announcement1=document.getElementById('announcementInput').value; announcement2=document.getElementById('announcementInput').value; renderAnnouncements();}
-function clearAnnouncement(){ announcement1='';announcement2=''; renderAnnouncements();}
-function renderAnnouncements(){ document.getElementById('announcementText1').textContent=announcement1; document.getElementById('announcementText2').textContent=announcement2;}
-
-// Bloquer
-function blockUser(){ const t=document.getElementById('targetUserId').value.trim(); if(t&&!blockedUsers.includes(t)) blockedUsers.push(t); updateBlockedList(); }
-function unblockUser(){ const t=document.getElementById('targetUserId').value.trim(); blockedUsers=blockedUsers.filter(x=>x!==t); updateBlockedList(); }
-function updateBlockedList(){ document.getElementById('blockedList').textContent="Bloqués: "+(blockedUsers.length?blockedUsers.join(', '):"Aucun");}
-
-// Groupes
-async function createGroup(){ 
-  const name=document.getElementById('newGroup').value.trim(); if(!name) return;
-  const {data,error}=await supabase.from('groupes').insert([{name,creator:userId,members:[userId]}]);
-  if(!error) renderGroups();
+function updateClock(){
+  const tz = document.getElementById("countrySelect").value;
+  document.getElementById("currentTime").innerText = new Date().toLocaleString("fr-FR",{timeZone: tz});
 }
-async function renderGroups(){ 
-  const {data,error}=await supabase.from('groupes').select('*');
-  if(data){ 
-    const container=document.getElementById('groupList'); container.innerHTML='';
-    data.forEach(g=>{ 
-      const div=document.createElement('div'); 
-      div.className='group'; 
-      div.innerHTML=`<span onclick="openGroup('${g.id}')">${g.name}</span> <span>${g.members.length} abonnés</span>`; 
-      container.appendChild(div);
+setInterval(updateClock,1000); updateClock();
+
+async function fetchGroups(){
+  const { data, error } = await supabase.from("groups").select("*");
+  if(!error) { groups = data; renderGroups(groups); renderMenuGroups(); }
+}
+fetchGroups();
+
+async function createGroup(){
+  let name = document.getElementById("groupName").value.trim();
+  if(!name) return alert("Nom invalide !");
+  const { data, error } = await supabase.from("groups").insert([{name, members:[userId], messages:[]}]);
+  if(!error) { document.getElementById("groupName").value=""; fetchGroups(); }
+}
+
+function searchGroups(){ 
+  let input = document.getElementById("searchInput").value.toLowerCase();
+  renderGroups(groups.filter(g=>g.name.toLowerCase().includes(input)));
+}
+
+function renderGroups(list){
+  let container = document.getElementById("groupList"); container.innerHTML="";
+  list.forEach(g=>{
+    let div = document.createElement("div"); div.className="group";
+    div.innerHTML=`<span>${g.name} (${g.members.length} membres)</span>`;
+    div.onclick=()=>joinChat(g); container.appendChild(div);
+  });
+}
+
+function renderMenuGroups(){
+  let menu = document.getElementById("menuGroups"); menu.innerHTML="";
+  groups.forEach(g=>{
+    let a = document.createElement("a"); a.href="#"; a.innerText=g.name+" ("+g.members.length+")";
+    a.onclick=()=>joinChat(g); menu.appendChild(a);
+  });
+}
+
+function renderMenuLinks(){
+  let menu=document.getElementById("menuLinks"); menu.innerHTML="";
+  links.forEach(l=>{
+    let a=document.createElement("a"); a.href=l; a.target="_blank"; a.innerText=l;
+    menu.appendChild(a);
+  });
+}
+
+function addLink(){ let val=document.getElementById("newLink").value.trim(); if(!val) return; links.push(val); renderMenuLinks(); document.getElementById("newLink").value=""; }
+function updateAnnonces(){ document.getElementById("annonce1").innerText=document.getElementById("adminAnnonce1").value || "Annonce 1"; document.getElementById("annonce2").innerText=document.getElementById("adminAnnonce2").value || "Annonce 2"; }
+function blockUser(){ let uid=document.getElementById("blockUserId").value.trim(); if(!uid) return; if(!blockedUsers.includes(uid)) blockedUsers.push(uid); document.getElementById("blockUserId").value=""; alert("Utilisateur bloqué : "+uid);}
+function unblockUser(){ let uid=document.getElementById("blockUserId").value.trim(); blockedUsers=blockedUsers.filter(u=>u!==uid); document.getElementById("blockUserId").value=""; alert("Utilisateur débloqué : "+uid); }
+
+function joinChat(chat){ currentChat = chat; if(!chat.members.includes(userId)) chat.members.push(userId); document.getElementById("chatTitle").innerText=chat.name+" ("+chat.members.length+" membres)"; renderChat(); }
+
+functionrenderChat = async () => {
+  if(!currentChat) return;
+  const { data, error } = await supabase.from("groups").select("*").eq("id", currentChat.id).single();
+  if(!error) currentChat = data;
+
+  const chatBox = document.getElementById("chatBox");
+  chatBox.innerHTML = "";
+  if(currentChat.messages) {
+    const now = Date.now();
+    currentChat.messages = currentChat.messages.filter(m => now - m.timestamp < 24*60*60*1000);
+    currentChat.messages.forEach((m,index) => {
+      const div = document.createElement("div");
+      div.className = "message";
+      let mediaHtml = "";
+      if(m.media){
+        if(m.media.type.startsWith("image")) mediaHtml=`<img src="${m.media.url}" style="max-width:100%">`;
+        else if(m.media.type.startsWith("video")) mediaHtml=`<video src="${m.media.url}" controls style="max-width:100%"></video>`;
+        else if(m.media.type.startsWith("audio")) mediaHtml=`<audio controls src="${m.media.url}"></audio>`;
+        else mediaHtml=`<a href="${m.media.url}" target="_blank">Fichier</a>`;
+      }
+      div.innerHTML=`<strong>${m.user}</strong>: ${m.text||""} ${mediaHtml}`;
+      
+      const actions=document.createElement("div"); actions.className="actions";
+      const likeBtn=document.createElement("button"); likeBtn.innerText="❤ "+(m.likes||0);
+      likeBtn.onclick=async ()=>{
+        m.likes=(m.likes||0)+1;
+        await supabase.from("groups").update({messages: currentChat.messages}).eq("id",currentChat.id);
+        renderChat();
+      };
+      actions.appendChild(likeBtn);
+
+      if(m.user===userId || adminCode==="233233"){
+        const editBtn=document.createElement("button"); editBtn.innerText="✏️";
+        editBtn.onclick=async ()=>{
+          const newText=prompt("Modifier message:", m.text);
+          if(newText!==null){ m.text=newText; await supabase.from("groups").update({messages: currentChat.messages}).eq("id",currentChat.id); renderChat(); }
+        };
+        const delBtn=document.createElement("button"); delBtn.innerText="🗑️";
+        delBtn.onclick=async ()=>{
+          currentChat.messages.splice(index,1);
+          await supabase.from("groups").update({messages: currentChat.messages}).eq("id",currentChat.id);
+          renderChat();
+        };
+        actions.appendChild(editBtn); actions.appendChild(delBtn);
+      }
+
+      div.appendChild(actions);
+      chatBox.appendChild(div);
     });
   }
-}
-function searchGroups(){ const val=document.getElementById('searchGroup').value.toLowerCase(); Array.from(document.getElementById('groupList').children).forEach(div=>div.style.display=div.innerText.toLowerCase().includes(val)?'flex':'none');}
-function openGroup(id){ currentGroup=id; showSection('chat'); document.getElementById('currentGroupTitle').textContent='Chat: '+id; }
-
-// Sections
-function showSection(section){
-  document.getElementById('groups').style.display=section==='groups'?'block':'none';
-  document.getElementById('chat').style.display=section==='chat'?'block':'none';
-  document.getElementById('privateChat').style.display=section==='private'?'block':'none';
-}
-
-// Liens externes
-function addExternalLink(){ const url=document.getElementById('linkInput').value.trim(); if(!url) return; externalLinks.push(url); renderExternalLinks();}
-function renderExternalLinks(){ const ul=document.getElementById('externalLinks'); ul.innerHTML=''; externalLinks.forEach((l,i)=>{ const li=document.createElement('li'); li.innerHTML=`<a href="${l}" target="_blank">${l} <button onclick="removeLink(${i})">✖</button></a>`; ul.appendChild(li);});}
-function removeLink(i){ externalLinks.splice(i,1); renderExternalLinks();}
-
-// Chat groupe
-async function sendMessage(){ 
-  if(!currentGroup) return; 
-  const text=document.getElementById('chatInput').value.trim(); if(!text) return;
-  await supabase.from('messages_groupes').insert([{group_id:currentGroup,user:userId,text,media:null,timestamp:new Date().toISOString()}]);
-  document.getElementById('chatInput').value=''; renderGroupMessages();
-}
-function addMedia(){ document.getElementById('mediaInput').click(); }
-async function sendMedia(event){ const file=event.target.files[0]; if(!file) return; 
-const reader=new FileReader();
-reader.onload=async e=>{
-  await supabase.from('messages_groupes').insert([{
-    group_id: currentGroup,
-    user: userId,
-    text: '',
-    media: e.target.result,
-    media_type: file.type,
-    timestamp: new Date().toISOString()
-  }]);
-  renderGroupMessages();
+  chatBox.scrollTop=chatBox.scrollHeight;
 };
-reader.readAsDataURL(file);
-}
 
-async function renderGroupMessages(){
-  if(!currentGroup) return;
-  const {data,error}=await supabase.from('messages_groupes').select('*').eq('group_id',currentGroup).order('timestamp',{ascending:true});
-  const container=document.getElementById('chatMessages');
-  container.innerHTML='';
-  if(data){
-    data.forEach(msg=>{
-      const div=document.createElement('div');
-      div.className='chat-message';
-      let mediaHtml='';
-      if(msg.media){
-        if(msg.media_type.startsWith('image')) mediaHtml=`<img src="${msg.media}">`;
-        else if(msg.media_type.startsWith('video')) mediaHtml=`<video src="${msg.media}" controls></video>`;
-        else if(msg.media_type.startsWith('audio')) mediaHtml=`<audio src="${msg.media}" controls></audio>`;
-        else mediaHtml=`<a href="${msg.media}" target="_blank">Fichier</a>`;
-      }
-      div.innerHTML=`<strong>${msg.user}</strong> [${new Date(msg.timestamp).toLocaleTimeString()}]: ${msg.text||''} ${mediaHtml}`;
-      if(msg.user===userId || isAdmin){
-        const actions=document.createElement('div');
-        actions.className='actions';
-        const editBtn=document.createElement('button');
-        editBtn.textContent='✏️';
-        editBtn.onclick=async ()=>{ const newText=prompt('Modifier message:',msg.text); if(newText!==null){ await supabase.from('messages_groupes').update({text:newText}).eq('id',msg.id); renderGroupMessages(); }};
-        const delBtn=document.createElement('button');
-        delBtn.textContent='🗑️';
-        delBtn.onclick=async ()=>{ await supabase.from('messages_groupes').delete().eq('id',msg.id); renderGroupMessages(); };
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-        div.appendChild(actions);
-      }
-      container.appendChild(div);
-    });
-    container.scrollTop=container.scrollHeight;
+document.getElementById("messageInput").addEventListener("keypress", async (e)=>{
+  if(e.key==="Enter") await sendMessage();
+});
+
+async function sendMessage(){
+  if(!currentChat) return;
+  const text=document.getElementById("messageInput").value.trim();
+  const files=document.getElementById("mediaInput").files;
+  if(!text && files.length===0) return;
+  const newMsg = {id:Date.now(), user:userId, text, media:null, likes:0, timestamp:Date.now()};
+  if(files.length>0){
+    newMsg.media=[];
+    for(let f of files){
+      const reader = new FileReader();
+      await new Promise(resolve=>{
+        reader.onload=e=>{
+          newMsg.media.push({url:e.target.result, type:f.type});
+          resolve();
+        };
+        reader.readAsDataURL(f);
+      });
+    }
   }
+  if(!currentChat.messages) currentChat.messages=[];
+  currentChat.messages.push(newMsg);
+  await supabase.from("groups").update({messages: currentChat.messages}).eq("id",currentChat.id);
+  document.getElementById("messageInput").value="";
+  document.getElementById("mediaInput").value="";
+  renderChat();
 }
 
-// Messages privés
-function openPrivateChat(otherUser){
-  privateUser=otherUser;
-  showSection('private');
-  document.getElementById('privateTitle').textContent='Conversation avec '+otherUser;
-  renderPrivateMessages();
-}
-
-async function sendPrivateMessage(){
-  if(!privateUser) return;
-  const text=document.getElementById('privateInput').value.trim(); if(!text) return;
-  await supabase.from('messages_prives').insert([{user1:userId,user2:privateUser,text,media:null,timestamp:new Date().toISOString()}]);
-  document.getElementById('privateInput').value='';
-  renderPrivateMessages();
-}
-
-function addPrivateMedia(){ document.getElementById('privateMedia').click(); }
-async function sendPrivateMedia(event){ const file=event.target.files[0]; if(!file || !privateUser) return;
-const reader=new FileReader();
-reader.onload=async e=>{
-  await supabase.from('messages_prives').insert([{
-    user1:userId,
-    user2:privateUser,
-    text:'',
-    media:e.target.result,
-    media_type:file.type,
-    timestamp:new Date().toISOString()
-  }]);
-  renderPrivateMessages();
-};
-reader.readAsDataURL(file);
-}
-
-async function renderPrivateMessages(){
-  if(!privateUser) return;
-  const {data,error}=await supabase.from('messages_prives').select('*')
-    .or(`user1.eq.${userId},user2.eq.${userId}`)
-    .order('timestamp',{ascending:true});
-  const container=document.getElementById('privateMessages');
-  container.innerHTML='';
-  if(data){
-    data.filter(m=>m.user1===privateUser || m.user2===privateUser).forEach(msg=>{
-      const div=document.createElement('div');
-      div.className='chat-message';
-      let mediaHtml='';
-      if(msg.media){
-        if(msg.media_type.startsWith('image')) mediaHtml=`<img src="${msg.media}">`;
-        else if(msg.media_type.startsWith('video')) mediaHtml=`<video src="${msg.media}" controls></video>`;
-        else if(msg.media_type.startsWith('audio')) mediaHtml=`<audio src="${msg.media}" controls></audio>`;
-        else mediaHtml=`<a href="${msg.media}" target="_blank">Fichier</a>`;
-      }
-      div.innerHTML=`<strong>${msg.user1===userId?userId:privateUser}</strong> [${new Date(msg.timestamp).toLocaleTimeString()}]: ${msg.text||''} ${mediaHtml}`;
-      if(msg.user1===userId || isAdmin){
-        const actions=document.createElement('div');
-        actions.className='actions';
-        const editBtn=document.createElement('button');
-        editBtn.textContent='✏️';
-        editBtn.onclick=async ()=>{ const newText=prompt('Modifier message:',msg.text); if(newText!==null){ await supabase.from('messages_prives').update({text:newText}).eq('id',msg.id); renderPrivateMessages(); }};
-        const delBtn=document.createElement('button');
-        delBtn.textContent='🗑️';
-        delBtn.onclick=async ()=>{ await supabase.from('messages_prives').delete().eq('id',msg.id); renderPrivateMessages(); };
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-        div.appendChild(actions);
-      }
-      container.appendChild(div);
-    });
-    container.scrollTop=container.scrollHeight;
-  }
-}
-
-// Auto clean messages >24h
-async function cleanOldMessages(){
-  const limit=new Date(Date.now()-24*60*60*1000).toISOString();
-  await supabase.from('messages_groupes').delete().lt('timestamp',limit);
-  await supabase.from('messages_prives').delete().lt('timestamp',limit);
-}
-
-// Initialisation
-renderGroups();
-renderAnnouncements();
-setInterval(renderGroupMessages,5000);
-setInterval(renderPrivateMessages,5000);
-setInterval(cleanOldMessages,60*60*1000); // toutes les heures
+// Rafraîchissement automatique toutes les 10 secondes
+setInterval(()=>{ if(currentChat) renderChat(); fetchGroups(); }, 10000);
 </script>
 </body>
 </html>
