@@ -15,7 +15,7 @@ nav ul li:hover ul { display:block; }
 nav ul li ul li { margin:0; }
 nav ul li ul li a { color:white; }
 footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
-.announcement-bar { background:#ffcc00; color:#000; padding:10px; overflow:hidden; white-space:nowrap; }
+.announcement-bar { padding:10px; overflow:hidden; white-space:nowrap; }
 .announcement-text { display:inline-block; padding-left:100%; animation: marquee 15s linear infinite; }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 .chat-container { padding:20px; }
@@ -49,13 +49,18 @@ footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
 </nav>
 </header>
 
-<div id="announcementBar" class="announcement-bar" style="display:none;">
-<span id="announcementText" class="announcement-text"></span>
+<!-- Première barre annonce (jaune) -->
+<div id="announcementBar" class="announcement-bar" style="display:none; background:#ffcc00; color:#000;">
+  <span id="announcementText" class="announcement-text"></span>
+</div>
+
+<!-- Deuxième barre annonce (bleu clair) -->
+<div id="announcementBar2" class="announcement-bar" style="display:none; background:#00ccff; color:#fff;">
+  <span id="announcementText2" class="announcement-text"></span>
 </div>
 
 <section id="groups" class="chat-container">
 <h2>Mes Groupes</h2>
-<input type="text" id="searchGroup" placeholder="Rechercher un groupe..." onkeyup="searchGroups()">
 <div class="group-list" id="groupList"></div>
 <input type="text" id="newGroup" placeholder="Nom du nouveau groupe">
 <button onclick="createGroup()">Créer Groupe</button>
@@ -80,9 +85,15 @@ footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
 <button onclick="unblockUser()">Débloquer</button>
 <div id="blockedList"></div>
 <hr>
-<input type="text" id="announcementInput" placeholder="Texte de l’annonce">
-<button onclick="setAnnouncement()">Publier Annonce</button>
-<button onclick="clearAnnouncement()">Supprimer Annonce</button>
+<!-- Gestion Annonce 1 -->
+<input type="text" id="announcementInput" placeholder="Texte de l’annonce 1">
+<button onclick="setAnnouncement()">Publier Annonce 1</button>
+<button onclick="clearAnnouncement()">Supprimer Annonce 1</button>
+<hr>
+<!-- Gestion Annonce 2 -->
+<input type="text" id="announcementInput2" placeholder="Texte de l’annonce 2">
+<button onclick="setAnnouncement2()">Publier Annonce 2</button>
+<button onclick="clearAnnouncement2()">Supprimer Annonce 2</button>
 </div>
 
 <div class="admin-panel">
@@ -103,6 +114,7 @@ let blockedUsers=JSON.parse(localStorage.getItem('blockedUsers')||'[]');
 let groups=JSON.parse(localStorage.getItem('groups')||'[]');
 let currentGroup=null;
 let globalAnnouncement=localStorage.getItem('announcement')||'';
+let globalAnnouncement2=localStorage.getItem('announcement2')||'';
 
 function isAdmin(){ return isUserAdmin; }
 function isBlocked(uid){ return blockedUsers.includes(uid); }
@@ -114,143 +126,106 @@ function updateBlockedList(){ document.getElementById('blockedList').textContent
 function blockUser(){ const t=document.getElementById('targetUserId').value.trim(); if(t&&!blockedUsers.includes(t)){blockedUsers.push(t); localStorage.setItem('blockedUsers',JSON.stringify(blockedUsers)); updateBlockedList();} }
 function unblockUser(){ const t=document.getElementById('targetUserId').value.trim(); blockedUsers=blockedUsers.filter(x=>x!==t); localStorage.setItem('blockedUsers',JSON.stringify(blockedUsers)); updateBlockedList(); }
 
+/* ---------- Annonce 1 ---------- */
 function setAnnouncement(){ if(!isAdmin()) return; const a=document.getElementById('announcementInput').value.trim(); if(!a) return; globalAnnouncement=a; localStorage.setItem('announcement',a); renderAnnouncement(); }
 function clearAnnouncement(){ if(!isAdmin()) return; globalAnnouncement=''; localStorage.removeItem('announcement'); renderAnnouncement(); }
 function renderAnnouncement(){ const bar=document.getElementById('announcementBar'); const text=document.getElementById('announcementText'); if(globalAnnouncement){ text.textContent=globalAnnouncement; bar.style.display='block'; } else bar.style.display='none'; }
 
-/* ---------- Groupes ---------- */
-function renderGroups(list=groups){
-  const listEl=document.getElementById('groupList');
-  listEl.innerHTML='';
-  list.forEach((g,index)=>{
-    if(!g.members) g.members=[];
-    const div=document.createElement('div');
-    div.className='group';
-    div.innerHTML=`<span style="cursor:pointer">${g.name} (👥 ${g.members.length})</span>`;
-    div.querySelector('span').onclick=()=>joinGroup(index);
-    if(isAdmin()){
-      const del=document.createElement('button');
-      del.textContent="Supprimer";
-      del.onclick=()=>{ groups.splice(index,1); localStorage.setItem('groups',JSON.stringify(groups)); renderGroups(); };
-      div.appendChild(del);
-    }
-    listEl.appendChild(div);
-  });
-  if(isAdmin()) document.getElementById('adminPanel').style.display='block';
-}
+/* ---------- Annonce 2 ---------- */
+function setAnnouncement2(){ if(!isAdmin()) return; const a=document.getElementById('announcementInput2').value.trim(); if(!a) return; globalAnnouncement2=a; localStorage.setItem('announcement2',a); renderAnnouncement2(); }
+function clearAnnouncement2(){ if(!isAdmin()) return; globalAnnouncement2=''; localStorage.removeItem('announcement2'); renderAnnouncement2(); }
+function renderAnnouncement2(){ const bar=document.getElementById('announcementBar2'); const text=document.getElementById('announcementText2'); if(globalAnnouncement2){ text.textContent=globalAnnouncement2; bar.style.display='block'; } else bar.style.display='none'; }
 
-function createGroup(){
-  const name=document.getElementById('newGroup').value.trim();
-  if(!name) return;
-  const newGroup={name,messages:[],members:[userId]};
-  groups.push(newGroup);
-  localStorage.setItem('groups',JSON.stringify(groups));
-  document.getElementById('newGroup').value='';
-  renderGroups();
-}
+function renderGroups(){ const list=document.getElementById('groupList'); list.innerHTML=''; groups.forEach((g,index)=>{ const div=document.createElement('div'); div.className='group'; div.innerHTML=`<span style="cursor:pointer">${g.name}</span>`; div.querySelector('span').onclick=()=>openGroup(index); const del=document.createElement('button'); del.textContent="Supprimer"; del.onclick=()=>{ groups.splice(index,1); localStorage.setItem('groups',JSON.stringify(groups)); renderGroups(); }; div.appendChild(del); list.appendChild(div); }); if(isAdmin()) document.getElementById('adminPanel').style.display='block'; }
+function createGroup(){ const name=document.getElementById('newGroup').value.trim(); if(!name) return; groups.push({name,messages:[]}); localStorage.setItem('groups',JSON.stringify(groups)); document.getElementById('newGroup').value=''; renderGroups(); }
+function openGroup(index){ currentGroup=index; document.getElementById('currentGroupTitle').textContent=groups[index].name; showSection('chat'); cleanOldMessages(); renderMessages(); }
 
-function joinGroup(index){
-  if(!groups[index].members) groups[index].members=[];
-  if(!groups[index].members.includes(userId)){
-    groups[index].members.push(userId);
-    localStorage.setItem('groups',JSON.stringify(groups));
-    alert("✅ Vous avez rejoint le groupe: "+groups[index].name);
-  }
-  openGroup(index);
-}
-
-function searchGroups(){
-  const input=document.getElementById('searchGroup').value.toLowerCase();
-  const filtered=groups.filter(g=>g.name.toLowerCase().includes(input));
-  renderGroups(filtered);
-}
-
-function openGroup(index){
-  currentGroup=index;
-  document.getElementById('currentGroupTitle').textContent=groups[index].name+" (👥 "+groups[index].members.length+")";
-  showSection('chat');
-  cleanOldMessages();
-  renderMessages();
-}
-
-/* ---------- Messages ---------- */
 function cleanOldMessages(){ const now=Date.now(); const limit=24*60*60*1000; groups.forEach(group=>{ group.messages=group.messages.filter(msg=>now-msg.timestamp<limit); }); localStorage.setItem('groups',JSON.stringify(groups)); }
 
-function sendMessage(){
-  if(currentGroup===null||isBlocked(userId)) return;
-  const input=document.getElementById('chatInput');
-  if(!input.value.trim()) return;
-  groups[currentGroup].messages.push({id:Date.now(), user:userId, text:input.value, media:null, likes:0, likedBy:[], timestamp:Date.now()});
-  localStorage.setItem('groups',JSON.stringify(groups));
-  input.value='';
-  renderMessages();
+function sendMessage(){ if(currentGroup===null||isBlocked(userId)) return; const input=document.getElementById('chatInput'); if(!input.value.trim()) return; groups[currentGroup].messages.push({id:Date.now(), user:userId, text:input.value, media:null, likes:0, likedBy:[], timestamp:Date.now()}); localStorage.setItem('groups',JSON.stringify(groups)); input.value=''; renderMessages(); }
+function renderMessages(){ if(currentGroup===null) return; const container=document.getElementById('chatMessages'); container.innerHTML=''; groups[currentGroup].messages.forEach((m,index)=>{ const div=document.createElement('div'); div.className='chat-message'; let mediaHtml=''; if(m.media){ if(m.media.type.startsWith('image')) mediaHtml=`<img src="${m.media.url}">`; else if(m.media.type.startsWith('video')) mediaHtml=`<video src="${m.media.url}" controls></video>`; else if(m.media.type.startsWith('audio')) mediaHtml=`<audio controls src="${m.media.url}"></audio>`; } div.innerHTML=`<strong>${m.user}</strong>: ${m.text||''} ${mediaHtml} <button class="like-button ${m.likedBy?.includes(userId)?'liked':''}" onclick="likeMessage(${index})">❤ ${m.likes||0}</button>`;
+
+// Actions pour l'auteur ou admin
+if(m.user===userId || isAdmin()){
+  const actions=document.createElement('div');
+  actions.className='actions';
+
+  const editBtn=document.createElement('button');
+  editBtn.textContent='✏️';
+  editBtn.onclick=()=>{
+    const newText=prompt('Modifier message:',m.text);
+    if(newText!==null){ m.text=newText; localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); }
+  };
+
+  const delBtn=document.createElement('button');
+  delBtn.textContent='🗑️';
+  delBtn.onclick=()=>{
+    groups[currentGroup].messages=groups[currentGroup].messages.filter(x=>x.id!==m.id);
+    localStorage.setItem('groups',JSON.stringify(groups));
+    renderMessages();
+  };
+
+  actions.appendChild(editBtn);
+  actions.appendChild(delBtn);
+  div.appendChild(actions);
 }
 
-function renderMessages(){
-  if(currentGroup===null) return;
-  const container=document.getElementById('chatMessages');
-  container.innerHTML='';
-  groups[currentGroup].messages.forEach((m,index)=>{
-    const div=document.createElement('div');
-    div.className='chat-message';
-    let mediaHtml='';
-    if(m.media){
-      if(m.media.type.startsWith('image')) mediaHtml=`<img src="${m.media.url}">`;
-      else if(m.media.type.startsWith('video')) mediaHtml=`<video src="${m.media.url}" controls></video>`;
-      else if(m.media.type.startsWith('audio')) mediaHtml=`<audio controls src="${m.media.url}"></audio>`;
-    }
-    div.innerHTML=`<strong>${m.user}</strong>: ${m.text||''} ${mediaHtml} <button class="like-button ${m.likedBy?.includes(userId)?'liked':''}" onclick="likeMessage(${index})">❤ ${m.likes||0}</button>`;
-    if(m.user===userId || isAdmin()){
-      const actions=document.createElement('div');
-      actions.className='actions';
-      const editBtn=document.createElement('button');
-      editBtn.textContent='✏️';
-      editBtn.onclick=()=>{
-        const newText=prompt('Modifier message:',m.text);
-        if(newText!==null){ m.text=newText; localStorage.setItem('groups',JSON.stringify(groups)); renderMessages(); }
-      };
-      const delBtn=document.createElement('button');
-      delBtn.textContent='🗑️';
-      delBtn.onclick=()=>{
-        groups[currentGroup].messages=groups[currentGroup].messages.filter(x=>x.id!==m.id);
-        localStorage.setItem('groups',JSON.stringify(groups));
-        renderMessages();
-      };
-      actions.appendChild(editBtn);
-      actions.appendChild(delBtn);
-      div.appendChild(actions);
-    }
-    container.appendChild(div);
-  });
-  container.scrollTop=container.scrollHeight;
+container.appendChild(div);
+});
+container.scrollTop=container.scrollHeight;
 }
 
 function likeMessage(index){
-  const msg=groups[currentGroup].messages[index];
-  msg.likedBy=msg.likedBy||[];
-  if(!msg.likedBy.includes(userId)){
-    msg.likes=(msg.likes||0)+1;
-    msg.likedBy.push(userId);
-  } else {
-    msg.likes=(msg.likes||1)-1;
-    msg.likedBy=msg.likedBy.filter(u=>u!==userId);
-  }
-  localStorage.setItem('groups',JSON.stringify(groups));
-  renderMessages();
+const msg=groups[currentGroup].messages[index];
+msg.likedBy=msg.likedBy||[];
+if(!msg.likedBy.includes(userId)){
+  msg.likes=(msg.likes||0)+1;
+  msg.likedBy.push(userId);
+} else {
+  msg.likes=(msg.likes||1)-1;
+  msg.likedBy=msg.likedBy.filter(u=>u!==userId);
+}
+localStorage.setItem('groups',JSON.stringify(groups));
+renderMessages();
 }
 
 /* ---------- Médias ---------- */
 function addMedia(){ document.getElementById('mediaInput').click(); }
 function sendMedia(event){
-  const file=event.target.files[0];
-  if(!file||currentGroup===null||isBlocked(userId)) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
+const file=event.target.files[0];
+if(!file||currentGroup===null||isBlocked(userId)) return;
+const reader=new FileReader();
+reader.onload=e=>{
+  groups[currentGroup].messages.push({
+    id:Date.now(),
+    user:userId,
+    text:'',
+    media:{url:e.target.result,type:file.type},
+    likes:0,
+    likedBy:[],
+    timestamp:Date.now()
+  });
+  localStorage.setItem('groups',JSON.stringify(groups));
+  renderMessages();
+};
+reader.readAsDataURL(file);
+}
+
+/* ---------- Message vocal ---------- */
+function recordVoice(){
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ alert("Microphone non disponible"); return; }
+navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+  const mediaRecorder=new MediaRecorder(stream);
+  let chunks=[];
+  mediaRecorder.ondataavailable=e=>chunks.push(e.data);
+  mediaRecorder.onstop=e=>{
+    const blob=new Blob(chunks,{type:'audio/webm'});
+    const url=URL.createObjectURL(blob);
     groups[currentGroup].messages.push({
       id:Date.now(),
       user:userId,
       text:'',
-      media:{url:e.target.result,type:file.type},
+      media:{url,type:'audio/webm'},
       likes:0,
       likedBy:[],
       timestamp:Date.now()
@@ -258,41 +233,17 @@ function sendMedia(event){
     localStorage.setItem('groups',JSON.stringify(groups));
     renderMessages();
   };
-  reader.readAsDataURL(file);
-}
-
-/* ---------- Message vocal ---------- */
-function recordVoice(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ alert("Microphone non disponible"); return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-    const mediaRecorder=new MediaRecorder(stream);
-    let chunks=[];
-    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
-    mediaRecorder.onstop=e=>{
-      const blob=new Blob(chunks,{type:'audio/webm'});
-      const url=URL.createObjectURL(blob);
-      groups[currentGroup].messages.push({
-        id:Date.now(),
-        user:userId,
-        text:'',
-        media:{url,type:'audio/webm'},
-        likes:0,
-        likedBy:[],
-        timestamp:Date.now()
-      });
-      localStorage.setItem('groups',JSON.stringify(groups));
-      renderMessages();
-    };
-    mediaRecorder.start();
-    setTimeout(()=>mediaRecorder.stop(),5000);
-    alert("Enregistrement vocal démarré pendant 5 secondes...");
-  }).catch(err=>alert("Erreur microphone: "+err));
+  mediaRecorder.start();
+  setTimeout(()=>mediaRecorder.stop(),5000);
+  alert("Enregistrement vocal démarré pendant 5 secondes...");
+}).catch(err=>alert("Erreur microphone: "+err));
 }
 
 /* ---------- Initialisation ---------- */
 cleanOldMessages();
 renderGroups();
 renderAnnouncement();
+renderAnnouncement2();
 </script>
 </body>
 </html>
