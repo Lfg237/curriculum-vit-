@@ -6,12 +6,12 @@
 <title>Mini Messenger Supabase</title>
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f2f5; }
-header { background:#1e1e2f; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; }
-nav { display:flex; gap:20px; }
+header { background:#1e1e2f; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+nav { display:flex; gap:20px; flex-wrap:wrap; }
 nav ul { list-style:none; display:flex; gap:20px; margin:0; padding:0; }
 nav ul li { position:relative; }
 nav ul li a { color:white; text-decoration:none; cursor:pointer; padding:5px 10px; display:block; }
-nav ul li ul { display:none; position:absolute; top:30px; left:0; background-color:#333; padding:10px; border-radius:5px; max-height:200px; overflow-y:auto; }
+nav ul li ul { display:none; position:absolute; top:30px; left:0; background-color:#333; padding:10px; border-radius:5px; max-height:200px; overflow-y:auto; white-space:nowrap; }
 nav ul li:hover ul { display:block; }
 footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
 .announcement-bar { background:#ffcc00; color:#000; padding:10px; overflow:hidden; white-space:nowrap; }
@@ -22,7 +22,7 @@ footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
 .chat-message { background:white; padding:10px; margin-bottom:10px; border-radius:5px; position:relative; word-break:break-word; }
 .chat-message .actions { position:absolute; top:0; right:0; display:flex; gap:5px; }
 .chat-message img, .chat-message video, .chat-message audio, .chat-message iframe { max-width:100%; border-radius:5px; margin-top:5px; }
-.chat-input { display:flex; gap:10px; margin-top:10px; }
+.chat-input { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
 .chat-input input { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
 .chat-input button { padding:10px 15px; border:none; border-radius:5px; background:#1e1e2f; color:white; cursor:pointer; }
 .group-list { margin-bottom:20px; display:flex; flex-direction:column; gap:5px; }
@@ -121,89 +121,228 @@ footer { background:#1e1e2f; color:white; text-align:center; padding:20px; }
 <footer>&copy; 2025 Mini Messenger</footer>
 
 <script>
-const SUPABASE_URL="TA_SUPABASE_URL"; 
-const SUPABASE_ANON_KEY="TA_SUPABASE_ANON_KEY"; 
+const SUPABASE_URL="https://chgyzvowfsblodxbagfa.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoZ3l6dm93ZnNibG9keGJhZ2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjA2MjQsImV4cCI6MjA3MzMzNjYyNH0.JEg_WFTJlB3gNBI8-oaP35N68tu9p6TGl6vM3sYPL4Y";
 const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let userId=null;
-let isAdmin=false;
-let currentGroup=null;
-let currentPrivate=null;
-let blocked=[];
+let userId = crypto.randomUUID();
+let isAdmin = false;
+let currentGroup = null;
+let currentPrivate = null;
+let blocked = [];
 
-async function init(){
-  const { data, error } = await supabase.auth.signInWithOtp({ email: Math.random()+"@test.com" }).catch(()=>supabase.auth.signInAnonymously());
-  userId = supabase.auth.user()?.id || crypto.randomUUID();
-  updateTime();
-  setInterval(updateTime,1000);
-  renderGroups();
-  renderLinks();
-  renderAnnouncements();
-}
-init();
-
+// Gestion du temps
 function updateTime(){
   const now=new Date();
   document.getElementById('timeDisplay').textContent="Heure locale: "+now.toLocaleTimeString();
 }
+setInterval(updateTime,1000);
+updateTime();
 
+// Navigation sections
 function showSection(id){
   document.getElementById('groups').style.display=id==='groups'?'block':'none';
   document.getElementById('chat').style.display=id==='chat'?'block':'none';
   document.getElementById('private').style.display=id==='private'?'block':'none';
 }
 
-async function checkAdmin(){
+// Admin
+function checkAdmin(){
   const code=document.getElementById('adminCodeInput').value.trim();
-  if(code==='233233'){isAdmin=true; document.getElementById('adminPanel').style.display='block'; alert("Admin activé");} else alert("Code incorrect");
+  if(code==='233233'){isAdmin=true; document.getElementById('adminPanel').style.display='block'; alert("Admin activé");} 
+  else alert("Code incorrect");
 }
 
+// Données locales
+let groups = [];
+let privateMessages = {};
+let links = [];
+let announcements = [{text:'',color:'#ffcc00'},{text:'',color:'#00ccff'}];
+
+// --- Fonctions groupes ---
 async function createGroup(){
   const name=document.getElementById('newGroup').value.trim();
   if(!name) return;
-  await supabase.from('groups').insert({name,created_by:userId});
+  const { data, error } = await supabase.from('groups').insert([{name}]);
+  if(error){alert(error.message); return;}
   document.getElementById('newGroup').value='';
+  fetchGroups();
+}
+
+async function fetchGroups(){
+  const { data, error } = await supabase.from('groups').select('*');
+  if(error){alert(error.message); return;}
+  groups = data;
   renderGroups();
 }
 
-async function renderGroups(){
-  let { data:groupsData } = await supabase.from('groups').select('*');
+function renderGroups(){
   const container=document.getElementById('groupList');
   container.innerHTML='';
-  for(let g of groupsData){
+  groups.forEach(g=>{
     const div=document.createElement('div');
     div.className='group';
-    const memberCount = await supabase.from('group_members').select('*',{count:'exact'}).eq('group_id',g.id);
-    div.innerHTML=`<span style="cursor:pointer" onclick="openGroup('${g.id}','${g.name}')">${g.name} (${memberCount.count||0})</span>`;
+    div.innerHTML=`<span onclick="openGroup(${g.id})">${g.name}</span> <span>${g.members_count||0} abonnés</span>`;
     container.appendChild(div);
-  }
+  });
 }
 
-async function openGroup(id,name){
-  currentGroup=id;
-  document.getElementById('currentGroupTitle').textContent=name;
+// --- Open Group Chat ---
+async function openGroup(groupId){
+  currentGroup=groupId;
+  const group = groups.find(g=>g.id===groupId);
+  document.getElementById('currentGroupTitle').textContent=group.name;
   showSection('chat');
-  renderMessages();
+  fetchMessages(groupId);
 }
 
-async function sendMessage(){
-  if(!currentGroup) return;
-  const text=document.getElementById('chatInput').value.trim();
-  if(!text) return;
-  await supabase.from('messages').insert({group_id:currentGroup,sender_id:userId,text,type:'text'});
-  document.getElementById('chatInput').value='';
-  renderMessages();
-}
-
-async function renderMessages(){
-  if(!currentGroup) return;
-  const { data:msgs } = await supabase.from('messages').select('*').eq('group_id',currentGroup).order('created_at',{ascending:true});
+// --- Messages ---
+async function fetchMessages(groupId){
+  const { data,error } = await supabase.from('messages').select('*').eq('group_id',groupId).order('timestamp',{ascending:true});
+  if(error){alert(error.message); return;}
   const container=document.getElementById('chatMessages');
   container.innerHTML='';
-  for(let m of msgs){
+  data.forEach(msg=>{
     const div=document.createElement('div');
     div.className='chat-message';
     let media='';
-    if(m.media_url){
-      if(m.type==='image') media=`<img src="${m.media_url}">`;
-      else if(m.type==='video') media=`<video src="${m.media_url
+    if(msg.media_url){
+      if(msg.media_type.startsWith('image')) media=`<img src="${msg.media_url}">`;
+      else if(msg.media_type.startsWith('video')) media=`<video src="${msg.media_url}" controls></video>`;
+      else if(msg.media_type.startsWith('audio')) media=`<audio src="${msg.media_url}" controls></audio>`;
+      else media=`<a href="${msg.media_url}" target="_blank">Fichier</
+</a>`;
+    }
+    div.innerHTML = `<strong>${msg.user_id}</strong>: ${msg.text || ''} ${media} <button class="like-button ${msg.liked_by?.includes(userId)?'liked':''}" onclick="likeMessage(${msg.id}, ${groupId})">❤ ${msg.likes||0}</button>`;
+    
+    // Actions pour l'auteur ou admin
+    if(msg.user_id===userId || isAdmin){
+      const actions=document.createElement('div');
+      actions.className='actions';
+      
+      const editBtn=document.createElement('button');
+      editBtn.textContent='✏️';
+      editBtn.onclick=async ()=>{
+        const newText=prompt('Modifier message:',msg.text);
+        if(newText!==null){
+          await supabase.from('messages').update({text:newText}).eq('id',msg.id);
+          fetchMessages(groupId);
+        }
+      };
+      
+      const delBtn=document.createElement('button');
+      delBtn.textContent='🗑️';
+      delBtn.onclick=async ()=>{
+        await supabase.from('messages').delete().eq('id',msg.id);
+        fetchMessages(groupId);
+      };
+      
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      div.appendChild(actions);
+    }
+    
+    container.appendChild(div);
+  });
+  container.scrollTop=container.scrollHeight;
+}
+
+// --- Envoyer un message ---
+async function sendMessage(){
+  const input=document.getElementById('chatInput');
+  if(!input.value.trim() || !currentGroup) return;
+  await supabase.from('messages').insert([{
+    group_id: currentGroup,
+    user_id: userId,
+    text: input.value,
+    media_url: null,
+    media_type: null,
+    likes: 0,
+    liked_by: [],
+    timestamp: new Date().toISOString()
+  }]);
+  input.value='';
+  fetchMessages(currentGroup);
+}
+
+// --- Envoyer médias ---
+function addMedia(){ document.getElementById('mediaInput').click(); }
+async function sendMedia(event){
+  const file=event.target.files[0];
+  if(!file || !currentGroup) return;
+  const { data, error } = await supabase.storage.from('media').upload(`${Date.now()}_${file.name}`, file);
+  if(error){alert(error.message); return;}
+  const url = `${SUPABASE_URL}/storage/v1/object/public/media/${data.path}`;
+  await supabase.from('messages').insert([{
+    group_id: currentGroup,
+    user_id: userId,
+    text:'',
+    media_url:url,
+    media_type:file.type,
+    likes:0,
+    liked_by:[],
+    timestamp: new Date().toISOString()
+  }]);
+  fetchMessages(currentGroup);
+}
+
+// --- Like message ---
+async function likeMessage(msgId, groupId){
+  const { data: msg } = await supabase.from('messages').select('*').eq('id',msgId).single();
+  let liked_by = msg.liked_by || [];
+  let likes = msg.likes || 0;
+  if(!liked_by.includes(userId)){
+    liked_by.push(userId); likes++;
+  } else {
+    liked_by = liked_by.filter(u=>u!==userId); likes--;
+  }
+  await supabase.from('messages').update({liked_by, likes}).eq('id',msgId);
+  fetchMessages(groupId);
+}
+
+// --- Barre de recherche ---
+function searchGroups(){
+  const val=document.getElementById('searchGroup').value.toLowerCase();
+  const filtered=groups.filter(g=>g.name.toLowerCase().includes(val));
+  const container=document.getElementById('groupList');
+  container.innerHTML='';
+  filtered.forEach(g=>{
+    const div=document.createElement('div');
+    div.className='group';
+    div.innerHTML=`<span onclick="openGroup(${g.id})">${g.name}</span> <span>${g.members_count||0} abonnés</span>`;
+    container.appendChild(div);
+  });
+}
+
+// --- Annonces ---
+function renderAnnouncements(){
+  const bar1=document.getElementById('announcementBar'); 
+  const bar2=document.getElementById('announcementBar2');
+  if(announcements[0].text){bar1.style.display='block'; bar1.querySelector('.announcement-text').textContent=announcements[0].text; bar1.style.background=announcements[0].color;} else bar1.style.display='none';
+  if(announcements[1].text){bar2.style.display='block'; bar2.querySelector('.announcement-text').textContent=announcements[1].text; bar2.style.background=announcements[1].color;} else bar2.style.display='none';
+}
+function setAnnouncement(n){
+  const text=document.getElementById(`announcementInput${n===2?'2':''}`).value.trim();
+  const color=document.getElementById(`announcementColor${n===2?'2':''}`).value;
+  announcements[n-1]={text,color};
+  renderAnnouncements();
+}
+function clearAnnouncement(n){ announcements[n-1]={text:'',color:'#fff'}; renderAnnouncements(); }
+
+// --- Bloquer / débloquer utilisateur ---
+function blockUser(){ const u=document.getElementById('targetUser').value.trim(); if(!blocked.includes(u)) blocked.push(u); updateBlocked(); }
+function unblockUser(){ const u=document.getElementById('targetUser').value.trim(); blocked=blocked.filter(x=>x!==u); updateBlocked(); }
+function updateBlocked(){ document.getElementById('blockedList').textContent=blocked.join(', ')||'Aucun'; }
+
+// --- Gestion liens menu droit ---
+function addLink(){ const name=document.getElementById('linkName').value.trim(); const url=document.getElementById('linkURL').value.trim(); if(!name||!url) return; links.push({name,url}); renderLinks(); }
+function renderLinks(){ const container=document.getElementById('externalLinks'); container.innerHTML=''; links.forEach(l=>{ const a=document.createElement('a'); a.href=l.url; a.target='_blank'; a.textContent=l.name; container.appendChild(a); }); }
+
+// --- Initialisation ---
+fetchGroups();
+renderAnnouncements();
+renderLinks();
+</script>
+
+</body>
+</html>
