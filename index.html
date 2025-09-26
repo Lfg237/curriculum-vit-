@@ -6,7 +6,7 @@
 <title>CV / Lettre / Plan</title>
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
-.paper{background:white;padding:20px;margin:0 auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
+.paper{background:white;padding:20px;margin:0 auto 20px;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
 header{text-align:center;margin-bottom:10px;}
 header h1{font-size:2em;font-weight:bold;margin:0;}
 header h2{font-size:1em;color:#555;margin:5px 0;}
@@ -22,56 +22,61 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 
 <h1>📄 CV / Lettre / Plan</h1>
 
-<div class="paper" id="paperContent">
-
+<!-- CV -->
+<div class="paper" id="cv">
 <header>
-<h1 id="displayName">Nom Complet</h1>
-<h2 id="displayProfession">Profession</h2>
+<h1 id="cvName">Nom Complet</h1>
+<h2 id="cvProfession">Profession</h2>
 </header>
-
-<section id="photoSection">
+<section>
 <h3>📸 Photo (facultatif)</h3>
-<input type="file" id="photoInput" accept="image/*">
-<img id="photoPreview">
+<input type="file" id="cvPhoto" accept="image/*">
+<img id="cvPhotoPreview">
 </section>
-
-<section id="cv">
+<section>
 <h3>👤 CV</h3>
-<label>Nom complet</label><input id="fullName" placeholder="Nom complet">
-<label>Profession / poste</label><input id="profession" placeholder="Profession / poste">
-<label>Prénom</label><input id="prenom" placeholder="Prénom">
-<label>Âge</label><input id="age" placeholder="Âge">
-<label>Ville</label><input id="ville" placeholder="Ville">
-<label>Quartier</label><input id="quartier" placeholder="Quartier">
-<label>Situation matrimoniale</label><input id="situation" placeholder="Situation matrimoniale">
-<label>Nombre d'enfants</label><input id="enfants" placeholder="Nombre d'enfants">
-<label>Dernier poste</label><input id="poste" placeholder="Dernier poste">
-<label>Loisirs</label><input id="loisirs" placeholder="Loisirs">
-<label>Caractère</label><input id="caractere" placeholder="Caractère">
-<label>Dernier diplôme</label><input id="diplome" placeholder="Dernier diplôme">
-<label>Établissement</label><input id="etablissement" placeholder="Établissement">
-<label>Alcoolique Oui/Non</label><input id="alcool" placeholder="Alcoolique Oui/Non">
-<label>Salaire</label><input id="salaire" placeholder="Salaire">
-<label>Email</label><input id="email" placeholder="Email">
-<label>Tel MTN</label><input id="telMtn" placeholder="Tel MTN">
-<label>Tel Orange</label><input id="telOrange" placeholder="Tel Orange">
-</section>
-
-<section id="lettre">
-<h3>✉️ Lettre de motivation</h3>
-<label>Prénom</label><input id="prenomLetter" placeholder="Prénom">
-<label>Nom</label><input id="nomLetter" placeholder="Nom">
-<label>Entreprise</label><input id="entreprise" placeholder="Entreprise">
-<label>Poste souhaité</label><input id="posteLetter" placeholder="Poste souhaité">
-<label>Contenu</label><textarea id="contenu" placeholder="Contenu"></textarea>
-</section>
-
-<section id="plan">
-<h3>🗺️ Plan de localisation</h3>
-<label>Plan</label><textarea id="planText" placeholder="Plan de localisation"></textarea>
+<label>Nom complet</label><input id="cvFullName" placeholder="Nom complet">
+<label>Profession / poste</label><input id="cvProf" placeholder="Profession / poste">
+<label>Prénom</label><input id="cvPrenom" placeholder="Prénom">
+<label>Âge</label><input id="cvAge" placeholder="Âge">
+<label>Ville</label><input id="cvVille" placeholder="Ville">
+<label>Quartier</label><input id="cvQuartier" placeholder="Quartier">
+<label>Situation matrimoniale</label><input id="cvSituation" placeholder="Situation matrimoniale">
+<label>Nombre d'enfants</label><input id="cvEnfants" placeholder="Nombre d'enfants">
+<label>Dernier poste</label><input id="cvPoste" placeholder="Dernier poste">
+<label>Loisirs</label><input id="cvLoisirs" placeholder="Loisirs">
+<label>Caractère</label><input id="cvCaractere" placeholder="Caractère">
+<label>Dernier diplôme</label><input id="cvDiplome" placeholder="Dernier diplôme">
+<label>Établissement</label><input id="cvEtablissement" placeholder="Établissement">
+<label>Alcoolique Oui/Non</label><input id="cvAlcool" placeholder="Alcoolique Oui/Non">
+<label>Salaire</label><input id="cvSalaire" placeholder="Salaire">
+<label>Email</label><input id="cvEmail" placeholder="Email">
+<label>Tel MTN</label><input id="cvTelMtn" placeholder="Tel MTN">
+<label>Tel Orange</label><input id="cvTelOrange" placeholder="Tel Orange">
 </section>
 </div>
 
+<!-- Lettre -->
+<div class="paper" id="lettre">
+<section>
+<h3>✉️ Lettre de motivation</h3>
+<label>Prénom</label><input id="lettrePrenom" placeholder="Prénom">
+<label>Nom</label><input id="lettreNom" placeholder="Nom">
+<label>Entreprise</label><input id="lettreEntreprise" placeholder="Entreprise">
+<label>Poste souhaité</label><input id="lettrePoste" placeholder="Poste souhaité">
+<label>Contenu</label><textarea id="lettreContenu" placeholder="Contenu"></textarea>
+</section>
+</div>
+
+<!-- Plan -->
+<div class="paper" id="plan">
+<section>
+<h3>🗺️ Plan de localisation</h3>
+<label>Plan</label><textarea id="planTexte" placeholder="Plan de localisation"></textarea>
+</section>
+</div>
+
+<!-- Boutons PDF / WhatsApp -->
 <button id="downloadCV">📥 Télécharger CV</button>
 <button id="downloadLettre">📥 Télécharger Lettre</button>
 <button id="downloadPlan">📥 Télécharger Plan</button>
@@ -83,46 +88,46 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 const { jsPDF } = window.jspdf;
 
 // Nom et profession dynamiques
-const fullNameInput=document.getElementById('fullName');
-const professionInput=document.getElementById('profession');
-fullNameInput.addEventListener('input',()=>document.getElementById('displayName').textContent=fullNameInput.value || "Nom Complet");
-professionInput.addEventListener('input',()=>document.getElementById('displayProfession').textContent=professionInput.value || "Profession");
+const cvFullName=document.getElementById('cvFullName');
+const cvProf=document.getElementById('cvProf');
+cvFullName.addEventListener('input',()=>document.getElementById('cvName').textContent=cvFullName.value || "Nom Complet");
+cvProf.addEventListener('input',()=>document.getElementById('cvProfession').textContent=cvProf.value || "Profession");
 
 // Photo preview
-const photoInput=document.getElementById('photoInput');
-const photoPreview=document.getElementById('photoPreview');
-photoInput.addEventListener('change', e=>{
+const cvPhoto=document.getElementById('cvPhoto');
+const cvPhotoPreview=document.getElementById('cvPhotoPreview');
+cvPhoto.addEventListener('change', e=>{
   const file=e.target.files[0];
   if(file){
     const reader=new FileReader();
-    reader.onload=function(ev){photoPreview.src=ev.target.result; photoPreview.style.display='block';}
+    reader.onload=function(ev){cvPhotoPreview.src=ev.target.result; cvPhotoPreview.style.display='block';}
     reader.readAsDataURL(file);
   }
 });
 
-function downloadSection(sectionId, filename){
+// Fonction pour télécharger chaque section en PDF
+function downloadPDF(sectionId, filename){
   const section=document.getElementById(sectionId);
   html2canvas(section,{scale:2,useCORS:true}).then(canvas=>{
     const imgData=canvas.toDataURL('image/png');
     const pdf=new jsPDF('p','mm','a4');
-    const imgProps=pdf.getImageProperties(imgData);
     const pdfWidth=pdf.internal.pageSize.getWidth();
-    const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+    const pdfHeight=(canvas.height*pdfWidth)/canvas.width;
     pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
     pdf.save(filename);
   });
 }
 
-document.getElementById('downloadCV').onclick=()=>downloadSection('cv','CV.pdf');
-document.getElementById('downloadLettre').onclick=()=>downloadSection('lettre','Lettre.pdf');
-document.getElementById('downloadPlan').onclick=()=>downloadSection('plan','Plan.pdf');
+document.getElementById('downloadCV').onclick=()=>downloadPDF('cv','CV.pdf');
+document.getElementById('downloadLettre').onclick=()=>downloadPDF('lettre','Lettre.pdf');
+document.getElementById('downloadPlan').onclick=()=>downloadPDF('plan','Plan.pdf');
 
 // WhatsApp
 document.getElementById('shareBtn').onclick=()=>{
-  let text=`📄 CV de ${fullNameInput.value} (${professionInput.value})\n\n`;
+  let text=`📄 CV de ${cvFullName.value} (${cvProf.value})\n\n`;
   document.querySelectorAll('#cv input').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
   document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
-  text+=`Plan: ${document.getElementById('planText').value}\n`;
+  text+=`Plan: ${document.getElementById('planTexte').value}\n`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
 };
 </script>
