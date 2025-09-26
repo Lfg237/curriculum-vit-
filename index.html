@@ -7,19 +7,21 @@
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
 .paper{background:white;padding:20px;margin:0 auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
-header{text-align:center;margin-bottom:20px;}
+header{text-align:center;margin-bottom:10px;}
 header h1{font-size:2em;font-weight:bold;margin:0;}
 header h2{font-size:1em;color:#555;margin:5px 0;}
-section{margin-bottom:20px;padding:15px;border:1px solid #ccc;border-radius:5px;page-break-inside:avoid;}
+section{margin-bottom:15px;padding:15px;border:1px solid #ccc;border-radius:5px;page-break-inside:avoid;}
 section h3{margin-top:0;color:#1e88e5;}
 input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
+label{font-weight:bold;}
+p{margin:2px 0;}
 button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
 .page-break{page-break-after:always;}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
 #popup{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
 .result{margin:5px 0;font-weight:bold;}
-#photoPreview{display:none;width:120px;height:120px;border-radius:10px;margin-top:10px;}
-.text-output p{margin:2px 0;}
+#photoPreview{display:none;width:120px;height:120px;border-radius:10px;margin-bottom:10px;}
+.text-output p span{font-weight:normal;}
 </style>
 </head>
 <body>
@@ -39,44 +41,47 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <img id="photoPreview">
 </section>
 
+<!-- CV -->
 <section id="cv">
 <h3>👤 CV</h3>
-<input id="fullName" placeholder="Nom complet">
-<input id="profession" placeholder="Profession / poste">
-<input id="prenom" placeholder="Prénom">
-<input id="age" placeholder="Âge">
-<input id="ville" placeholder="Ville">
-<input id="quartier" placeholder="Quartier">
-<input id="situation" placeholder="Situation matrimoniale">
-<input id="enfants" placeholder="Nombre d'enfants">
-<input id="poste" placeholder="Dernier poste">
-<input id="loisirs" placeholder="Loisirs">
-<input id="caractere" placeholder="Caractère">
-<input id="diplome" placeholder="Dernier diplôme">
-<input id="etablissement" placeholder="Établissement">
-<input id="alcool" placeholder="Alcoolique Oui/Non">
-<input id="salaire" placeholder="Salaire">
-<input id="email" placeholder="Email">
-<input id="telMtn" placeholder="Tel MTN">
-<input id="telOrange" placeholder="Tel Orange">
+<label>Nom complet</label><input id="fullName" placeholder="Nom complet">
+<label>Profession / poste</label><input id="profession" placeholder="Profession / poste">
+<label>Prénom</label><input id="prenom" placeholder="Prénom">
+<label>Âge</label><input id="age" placeholder="Âge">
+<label>Ville</label><input id="ville" placeholder="Ville">
+<label>Quartier</label><input id="quartier" placeholder="Quartier">
+<label>Situation matrimoniale</label><input id="situation" placeholder="Situation matrimoniale">
+<label>Nombre d'enfants</label><input id="enfants" placeholder="Nombre d'enfants">
+<label>Dernier poste</label><input id="poste" placeholder="Dernier poste">
+<label>Loisirs</label><input id="loisirs" placeholder="Loisirs">
+<label>Caractère</label><input id="caractere" placeholder="Caractère">
+<label>Dernier diplôme</label><input id="diplome" placeholder="Dernier diplôme">
+<label>Établissement</label><input id="etablissement" placeholder="Établissement">
+<label>Alcoolique Oui/Non</label><input id="alcool" placeholder="Alcoolique Oui/Non">
+<label>Salaire</label><input id="salaire" placeholder="Salaire">
+<label>Email</label><input id="email" placeholder="Email">
+<label>Tel MTN</label><input id="telMtn" placeholder="Tel MTN">
+<label>Tel Orange</label><input id="telOrange" placeholder="Tel Orange">
 </section>
 
 <div class="page-break"></div>
 
+<!-- Lettre de motivation -->
 <section id="lettre">
 <h3>✉️ Lettre de motivation</h3>
-<input id="prenomLetter" placeholder="Prénom">
-<input id="nomLetter" placeholder="Nom">
-<input id="entreprise" placeholder="Entreprise">
-<input id="posteLetter" placeholder="Poste souhaité">
-<textarea id="contenu" placeholder="Contenu"></textarea>
+<label>Prénom</label><input id="prenomLetter" placeholder="Prénom">
+<label>Nom</label><input id="nomLetter" placeholder="Nom">
+<label>Entreprise</label><input id="entreprise" placeholder="Entreprise">
+<label>Poste souhaité</label><input id="posteLetter" placeholder="Poste souhaité">
+<label>Contenu</label><textarea id="contenu" placeholder="Contenu"></textarea>
 </section>
 
 <div class="page-break"></div>
 
+<!-- Plan -->
 <section id="plan">
 <h3>🗺️ Plan de localisation</h3>
-<textarea id="planText" placeholder="Plan de localisation"></textarea>
+<label>Plan</label><textarea id="planText" placeholder="Plan de localisation"></textarea>
 </section>
 </div>
 
@@ -124,8 +129,8 @@ photoInput.addEventListener('change', e=>{
 // WhatsApp
 function getAllText(){
   let text=`📄 CV de ${fullNameInput.value} (${professionInput.value})\n\n`;
-  document.querySelectorAll('#cv input').forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
-  document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
+  document.querySelectorAll('#cv input').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
+  document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
   text+=`Plan: ${document.getElementById('planText').value}\n`;
   return text;
 }
@@ -134,7 +139,7 @@ document.getElementById('shareBtn').onclick=()=>{
   else document.getElementById('popupOverlay').style.display='flex';
 };
 
-// PDF multi-pages avec conversion inputs -> texte
+// PDF multi-pages avec conversion inputs -> texte et labels en gras
 document.getElementById('downloadPdf').onclick=()=>{
   const tempDiv=document.createElement('div');
   tempDiv.style.position='absolute';
@@ -145,7 +150,8 @@ document.getElementById('downloadPdf').onclick=()=>{
   
   clone.querySelectorAll('input,textarea').forEach(i=>{
     const p=document.createElement('p');
-    p.textContent=`${i.placeholder}: ${i.value}`;
+    const label=i.previousElementSibling.textContent;
+    p.innerHTML=`<b>${label}</b>: <span>${i.value}</span>`;
     i.parentNode.replaceChild(p,i);
   });
   
