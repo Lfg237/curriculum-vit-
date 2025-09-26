@@ -14,7 +14,7 @@ section{margin-bottom:20px;padding:15px;border:1px solid #ccc;border-radius:5px;
 section h3{margin-top:0;color:#1e88e5;}
 input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
 button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
-.page-break{page-break-before:always;}
+.page-break{page-break-after:always;}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
 #popup{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
 .result{margin:5px 0;font-weight:bold;}
@@ -26,12 +26,12 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <h1>📄 CV / Lettre / Plan complet</h1>
 
 <div class="paper" id="paperContent">
+
 <header>
 <h1 id="displayName">Nom Complet</h1>
 <h2 id="displayProfession">Profession</h2>
 </header>
 
-<!-- Photo facultative -->
 <section id="photoSection">
 <h3>📸 Photo (facultatif)</h3>
 <input type="file" id="photoInput" accept="image/*">
@@ -61,7 +61,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <input id="telOrange" placeholder="Tel Orange">
 </section>
 
-<!-- Page break -->
 <div class="page-break"></div>
 
 <!-- Lettre de motivation -->
@@ -74,7 +73,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <textarea id="contenu" placeholder="Contenu"></textarea>
 </section>
 
-<!-- Page break -->
 <div class="page-break"></div>
 
 <!-- Plan -->
@@ -107,7 +105,7 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233'};
 let isAdmin=false;
 
-// Nom et profession dynamique
+// Nom et profession dynamiques
 const fullNameInput=document.getElementById('fullName');
 const professionInput=document.getElementById('profession');
 fullNameInput.addEventListener('input',()=>document.getElementById('displayName').textContent=fullNameInput.value || "Nom Complet");
@@ -138,14 +136,32 @@ document.getElementById('shareBtn').onclick=()=>{
   else document.getElementById('popupOverlay').style.display='flex';
 };
 
-// PDF complet avec plusieurs pages
+// PDF complet multi-pages
 document.getElementById('downloadPdf').onclick=()=>{
-  html2pdf().from(document.getElementById('paperContent')).set({
+  // Créer un conteneur temporaire avec le contenu transformé en texte
+  const tempDiv=document.createElement('div');
+  tempDiv.style.position='absolute';
+  tempDiv.style.left='-9999px';
+  
+  // Cloner le contenu pour remplacer inputs par du texte
+  const clone=document.getElementById('paperContent').cloneNode(true);
+  
+  // Remplacer inputs/textarea par valeurs
+  clone.querySelectorAll('input,textarea').forEach(i=>{
+    const p=document.createElement('p');
+    p.textContent=`${i.placeholder}: ${i.value}`;
+    i.parentNode.replaceChild(p,i);
+  });
+  
+  tempDiv.appendChild(clone);
+  document.body.appendChild(tempDiv);
+  
+  html2pdf().from(tempDiv).set({
     margin:10,
     filename:'document_complet.pdf',
     html2canvas:{scale:2,useCORS:true},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).save();
+  }).save().finally(()=>document.body.removeChild(tempDiv));
 };
 
 // Popup paiement
