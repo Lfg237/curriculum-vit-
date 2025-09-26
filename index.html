@@ -5,45 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tableau Utilisateurs</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:20px;}
-table{width:100%;border-collapse:collapse;margin-top:20px;}
-th,td{border:1px solid #1e88e5;padding:8px;text-align:center;vertical-align:top;}
-th{background:#1e88e5;color:white;}
-.paper{background:white;padding:10px;border-radius:5px;box-shadow:0 0 8px rgba(0,0,0,0.1);max-width:300px;margin:auto;}
-label{font-weight:bold;}
-input,textarea{width:100%;padding:4px;margin:2px 0;border:1px solid #1e88e5;border-radius:4px;}
-button{padding:6px 12px;border:none;border-radius:4px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:4px;}
-.section{margin-bottom:40px;}
+body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
+.page{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
+h1,h2{margin:10px 0;}
+.paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;}
+button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
 </style>
 </head>
 <body>
-<h1>📋 Tableau Utilisateurs</h1>
 
-<div id="sections"></div>
+<!-- Page CV -->
+<div class="page" id="pageCV">
+  <h1>📄 CV</h1>
+  <div class="paper" id="cvSection">
+    <p><b>Prénom:</b> Alice</p>
+    <p><b>Âge:</b> 28</p>
+    <p><b>Ville:</b> Paris</p>
+    <p><b>Dernier poste:</b> Frontend</p>
+    <p><b>Email:</b> alice@example.com</p>
+  </div>
+  <button id="btnDownloadCV">📥 Télécharger CV PDF</button>
+</div>
+
+<!-- Page Lettre de Motivation -->
+<div class="page" id="pageLettre">
+  <h1>✉️ Lettre de Motivation</h1>
+  <div class="paper" id="lettreSection">
+    <p><b>Prénom:</b> Alice</p>
+    <p><b>Nom:</b> Dupont</p>
+    <p><b>Entreprise:</b> TechCorp</p>
+    <p><b>Poste:</b> Ingénieur</p>
+    <p><b>Contenu:</b> Motivation pour rejoindre TechCorp.</p>
+  </div>
+  <button id="btnDownloadLettre">📥 Télécharger Lettre PDF</button>
+</div>
+
+<!-- Page Plan de Localisation -->
+<div class="page" id="pagePlan">
+  <h1>🗺️ Plan de Localisation</h1>
+  <div class="paper" id="planSection">
+    <p><b>Plan:</b> 123 Rue de Paris</p>
+  </div>
+  <button id="btnDownloadPlan">📥 Télécharger Plan PDF</button>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const { jsPDF } = window.jspdf;
 
-const users=[
-  {
-    nom:"Alice Dupont",
-    profession:"Développeuse",
-    cv:{prenom:"Alice", age:"28", ville:"Paris", poste:"Frontend", email:"alice@example.com"},
-    lettre:{prenom:"Alice", nom:"Dupont", entreprise:"TechCorp", poste:"Ingénieur", contenu:"Motivation pour rejoindre TechCorp."},
-    plan:{plan:"123 Rue de Paris"}
-  },
-  {
-    nom:"Bob Martin",
-    profession:"Designer",
-    cv:{prenom:"Bob", age:"30", ville:"Lyon", poste:"Graphiste", email:"bob@example.com"},
-    lettre:{prenom:"Bob", nom:"Martin", entreprise:"DesignInc", poste:"Graphiste", contenu:"Motivation pour DesignInc."},
-    plan:{plan:"456 Avenue Lyon"}
-  }
-];
-
-// Fonction PDF
 function downloadPDFFromElement(element, filename){
   html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
     const imgData=canvas.toDataURL('image/png');
@@ -55,58 +65,10 @@ function downloadPDFFromElement(element, filename){
   });
 }
 
-const container=document.getElementById('sections');
-
-users.forEach((user,index)=>{
-  // Section CV
-  const sectionCV=document.createElement('div');
-  sectionCV.className='section';
-  sectionCV.innerHTML=`
-    <h2>CV de ${user.nom}</h2>
-    <div class="paper" id="cv${index}">
-      <label>Prénom:</label> ${user.cv.prenom}<br>
-      <label>Âge:</label> ${user.cv.age}<br>
-      <label>Ville:</label> ${user.cv.ville}<br>
-      <label>Dernier poste:</label> ${user.cv.poste}<br>
-      <label>Email:</label> ${user.cv.email}<br>
-      <button id="btnCV${index}">📥 Télécharger CV PDF</button>
-    </div>
-  `;
-  container.appendChild(sectionCV);
-
-  // Section Lettre
-  const sectionLettre=document.createElement('div');
-  sectionLettre.className='section';
-  sectionLettre.innerHTML=`
-    <h2>Lettre de ${user.nom}</h2>
-    <div class="paper" id="lettre${index}">
-      <label>Prénom:</label> ${user.lettre.prenom}<br>
-      <label>Nom:</label> ${user.lettre.nom}<br>
-      <label>Entreprise:</label> ${user.lettre.entreprise}<br>
-      <label>Poste:</label> ${user.lettre.poste}<br>
-      <label>Contenu:</label> ${user.lettre.contenu}<br>
-      <button id="btnLettre${index}">📥 Télécharger Lettre PDF</button>
-    </div>
-  `;
-  container.appendChild(sectionLettre);
-
-  // Section Plan
-  const sectionPlan=document.createElement('div');
-  sectionPlan.className='section';
-  sectionPlan.innerHTML=`
-    <h2>Plan de ${user.nom}</h2>
-    <div class="paper" id="plan${index}">
-      <label>Plan:</label> ${user.plan.plan}<br>
-      <button id="btnPlan${index}">📥 Télécharger Plan PDF</button>
-    </div>
-  `;
-  container.appendChild(sectionPlan);
-
-  // Attache PDF buttons
-  document.getElementById(`btnCV${index}`).onclick=()=>downloadPDFFromElement(document.getElementById(`cv${index}`), `CV_${user.nom}.pdf`);
-  document.getElementById(`btnLettre${index}`).onclick=()=>downloadPDFFromElement(document.getElementById(`lettre${index}`), `Lettre_${user.nom}.pdf`);
-  document.getElementById(`btnPlan${index}`).onclick=()=>downloadPDFFromElement(document.getElementById(`plan${index}`), `Plan_${user.nom}.pdf`);
-});
+document.getElementById('btnDownloadCV').onclick = () => downloadPDFFromElement(document.getElementById('cvSection'), 'CV_Alice.pdf');
+document.getElementById('btnDownloadLettre').onclick = () => downloadPDFFromElement(document.getElementById('lettreSection'), 'Lettre_Alice.pdf');
+document.getElementById('btnDownloadPlan').onclick = () => downloadPDFFromElement(document.getElementById('planSection'), 'Plan_Alice.pdf');
 </script>
+
 </body>
 </html>
