@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre / Plan complet</title>
+<title>CV / Lettre / Plan</title>
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
 .paper{background:white;padding:20px;margin:0 auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
@@ -20,9 +20,10 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 </head>
 <body>
 
-<h1>📄 CV / Lettre / Plan complet</h1>
+<h1>📄 CV / Lettre / Plan</h1>
 
 <div class="paper" id="paperContent">
+
 <header>
 <h1 id="displayName">Nom Complet</h1>
 <h2 id="displayProfession">Profession</h2>
@@ -71,9 +72,12 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 </section>
 </div>
 
+<button id="downloadCV">📥 Télécharger CV</button>
+<button id="downloadLettre">📥 Télécharger Lettre</button>
+<button id="downloadPlan">📥 Télécharger Plan</button>
 <button id="shareBtn">📤 Partager sur WhatsApp</button>
-<button id="downloadPdf">📥 Télécharger PDF</button>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const { jsPDF } = window.jspdf;
@@ -96,41 +100,22 @@ photoInput.addEventListener('change', e=>{
   }
 });
 
-// Génération PDF multi-pages
-document.getElementById('downloadPdf').onclick=()=>{
-  const doc=new jsPDF('p','mm','a4');
-  const margin=10;
-  const lineHeight=7;
-  let y=margin;
-
-  function writeLines(lines){
-    lines.forEach(line=>{
-      doc.text(line, margin, y);
-      y+=lineHeight;
-      if(y>290){doc.addPage(); y=margin;}
-    });
-  }
-
-  // --- Page 1 : CV ---
-  y=margin;
-  writeLines([`📄 CV de ${fullNameInput.value} (${professionInput.value})`]);
-  document.querySelectorAll('#cv input').forEach(i=>{
-    writeLines([`${i.previousElementSibling.textContent}: ${i.value}`]);
+function downloadSection(sectionId, filename){
+  const section=document.getElementById(sectionId);
+  html2canvas(section,{scale:2,useCORS:true}).then(canvas=>{
+    const imgData=canvas.toDataURL('image/png');
+    const pdf=new jsPDF('p','mm','a4');
+    const imgProps=pdf.getImageProperties(imgData);
+    const pdfWidth=pdf.internal.pageSize.getWidth();
+    const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.save(filename);
   });
+}
 
-  // --- Page 2 : Lettre ---
-  doc.addPage(); y=margin;
-  writeLines(['✉️ Lettre de motivation']);
-  document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>{
-    writeLines([`${i.previousElementSibling.textContent}: ${i.value}`]);
-  });
-
-  // --- Page 3 : Plan ---
-  doc.addPage(); y=margin;
-  writeLines(['🗺️ Plan de localisation', `Plan: ${document.getElementById('planText').value}`]);
-
-  doc.save('document_complet.pdf');
-};
+document.getElementById('downloadCV').onclick=()=>downloadSection('cv','CV.pdf');
+document.getElementById('downloadLettre').onclick=()=>downloadSection('lettre','Lettre.pdf');
+document.getElementById('downloadPlan').onclick=()=>downloadSection('plan','Plan.pdf');
 
 // WhatsApp
 document.getElementById('shareBtn').onclick=()=>{
