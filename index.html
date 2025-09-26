@@ -13,6 +13,11 @@ section{padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px 
 input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px}
 button{cursor:pointer}
 button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-size:1rem}
+
+/* Popup paiement */
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center}
+#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px}
+.result{margin:5px 0;font-weight:bold}
 </style>
 </head>
 <body>
@@ -58,12 +63,67 @@ button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-si
 <button id="shareBtn" class="primary">📤 Partager sur WhatsApp</button>
 <button id="downloadPdf" class="primary">📥 Télécharger PDF</button>
 
+<!-- Popup paiement -->
+<div id="popupOverlay">
+<div id="popup">
+<h2>Paiement requis</h2>
+<p>Bénéficiaire: Wirnkar Loveline</p>
+<p>MTN MoMo: 676353859<br>OM: 640647072<br>Montant: 25 FCFA</p>
+<textarea class="momoMsg" placeholder="Message Mobile Money"></textarea>
+<input class="adminCode" type="password" placeholder="Code admin">
+<div class="result"></div>
+<button class="validateAdminBtn primary">✅ Valider code admin</button>
+<button class="verifyBtn primary">✅ Vérifier & Partager</button>
+<button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
+</div>
+</div>
+
 <!-- html2pdf.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-const shareBtn = document.getElementById('shareBtn');
-const downloadBtn = document.getElementById('downloadPdf');
+const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
+let isAdmin=false;
+
+const shareBtn=document.getElementById('shareBtn');
+const downloadBtn=document.getElementById('downloadPdf');
+
+function buildDocumentHTML() {
+  return `
+<section style="background:#fff9c4;padding:10px;border-radius:8px;margin-bottom:10px;">
+<h2>CV</h2>
+<p>Nom: ${document.getElementById('fullName').value}</p>
+<p>Profession: ${document.getElementById('profession').value}</p>
+<p>Prénom: ${document.getElementById('prenom').value}</p>
+<p>Âge: ${document.getElementById('age').value}</p>
+<p>Ville: ${document.getElementById('ville').value}</p>
+<p>Quartier: ${document.getElementById('quartier').value}</p>
+<p>Situation: ${document.getElementById('situation').value}</p>
+<p>Enfants: ${document.getElementById('enfants').value}</p>
+<p>Dernier poste: ${document.getElementById('poste').value}</p>
+<p>Loisirs: ${document.getElementById('loisirs').value}</p>
+<p>Caractère: ${document.getElementById('caractere').value}</p>
+<p>Diplôme: ${document.getElementById('diplome').value}</p>
+<p>Établissement: ${document.getElementById('etablissement').value}</p>
+<p>Alcoolique: ${document.getElementById('alcool').value}</p>
+<p>Salaire: ${document.getElementById('salaire').value}</p>
+<p>Email: ${document.getElementById('email').value}</p>
+<p>Tel MTN: ${document.getElementById('telMtn').value}</p>
+<p>Tel Orange: ${document.getElementById('telOrange').value}</p>
+</section>
+<section style="background:#c8e6c9;padding:10px;border-radius:8px;margin-bottom:10px;">
+<h2>Lettre de motivation</h2>
+<p>Prénom: ${document.getElementById('prenomLetter').value}</p>
+<p>Nom: ${document.getElementById('nomLetter').value}</p>
+<p>Entreprise: ${document.getElementById('entreprise').value}</p>
+<p>Poste: ${document.getElementById('posteLetter').value}</p>
+<p>Contenu: ${document.getElementById('contenu').value}</p>
+</section>
+<section style="background:#bbdefb;padding:10px;border-radius:8px;margin-bottom:10px;">
+<h2>Plan de localisation</h2>
+<p>${document.getElementById('planText').value}</p>
+</section>`;
+}
 
 function buildDocumentText() {
   return `📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})
@@ -99,41 +159,15 @@ ${document.getElementById('planText').value}`;
 
 // Partage WhatsApp
 shareBtn.onclick = () => {
-  const data = buildDocumentText();
-  const url = `https://wa.me/?text=${encodeURIComponent(data)}`;
-  window.open(url, '_blank');
+  if(isAdmin){
+    const data = buildDocumentText();
+    window.open(`https://wa.me/?text=${encodeURIComponent(data)}`,'_blank');
+  } else {
+    document.getElementById('popupOverlay').style.display='flex';
+    document.querySelector('#popup .result').innerHTML='';
+  }
 };
 
-// Télécharger PDF (fix génération)
+// Télécharger PDF
 downloadBtn.onclick = () => {
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  tempDiv.innerHTML = `
-    <section style="background:#fff9c4;padding:10px;border-radius:8px;margin-bottom:10px;">
-      <h2>CV</h2>
-      ${buildDocumentText().split('🟨───────── CV ─────────🟨')[1].split('🟩──── Lettre')[0]}
-    </section>
-    <section style="background:#c8e6c9;padding:10px;border-radius:8px;margin-bottom:10px;">
-      <h2>Lettre de motivation</h2>
-      ${buildDocumentText().split('🟩──── Lettre de motivation ────🟩')[1].split('🟦──── Plan')[0]}
-    </section>
-    <section style="background:#bbdefb;padding:10px;border-radius:8px;margin-bottom:10px;">
-      <h2>Plan de localisation</h2>
-      ${buildDocumentText().split('🟦──── Plan de localisation ────🟦')[1]}
-    </section>
-  `;
-  document.body.appendChild(tempDiv);
-
-  html2pdf().from(tempDiv).set({
-    margin:10,
-    filename:'document.pdf',
-    html2canvas:{scale:2,useCORS:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).save().finally(() => {
-    document.body.removeChild(tempDiv);
-  });
-};
-</script>
-</body>
-</html>
+  const tempDiv =
