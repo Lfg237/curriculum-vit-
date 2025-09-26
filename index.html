@@ -78,15 +78,19 @@ button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-si
 </div>
 </div>
 
-<!-- html2pdf.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 <script>
 const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
 let isAdmin=false;
 
 const shareBtn=document.getElementById('shareBtn');
 const downloadBtn=document.getElementById('downloadPdf');
+const popup=document.getElementById('popupOverlay');
+const momoMsg=popup.querySelector('.momoMsg');
+const adminInput=popup.querySelector('.adminCode');
+const validateBtn=popup.querySelector('.validateAdminBtn');
+const verifyBtn=popup.querySelector('.verifyBtn');
+const result=popup.querySelector('.result');
 
 function buildDocumentHTML() {
   return `
@@ -157,17 +161,60 @@ Contenu: ${document.getElementById('contenu').value}
 ${document.getElementById('planText').value}`;
 }
 
-// Partage WhatsApp
+// Partage WhatsApp avec popup paiement
 shareBtn.onclick = () => {
   if(isAdmin){
     const data = buildDocumentText();
     window.open(`https://wa.me/?text=${encodeURIComponent(data)}`,'_blank');
   } else {
-    document.getElementById('popupOverlay').style.display='flex';
-    document.querySelector('#popup .result').innerHTML='';
+    popup.style.display='flex';
+    result.innerHTML='';
   }
+};
+
+// Valider code admin
+validateBtn.onclick = () => {
+  if(adminInput.value === EXPECTED.admin){
+    result.innerHTML='<span style="color:green">Code admin correct ✅</span>';
+    isAdmin=true;
+    popup.style.display='none';
+  } else {
+    result.innerHTML='<span style="color:red">Code admin incorrect ❌</span>';
+  }
+};
+
+// Vérification Mobile Money
+verifyBtn.onclick = () => {
+  const msg=momoMsg.value.toLowerCase().replace(/\s+/g,'');
+  result.innerHTML='';
+
+  const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
+  if(!phoneMatch){ result.innerHTML='<span style="color:red">Numéro incorrect</span>'; return; }
+
+  const amtMatch=msg.match(/(\d+)/);
+  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){ result.innerHTML='<span style="color:red">Montant incorrect</span>'; return; }
+
+  result.innerHTML='<span style="color:green">✅ Vérifié ! Partage en cours...</span>';
+  popup.style.display='none';
+  const data = buildDocumentText();
+  window.open(`https://wa.me/?text=${encodeURIComponent(data)}`,'_blank');
 };
 
 // Télécharger PDF
 downloadBtn.onclick = () => {
-  const tempDiv =
+  const tempDiv=document.createElement('div');
+  tempDiv.style.position='absolute';
+  tempDiv.style.left='-9999px';
+  tempDiv.innerHTML=buildDocumentHTML();
+  document.body.appendChild(tempDiv);
+
+  html2pdf().from(tempDiv).set({
+    margin:10,
+    filename:'document.pdf',
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  }).save().finally(()=>document.body.removeChild(tempDiv));
+};
+</script>
+</body>
+</html>
