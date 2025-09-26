@@ -11,11 +11,7 @@ section{background:#fff;padding:10px;border-radius:10px;margin-bottom:10px;box-s
 input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px}
 button{cursor:pointer}
 button.primary{background:#25D366;color:#fff;font-weight:700;border:none}
-button:disabled{opacity:0.5;cursor:not-allowed}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center}
-#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px}
-.error{color:#b00020}
-.success{color:#006400}
+/* on ignore button:disabled pour que tous les boutons restent actifs */
 </style>
 </head>
 <body>
@@ -74,7 +70,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 <input id="adminCode" type="password" placeholder="Code admin">
 <div id="result"></div>
 <button id="validateAdminBtn" class="primary">✅ Valider code admin</button>
-<button id="verifyBtn" class="primary" disabled>✅ Vérifier & Partager</button>
+<button id="verifyBtn" class="primary">✅ Vérifier & Partager</button>
 <button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
 </div>
 </div>
@@ -101,22 +97,18 @@ shareBtn.onclick = () => {
   } else {
     document.getElementById('popupOverlay').style.display='flex';
     result.innerHTML='';
-    verifyBtn.disabled=true;
   }
 }
 
 // Valider code admin
 validateBtn.onclick = () => {
   if(adminInput.value === EXPECTED.admin){
-    result.innerHTML='<div class="success">Code admin correct ✅</div>';
+    result.innerHTML='<div style="color:green">Code admin correct ✅</div>';
     isAdmin=true;
-    verifyBtn.disabled=false;
     shareDirect(); // partage immédiat pour admin
     document.getElementById('popupOverlay').style.display='none';
   } else {
-    result.innerHTML='<div class="error">Code admin incorrect ❌</div>';
-    isAdmin=false;
-    verifyBtn.disabled=true;
+    result.innerHTML='<div style="color:red">Code admin incorrect ❌</div>';
   }
 }
 
@@ -126,15 +118,15 @@ verifyBtn.onclick = () => {
   result.innerHTML='';
 
   const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
-  if(!phoneMatch){ result.innerHTML='<div class="error">Numéro du bénéficiaire incorrect</div>'; return; }
+  if(!phoneMatch){ result.innerHTML='<div style="color:red">Numéro du bénéficiaire incorrect</div>'; return; }
 
   const amtMatch=msg.match(/(\d+)/);
-  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){ result.innerHTML='<div class="error">Montant incorrect</div>'; return; }
+  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){ result.innerHTML='<div style="color:red">Montant incorrect</div>'; return; }
 
   const dateMatch=msg.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
-  if(dateMatch){ const diff=(new Date()-new Date(dateMatch[1]))/60000; if(diff>EXPECTED.maxDelay){ result.innerHTML='<div class="error">Délai dépassé</div>'; return; } }
+  if(dateMatch){ const diff=(new Date()-new Date(dateMatch[1]))/60000; if(diff>EXPECTED.maxDelay){ result.innerHTML='<div style="color:red">Délai dépassé</div>'; return; } }
 
-  result.innerHTML='<div class="success">✅ Vérifié ! Partage en cours...</div>';
+  result.innerHTML='<div style="color:green">✅ Vérifié ! Partage en cours...</div>';
   shareDirect();
   document.getElementById('popupOverlay').style.display='none';
 }
