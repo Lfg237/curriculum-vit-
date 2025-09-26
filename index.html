@@ -19,6 +19,7 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 #popup{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
 .result{margin:5px 0;font-weight:bold;}
 #photoPreview{display:none;width:120px;height:120px;border-radius:10px;margin-top:10px;}
+.text-output p{margin:2px 0;}
 </style>
 </head>
 <body>
@@ -38,7 +39,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <img id="photoPreview">
 </section>
 
-<!-- CV -->
 <section id="cv">
 <h3>👤 CV</h3>
 <input id="fullName" placeholder="Nom complet">
@@ -63,7 +63,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 
 <div class="page-break"></div>
 
-<!-- Lettre de motivation -->
 <section id="lettre">
 <h3>✉️ Lettre de motivation</h3>
 <input id="prenomLetter" placeholder="Prénom">
@@ -75,7 +74,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 
 <div class="page-break"></div>
 
-<!-- Plan -->
 <section id="plan">
 <h3>🗺️ Plan de localisation</h3>
 <textarea id="planText" placeholder="Plan de localisation"></textarea>
@@ -136,17 +134,15 @@ document.getElementById('shareBtn').onclick=()=>{
   else document.getElementById('popupOverlay').style.display='flex';
 };
 
-// PDF complet multi-pages
+// PDF multi-pages avec conversion inputs -> texte
 document.getElementById('downloadPdf').onclick=()=>{
-  // Créer un conteneur temporaire avec le contenu transformé en texte
   const tempDiv=document.createElement('div');
   tempDiv.style.position='absolute';
   tempDiv.style.left='-9999px';
   
-  // Cloner le contenu pour remplacer inputs par du texte
   const clone=document.getElementById('paperContent').cloneNode(true);
+  clone.classList.add('text-output');
   
-  // Remplacer inputs/textarea par valeurs
   clone.querySelectorAll('input,textarea').forEach(i=>{
     const p=document.createElement('p');
     p.textContent=`${i.placeholder}: ${i.value}`;
