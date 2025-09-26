@@ -7,19 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
 body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
-.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
-.handwriting{font-family:'Patrick Hand', cursive;font-weight:bold;font-size:28px;margin:10px 0;} 
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
+.handwriting{font-family:'Patrick Hand', cursive;font-weight:bold;font-size:28px;margin:10px 0;} /* titres */
 .paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;display:inline-block;} 
-.category{font-weight:bold;margin:4px 0;} 
+.category{font-weight:bold;margin:4px 0;font-size:16px;} 
 button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
 
 /* Popup paiement */
 .popup-bg{
   position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);
   display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:0.3s;
+  z-index:999;
 }
 .popup{
-  background:white;padding:20px;border-radius:8px;max-width:300px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.3);
+  background:white;padding:20px;border-radius:8px;max-width:320px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.3);
 }
 .popup button{margin:5px;}
 .popup-bg.show{visibility:visible;opacity:1;}
@@ -51,10 +52,17 @@ const users=[
     cv:{prenom:"Alice", age:"28", ville:"Paris", poste:"Frontend", email:"alice@example.com"},
     lettre:{prenom:"Alice", nom:"Dupont", entreprise:"TechCorp", poste:"Ingénieur", contenu:"Motivation pour rejoindre TechCorp."},
     plan:{plan:"123 Rue de Paris"}
+  },
+  {
+    nom:"Bob Martin",
+    profession:"Designer",
+    cv:{prenom:"Bob", age:"30", ville:"Lyon", poste:"Graphiste", email:"bob@example.com"},
+    lettre:{prenom:"Bob", nom:"Martin", entreprise:"DesignInc", poste:"Graphiste", contenu:"Motivation pour DesignInc."},
+    plan:{plan:"456 Avenue Lyon"}
   }
 ];
 
-// Génération PDF
+// Fonction PDF
 function downloadPDFFromElement(element, filename){
   html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
     const imgData = canvas.toDataURL('image/png');
@@ -66,55 +74,56 @@ function downloadPDFFromElement(element, filename){
   });
 }
 
+// Génération des pages
 const container=document.getElementById('sections');
 users.forEach((user,index)=>{
-  // CV
-  const pageCV=document.createElement('div');
-  pageCV.className='page';
-  pageCV.innerHTML=`
-    <h1 class="handwriting">📄 CV - ${user.nom}</h1>
-    <div class="paper" id="cv${index}">
-      <p class="category">Prénom: ${user.cv.prenom}</p>
-      <p class="category">Âge: ${user.cv.age}</p>
-      <p class="category">Ville: ${user.cv.ville}</p>
-      <p class="category">Dernier poste: ${user.cv.poste}</p>
-      <p class="category">Email: ${user.cv.email}</p>
-    </div>
-    <button class="btnPDF" data-target="cv${index}" data-filename="CV_${user.nom}.pdf">📥 Télécharger CV PDF</button>
-    <button class="btnWA" data-index="${index}">📤 Partager sur WhatsApp</button>
-  `;
-  container.appendChild(pageCV);
-
-  // Lettre
-  const pageLettre=document.createElement('div');
-  pageLettre.className='page';
-  pageLettre.innerHTML=`
-    <h1 class="handwriting">✉️ LETTRE DE MOTIVATION - ${user.nom}</h1>
-    <div class="paper" id="lettre${index}">
-      <p class="category">Prénom: ${user.lettre.prenom}</p>
-      <p class="category">Nom: ${user.lettre.nom}</p>
-      <p class="category">Entreprise: ${user.lettre.entreprise}</p>
-      <p class="category">Poste: ${user.lettre.poste}</p>
-      <p class="category">Contenu: ${user.lettre.contenu}</p>
-    </div>
-    <button class="btnPDF" data-target="lettre${index}" data-filename="Lettre_${user.nom}.pdf">📥 Télécharger Lettre PDF</button>
-  `;
-  container.appendChild(pageLettre);
-
-  // Plan
-  const pagePlan=document.createElement('div');
-  pagePlan.className='page';
-  pagePlan.innerHTML=`
-    <h1 class="handwriting">🗺️ PLAN DE LOCALISATION - ${user.nom}</h1>
-    <div class="paper" id="plan${index}">
-      <p class="category">Plan: ${user.plan.plan}</p>
-    </div>
-    <button class="btnPDF" data-target="plan${index}" data-filename="Plan_${user.nom}.pdf">📥 Télécharger Plan PDF</button>
-  `;
-  container.appendChild(pagePlan);
+  ["CV","LETTRE DE MOTIVATION","PLAN DE LOCALISATION"].forEach((section,i)=>{
+    const page=document.createElement('div');
+    page.className='page';
+    let contentHTML = '';
+    let btnLabel = '';
+    let divID = '';
+    if(section==="CV"){
+      divID = `cv${index}`;
+      contentHTML = `
+        <div class="paper" id="${divID}">
+          <p class="category">Prénom: ${user.cv.prenom}</p>
+          <p class="category">Âge: ${user.cv.age}</p>
+          <p class="category">Ville: ${user.cv.ville}</p>
+          <p class="category">Dernier poste: ${user.cv.poste}</p>
+          <p class="category">Email: ${user.cv.email}</p>
+        </div>`;
+      btnLabel = `📥 Télécharger CV PDF`;
+    }
+    if(section==="LETTRE DE MOTIVATION"){
+      divID = `lettre${index}`;
+      contentHTML = `
+        <div class="paper" id="${divID}">
+          <p class="category">Prénom: ${user.lettre.prenom}</p>
+          <p class="category">Nom: ${user.lettre.nom}</p>
+          <p class="category">Entreprise: ${user.lettre.entreprise}</p>
+          <p class="category">Poste: ${user.lettre.poste}</p>
+          <p class="category">Contenu: ${user.lettre.contenu}</p>
+        </div>`;
+      btnLabel = `📥 Télécharger Lettre PDF`;
+    }
+    if(section==="PLAN DE LOCALISATION"){
+      divID = `plan${index}`;
+      contentHTML = `
+        <div class="paper" id="${divID}">
+          <p class="category">Plan: ${user.plan.plan}</p>
+        </div>`;
+      btnLabel = `📥 Télécharger Plan PDF`;
+    }
+    page.innerHTML = `<h1 class="handwriting">${section} - ${user.nom}</h1>
+                      ${contentHTML}
+                      <button class="btnPDF" data-target="${divID}" data-filename="${section}_${user.nom}.pdf">${btnLabel}</button>
+                      <button class="btnWA" data-index="${index}">📤 Partager sur WhatsApp</button>`;
+    container.appendChild(page);
+  });
 });
 
-// Gestion popup paiement pour PDF
+// Gestion popup paiement
 let currentElement = null;
 let currentFilename = null;
 const popup = document.getElementById('paymentPopup');
@@ -125,22 +134,19 @@ document.querySelectorAll('.btnPDF').forEach(btn=>{
   btn.onclick = ()=>{
     currentElement = document.getElementById(btn.dataset.target);
     currentFilename = btn.dataset.filename;
-    popup.classList.add('show'); // afficher popup paiement
+    popup.classList.add('show');
   }
 });
 
-// Paiement validé → télécharger PDF automatiquement
+// Paiement validé → téléchargement automatique du PDF
 payConfirm.onclick = ()=>{
   if(currentElement && currentFilename){
-    // Ici tu peux intégrer la logique de paiement réelle
-    downloadPDFFromElement(currentElement, currentFilename); // téléchargement automatique
+    // Ici, tu peux intégrer la logique de paiement réelle
+    downloadPDFFromElement(currentElement, currentFilename);
   }
   popup.classList.remove('show');
 };
-
-payCancel.onclick = ()=>{
-  popup.classList.remove('show');
-};
+payCancel.onclick = ()=>{ popup.classList.remove('show'); };
 
 // WhatsApp
 function generateWhatsAppText(user){
@@ -160,7 +166,6 @@ function generateWhatsAppText(user){
 
   text += "✏️🖋️ *🗺️ PLAN DE LOCALISATION*\n";
   text += "📍 *Plan:* " + user.plan.plan + "\n";
-
   return text;
 }
 
