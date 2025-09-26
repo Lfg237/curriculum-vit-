@@ -11,6 +11,7 @@ section{background:#fff;padding:10px;border-radius:10px;margin-bottom:10px;box-s
 input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px}
 button{cursor:pointer}
 button.primary{background:#25D366;color:#fff;font-weight:700;border:none}
+button:disabled{opacity:0.5;cursor:not-allowed}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center}
 #popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px}
 .error{color:#b00020}
@@ -65,37 +66,63 @@ button.primary{background:#25D366;color:#fff;font-weight:700;border:none}
 
 <div id="popupOverlay">
 <div id="popup">
-<h2>effectuer le dépôt pour les droits de téléchargement</h2>
+<h2>Paiement requis</h2>
 <p>Bénéficiaire: Wirnkar Loveline</p>
 <p>MTN MoMo: 676353859<br>OM: 640647072<br>Montant: 25 FCFA</p>
 <textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
 <input id="adminCode" type="password" placeholder="Code admin">
 <div id="result"></div>
-<button id="verifyBtn" class="primary">✅ Vérifier & Partager</button>
+
+<!-- Bouton pour valider le code admin -->
+<button id="validateAdminBtn" class="primary">✅ Valider code admin</button>
+
+<!-- Bouton pour vérifier le paiement et partager -->
+<button id="verifyBtn" class="primary" disabled>✅ Vérifier & Partager</button>
 <button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
 </div>
 </div>
 
 <script>
 const EXPECTED={name:'wirnkar loveline',phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
-document.getElementById('shareBtn').onclick=()=>{document.getElementById('popupOverlay').style.display='flex';document.getElementById('result').innerHTML=''}
-document.getElementById('verifyBtn').onclick=()=>{
-  const msg=document.getElementById('momoMsg').value.toLowerCase(),admin=document.getElementById('adminCode').value,result=document.getElementById('result');
+const adminInput=document.getElementById('adminCode');
+const validateBtn=document.getElementById('validateAdminBtn');
+const verifyBtn=document.getElementById('verifyBtn');
+const result=document.getElementById('result');
+
+document.getElementById('shareBtn').onclick=()=>{document.getElementById('popupOverlay').style.display='flex';result.innerHTML='';verifyBtn.disabled=true}
+
+validateBtn.onclick=()=>{
+  if(adminInput.value===EXPECTED.admin){
+    result.innerHTML='<div class="success">Code admin correct ✅</div>';
+    verifyBtn.disabled=false;
+  } else {
+    result.innerHTML='<div class="error">Code admin incorrect ❌</div>';
+    verifyBtn.disabled=true;
+  }
+};
+
+verifyBtn.onclick=()=>{
+  const msg=document.getElementById('momoMsg').value.toLowerCase();
   result.innerHTML='';result.className='';
-  if(admin!==EXPECTED.admin){result.innerHTML='<div class="error">Code admin incorrect</div>';return}
   if(!msg.includes(EXPECTED.name)){result.innerHTML='<div class="error">Nom du bénéficiaire incorrect</div>';return}
-  const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));if(!phoneMatch){result.innerHTML='<div class="error">Numéro incorrect</div>';return}
-  const amtMatch=msg.match(/(\d+)/);if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){result.innerHTML='<div class="error">Montant incorrect</div>';return}
-  const dateMatch=msg.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);if(dateMatch){const diff=(new Date()-new Date(dateMatch[1]))/60000;if(diff>EXPECTED.maxDelay){result.innerHTML='<div class="error">Délai dépassé</div>';return}}
+  const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
+  if(!phoneMatch){result.innerHTML='<div class="error">Numéro incorrect</div>';return}
+  const amtMatch=msg.match(/(\d+)/);
+  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){result.innerHTML='<div class="error">Montant incorrect</div>';return}
+  const dateMatch=msg.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+  if(dateMatch){const diff=(new Date()-new Date(dateMatch[1]))/60000;if(diff>EXPECTED.maxDelay){result.innerHTML='<div class="error">Délai dépassé</div>';return}}
   result.innerHTML='<div class="success">✅ Vérifié ! Partage en cours...</div>';
+  
   const data=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\nPrénom: ${document.getElementById('prenom').value}\nÂge: ${document.getElementById('age').value}\nVille: ${document.getElementById('ville').value}\nQuartier: ${document.getElementById('quartier').value}\nSituation: ${document.getElementById('situation').value}\nEnfants: ${document.getElementById('enfants').value}\nDernier poste: ${document.getElementById('poste').value}\nLoisirs: ${document.getElementById('loisirs').value}\nCaractère: ${document.getElementById('caractere').value}\nDiplôme: ${document.getElementById('diplome').value}\nÉtablissement: ${document.getElementById('etablissement').value}\nAlcoolique: ${document.getElementById('alcool').value}\nSalaire: ${document.getElementById('salaire').value}\nEmail: ${document.getElementById('email').value}\nTel MTN: ${document.getElementById('telMtn').value}\nTel Orange: ${document.getElementById('telOrange').value}\n\n✉️ Lettre de Motivation\nPrénom: ${document.getElementById('prenomLetter').value}\nNom: ${document.getElementById('nomLetter').value}\nEntreprise: ${document.getElementById('entreprise').value}\nPoste: ${document.getElementById('posteLetter').value}\nContenu: ${document.getElementById('contenu').value}\n\n🗺️ Plan de localisation\n${document.getElementById('plan').value}`;
+  
   const url=`https://wa.me/?text=${encodeURIComponent(data)}`;
   window.open(url,'_blank');
   document.getElementById('popupOverlay').style.display='none';
-}
+};
 
-// PWA
+// PWA registration
 if('serviceWorker' in navigator){navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered'));}
 </script>
+
 </body>
 </html>
