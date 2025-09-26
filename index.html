@@ -64,7 +64,7 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 
 <button id="shareBtn" class="primary">📤 Partager sur WhatsApp / Télécharger</button>
 
-<!-- Popup de paiement pour utilisateurs classiques -->
+<!-- Popup de paiement -->
 <div id="popupOverlay">
 <div id="popup">
 <h2>Paiement requis</h2>
@@ -73,7 +73,6 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 <textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
 <input id="adminCode" type="password" placeholder="Code admin">
 <div id="result"></div>
-
 <button id="validateAdminBtn" class="primary">✅ Valider code admin</button>
 <button id="verifyBtn" class="primary" disabled>✅ Vérifier & Partager</button>
 <button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
@@ -95,20 +94,25 @@ function shareDirect(){
   window.open(url,'_blank');
 }
 
+// Bouton principal
 shareBtn.onclick = () => {
   if(isAdmin){
     shareDirect();
   } else {
     document.getElementById('popupOverlay').style.display='flex';
-    result.innerHTML=''; verifyBtn.disabled=true;
+    result.innerHTML='';
+    verifyBtn.disabled=true;
   }
 }
 
+// Valider code admin
 validateBtn.onclick = () => {
   if(adminInput.value === EXPECTED.admin){
     result.innerHTML='<div class="success">Code admin correct ✅</div>';
     isAdmin=true;
     verifyBtn.disabled=false;
+    shareDirect(); // partage immédiat pour admin
+    document.getElementById('popupOverlay').style.display='none';
   } else {
     result.innerHTML='<div class="error">Code admin incorrect ❌</div>';
     isAdmin=false;
@@ -116,6 +120,7 @@ validateBtn.onclick = () => {
   }
 }
 
+// Vérification Mobile Money pour utilisateur normal
 verifyBtn.onclick = () => {
   const msg=document.getElementById('momoMsg').value.toLowerCase().replace(/\s+/g,'');
   result.innerHTML='';
