@@ -4,14 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV / Lettre PWA</title>
-<link rel="manifest" href="manifest.json">
 <style>
 body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:10px}
 section{background:#fff;padding:10px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
 input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px}
 button{cursor:pointer}
 button.primary{background:#25D366;color:#fff;font-weight:700;border:none}
-/* on ignore button:disabled pour que tous les boutons restent actifs */
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center}
+#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px}
+.error{color:#b00020}
+.success{color:#006400}
 </style>
 </head>
 <body>
@@ -66,23 +68,27 @@ button.primary{background:#25D366;color:#fff;font-weight:700;border:none}
 <h2>Paiement requis</h2>
 <p>Bénéficiaire: Wirnkar Loveline</p>
 <p>MTN MoMo: 676353859<br>OM: 640647072<br>Montant: 25 FCFA</p>
-<textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
-<input id="adminCode" type="password" placeholder="Code admin">
-<div id="result"></div>
-<button id="validateAdminBtn" class="primary">✅ Valider code admin</button>
-<button id="verifyBtn" class="primary">✅ Vérifier & Partager</button>
+<textarea class="momoMsg" placeholder="Message Mobile Money"></textarea>
+<input class="adminCode" type="password" placeholder="Code admin">
+<div class="result"></div>
+<button class="validateAdminBtn primary">✅ Valider code admin</button>
+<button class="verifyBtn primary">✅ Vérifier & Partager</button>
 <button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
 </div>
 </div>
 
 <script>
 const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
-const adminInput=document.getElementById('adminCode');
-const validateBtn=document.getElementById('validateAdminBtn');
-const verifyBtn=document.getElementById('verifyBtn');
-const result=document.getElementById('result');
-const shareBtn=document.getElementById('shareBtn');
 let isAdmin=false;
+
+// Sélection relative au popup
+const popup=document.getElementById('popup');
+const momoMsg=popup.querySelector('.momoMsg');
+const adminInput=popup.querySelector('.adminCode');
+const validateBtn=popup.querySelector('.validateAdminBtn');
+const verifyBtn=popup.querySelector('.verifyBtn');
+const result=popup.querySelector('.result');
+const shareBtn=document.getElementById('shareBtn');
 
 function shareDirect(){
   const data=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\nPrénom: ${document.getElementById('prenom').value}\nÂge: ${document.getElementById('age').value}\nVille: ${document.getElementById('ville').value}\nQuartier: ${document.getElementById('quartier').value}\nSituation: ${document.getElementById('situation').value}\nEnfants: ${document.getElementById('enfants').value}\nDernier poste: ${document.getElementById('poste').value}\nLoisirs: ${document.getElementById('loisirs').value}\nCaractère: ${document.getElementById('caractere').value}\nDiplôme: ${document.getElementById('diplome').value}\nÉtablissement: ${document.getElementById('etablissement').value}\nAlcoolique: ${document.getElementById('alcool').value}\nSalaire: ${document.getElementById('salaire').value}\nEmail: ${document.getElementById('email').value}\nTel MTN: ${document.getElementById('telMtn').value}\nTel Orange: ${document.getElementById('telOrange').value}\n\n✉️ Lettre de Motivation\nPrénom: ${document.getElementById('prenomLetter').value}\nNom: ${document.getElementById('nomLetter').value}\nEntreprise: ${document.getElementById('entreprise').value}\nPoste: ${document.getElementById('posteLetter').value}\nContenu: ${document.getElementById('contenu').value}\n\n🗺️ Plan de localisation\n${document.getElementById('plan').value}`;
@@ -112,9 +118,9 @@ validateBtn.onclick = () => {
   }
 }
 
-// Vérification Mobile Money pour utilisateur normal
+// Vérification Mobile Money
 verifyBtn.onclick = () => {
-  const msg=document.getElementById('momoMsg').value.toLowerCase().replace(/\s+/g,'');
+  const msg=momoMsg.value.toLowerCase().replace(/\s+/g,'');
   result.innerHTML='';
 
   const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
@@ -130,12 +136,6 @@ verifyBtn.onclick = () => {
   shareDirect();
   document.getElementById('popupOverlay').style.display='none';
 }
-
-// PWA service worker registration
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered'));
-}
 </script>
-
 </body>
 </html>
