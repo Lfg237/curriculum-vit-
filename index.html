@@ -4,12 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tableau Utilisateurs</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
 body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
-.page{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
-h1,h2{margin:10px 0;}
+.page{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
+.handwriting{font-family:'Patrick Hand', cursive;font-weight:bold;font-size:28px;margin:10px 0;}
 .paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;}
 button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
+
 /* Popup style */
 .popup-bg{
   position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);
@@ -75,7 +77,7 @@ users.forEach((user,index)=>{
   const pageCV=document.createElement('div');
   pageCV.className='page';
   pageCV.innerHTML=`
-    <h1>📄 CV - ${user.nom}</h1>
+    <h1 class="handwriting">📄 CV - ${user.nom}</h1>
     <div class="paper" id="cv${index}">
       <p><b>Prénom:</b> ${user.cv.prenom}</p>
       <p><b>Âge:</b> ${user.cv.age}</p>
@@ -84,6 +86,7 @@ users.forEach((user,index)=>{
       <p><b>Email:</b> ${user.cv.email}</p>
     </div>
     <button class="btnPDF" data-target="cv${index}" data-filename="CV_${user.nom}.pdf">📥 Télécharger CV PDF</button>
+    <button class="btnWA" data-index="${index}">📤 Partager sur WhatsApp</button>
   `;
   container.appendChild(pageCV);
 
@@ -91,7 +94,7 @@ users.forEach((user,index)=>{
   const pageLettre=document.createElement('div');
   pageLettre.className='page';
   pageLettre.innerHTML=`
-    <h1>✉️ Lettre de Motivation - ${user.nom}</h1>
+    <h1 class="handwriting">✉️ LETTRE DE MOTIVATION - ${user.nom}</h1>
     <div class="paper" id="lettre${index}">
       <p><b>Prénom:</b> ${user.lettre.prenom}</p>
       <p><b>Nom:</b> ${user.lettre.nom}</p>
@@ -107,7 +110,7 @@ users.forEach((user,index)=>{
   const pagePlan=document.createElement('div');
   pagePlan.className='page';
   pagePlan.innerHTML=`
-    <h1>🗺️ Plan de Localisation - ${user.nom}</h1>
+    <h1 class="handwriting">🗺️ PLAN DE LOCALISATION - ${user.nom}</h1>
     <div class="paper" id="plan${index}">
       <p><b>Plan:</b> ${user.plan.plan}</p>
     </div>
@@ -116,7 +119,7 @@ users.forEach((user,index)=>{
   container.appendChild(pagePlan);
 });
 
-// Popup
+// PDF popup
 let currentTarget = null;
 let currentFilename = null;
 const popupBG = document.getElementById('popupBG');
@@ -141,6 +144,36 @@ confirmBtn.onclick = ()=>{
 cancelBtn.onclick = ()=>{
   popupBG.classList.remove('show');
 };
+
+// WhatsApp avec mise en page professionnelle
+function generateWhatsAppText(user){
+  let text = "✏️🖋️ *📄 CV DE " + user.nom.toUpperCase() + "* 🖋️✏️\n";
+  text += "👤 *Prénom:* " + user.cv.prenom + "\n";
+  text += "🎂 *Âge:* " + user.cv.age + "\n";
+  text += "🏙️ *Ville:* " + user.cv.ville + "\n";
+  text += "💼 *Dernier poste:* " + user.cv.poste + "\n";
+  text += "📧 *Email:* " + user.cv.email + "\n\n";
+
+  text += "✏️🖋️ *✉️ LETTRE DE MOTIVATION* 🖋️✏️\n";
+  text += "👤 *Prénom:* " + user.lettre.prenom + "\n";
+  text += "👤 *Nom:* " + user.lettre.nom + "\n";
+  text += "🏢 *Entreprise:* " + user.lettre.entreprise + "\n";
+  text += "💼 *Poste:* " + user.lettre.poste + "\n";
+  text += "📝 *Contenu:* " + user.lettre.contenu + "\n\n";
+
+  text += "✏️🖋️ *🗺️ PLAN DE LOCALISATION* 🖋️✏️\n";
+  text += "📍 *Plan:* " + user.plan.plan + "\n";
+
+  return text;
+}
+
+document.querySelectorAll('.btnWA').forEach(btn=>{
+  btn.onclick = ()=>{
+    const user = users[parseInt(btn.dataset.index)];
+    const text = generateWhatsAppText(user);
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+});
 </script>
 </body>
 </html>
