@@ -10,18 +10,12 @@ body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
 header{text-align:center;margin-bottom:10px;}
 header h1{font-size:2em;font-weight:bold;margin:0;}
 header h2{font-size:1em;color:#555;margin:5px 0;}
-section{margin-bottom:15px;padding:15px;border:1px solid #ccc;border-radius:5px;page-break-inside:avoid;}
+section{margin-bottom:15px;padding:15px;border:1px solid #ccc;border-radius:5px;}
 section h3{margin-top:0;color:#1e88e5;}
 input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
 label{font-weight:bold;}
-p{margin:2px 0;}
 button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
-.page-break{page-break-after:always;}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-#popup{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
-.result{margin:5px 0;font-weight:bold;}
 #photoPreview{display:none;width:120px;height:120px;border-radius:10px;margin-bottom:10px;}
-.text-output p span{font-weight:normal;}
 </style>
 </head>
 <body>
@@ -29,7 +23,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <h1>📄 CV / Lettre / Plan complet</h1>
 
 <div class="paper" id="paperContent">
-
 <header>
 <h1 id="displayName">Nom Complet</h1>
 <h2 id="displayProfession">Profession</h2>
@@ -41,7 +34,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <img id="photoPreview">
 </section>
 
-<!-- CV -->
 <section id="cv">
 <h3>👤 CV</h3>
 <label>Nom complet</label><input id="fullName" placeholder="Nom complet">
@@ -64,9 +56,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <label>Tel Orange</label><input id="telOrange" placeholder="Tel Orange">
 </section>
 
-<div class="page-break"></div>
-
-<!-- Lettre de motivation -->
 <section id="lettre">
 <h3>✉️ Lettre de motivation</h3>
 <label>Prénom</label><input id="prenomLetter" placeholder="Prénom">
@@ -76,9 +65,6 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <label>Contenu</label><textarea id="contenu" placeholder="Contenu"></textarea>
 </section>
 
-<div class="page-break"></div>
-
-<!-- Plan -->
 <section id="plan">
 <h3>🗺️ Plan de localisation</h3>
 <label>Plan</label><textarea id="planText" placeholder="Plan de localisation"></textarea>
@@ -88,25 +74,9 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <button id="shareBtn">📤 Partager sur WhatsApp</button>
 <button id="downloadPdf">📥 Télécharger PDF</button>
 
-<!-- Popup paiement -->
-<div id="popupOverlay">
-<div id="popup">
-<h2>Paiement requis</h2>
-<p>Bénéficiaire: Wirnkar Loveline</p>
-<p>MTN MoMo: 676353859<br>OM: 640647072<br>Montant: 25 FCFA</p>
-<textarea class="momoMsg" placeholder="Message Mobile Money"></textarea>
-<input class="adminCode" type="password" placeholder="Code admin">
-<div class="result"></div>
-<button class="validateAdminBtn">✅ Valider code admin</button>
-<button class="verifyBtn">✅ Vérifier & Partager</button>
-<button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
-</div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233'};
-let isAdmin=false;
+const { jsPDF } = window.jspdf;
 
 // Nom et profession dynamiques
 const fullNameInput=document.getElementById('fullName');
@@ -126,65 +96,47 @@ photoInput.addEventListener('change', e=>{
   }
 });
 
+// Fonction pour générer PDF multi-pages
+document.getElementById('downloadPdf').onclick=async()=>{
+  const doc=new jsPDF('p','mm','a4');
+  const margin=10; let y=margin; const lineHeight=7;
+
+  // Fonction helper pour écrire texte avec saut de ligne
+  function writeText(lines){
+    lines.forEach(line=>{
+      doc.text(line, margin, y);
+      y+=lineHeight;
+      if(y>290){doc.addPage();y=margin;}
+    });
+  }
+
+  // CV page
+  y=margin;
+  writeText([`📄 CV de ${fullNameInput.value} (${professionInput.value})`]);
+  const cvInputs=document.querySelectorAll('#cv input');
+  cvInputs.forEach(i=>writeText([`${i.previousElementSibling.textContent}: ${i.value}`]));
+  doc.addPage(); y=margin;
+
+  // Lettre page
+  const lettreInputs=document.querySelectorAll('#lettre input, #lettre textarea');
+  writeText(['✉️ Lettre de motivation']);
+  lettreInputs.forEach(i=>writeText([`${i.previousElementSibling.textContent}: ${i.value}`]));
+  doc.addPage(); y=margin;
+
+  // Plan page
+  const planText=document.getElementById('planText').value;
+  writeText(['🗺️ Plan de localisation', `Plan: ${planText}`]);
+
+  doc.save('document_complet.pdf');
+};
+
 // WhatsApp
-function getAllText(){
+document.getElementById('shareBtn').onclick=()=>{
   let text=`📄 CV de ${fullNameInput.value} (${professionInput.value})\n\n`;
   document.querySelectorAll('#cv input').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
   document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
   text+=`Plan: ${document.getElementById('planText').value}\n`;
-  return text;
-}
-document.getElementById('shareBtn').onclick=()=>{
-  if(isAdmin){window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');}
-  else document.getElementById('popupOverlay').style.display='flex';
-};
-
-// PDF multi-pages avec conversion inputs -> texte et labels en gras
-document.getElementById('downloadPdf').onclick=()=>{
-  const tempDiv=document.createElement('div');
-  tempDiv.style.position='absolute';
-  tempDiv.style.left='-9999px';
-  
-  const clone=document.getElementById('paperContent').cloneNode(true);
-  clone.classList.add('text-output');
-  
-  clone.querySelectorAll('input,textarea').forEach(i=>{
-    const p=document.createElement('p');
-    const label=i.previousElementSibling.textContent;
-    p.innerHTML=`<b>${label}</b>: <span>${i.value}</span>`;
-    i.parentNode.replaceChild(p,i);
-  });
-  
-  tempDiv.appendChild(clone);
-  document.body.appendChild(tempDiv);
-  
-  html2pdf().from(tempDiv).set({
-    margin:10,
-    filename:'document_complet.pdf',
-    html2canvas:{scale:2,useCORS:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).save().finally(()=>document.body.removeChild(tempDiv));
-};
-
-// Popup paiement
-const popup=document.getElementById('popupOverlay');
-const momoMsg=popup.querySelector('.momoMsg');
-const adminInput=popup.querySelector('.adminCode');
-const validateBtn=popup.querySelector('.validateAdminBtn');
-const verifyBtn=popup.querySelector('.verifyBtn');
-const result=popup.querySelector('.result');
-
-validateBtn.onclick=()=>{
-  if(adminInput.value===EXPECTED.admin){isAdmin=true; result.innerHTML='<span style="color:green">Code admin correct ✅</span>'; popup.style.display='none';}
-  else result.innerHTML='<span style="color:red">Code admin incorrect ❌</span>';
-};
-
-verifyBtn.onclick=()=>{
-  const msg=momoMsg.value.toLowerCase().replace(/\s+/g,''); result.innerHTML='';
-  if(!EXPECTED.phones.some(p=>msg.includes(p))){ result.innerHTML='<span style="color:red">Numéro incorrect</span>'; return; }
-  const amt=msg.match(/(\d+)/); if(!amt || parseInt(amt[0])!==EXPECTED.amount){ result.innerHTML='<span style="color:red">Montant incorrect</span>'; return; }
-  result.innerHTML='<span style="color:green">✅ Vérifié ! PDF prêt au téléchargement</span>';
-  popup.style.display='none';
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
 };
 </script>
 </body>
