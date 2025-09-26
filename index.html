@@ -96,36 +96,38 @@ photoInput.addEventListener('change', e=>{
   }
 });
 
-// Fonction pour générer PDF multi-pages
-document.getElementById('downloadPdf').onclick=async()=>{
+// Génération PDF multi-pages
+document.getElementById('downloadPdf').onclick=()=>{
   const doc=new jsPDF('p','mm','a4');
-  const margin=10; let y=margin; const lineHeight=7;
+  const margin=10;
+  const lineHeight=7;
+  let y=margin;
 
-  // Fonction helper pour écrire texte avec saut de ligne
-  function writeText(lines){
+  function writeLines(lines){
     lines.forEach(line=>{
       doc.text(line, margin, y);
       y+=lineHeight;
-      if(y>290){doc.addPage();y=margin;}
+      if(y>290){doc.addPage(); y=margin;}
     });
   }
 
-  // CV page
+  // --- Page 1 : CV ---
   y=margin;
-  writeText([`📄 CV de ${fullNameInput.value} (${professionInput.value})`]);
-  const cvInputs=document.querySelectorAll('#cv input');
-  cvInputs.forEach(i=>writeText([`${i.previousElementSibling.textContent}: ${i.value}`]));
-  doc.addPage(); y=margin;
+  writeLines([`📄 CV de ${fullNameInput.value} (${professionInput.value})`]);
+  document.querySelectorAll('#cv input').forEach(i=>{
+    writeLines([`${i.previousElementSibling.textContent}: ${i.value}`]);
+  });
 
-  // Lettre page
-  const lettreInputs=document.querySelectorAll('#lettre input, #lettre textarea');
-  writeText(['✉️ Lettre de motivation']);
-  lettreInputs.forEach(i=>writeText([`${i.previousElementSibling.textContent}: ${i.value}`]));
+  // --- Page 2 : Lettre ---
   doc.addPage(); y=margin;
+  writeLines(['✉️ Lettre de motivation']);
+  document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>{
+    writeLines([`${i.previousElementSibling.textContent}: ${i.value}`]);
+  });
 
-  // Plan page
-  const planText=document.getElementById('planText').value;
-  writeText(['🗺️ Plan de localisation', `Plan: ${planText}`]);
+  // --- Page 3 : Plan ---
+  doc.addPage(); y=margin;
+  writeLines(['🗺️ Plan de localisation', `Plan: ${document.getElementById('planText').value}`]);
 
   doc.save('document_complet.pdf');
 };
