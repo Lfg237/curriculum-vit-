@@ -6,7 +6,7 @@
 <title>CV / Lettre / Plan</title>
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
-.paper{background:white;padding:20px;margin:0 auto 20px;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
+.paper{background:white;padding:20px;margin:20px auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
 header{text-align:center;margin-bottom:10px;}
 header h1{font-size:2em;font-weight:bold;margin:0;}
 header h2{font-size:1em;color:#555;margin:5px 0;}
@@ -54,6 +54,7 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <label>Tel MTN</label><input id="cvTelMtn" placeholder="Tel MTN">
 <label>Tel Orange</label><input id="cvTelOrange" placeholder="Tel Orange">
 </section>
+<button id="downloadCV">📥 Télécharger CV</button>
 </div>
 
 <!-- Lettre -->
@@ -66,6 +67,7 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <label>Poste souhaité</label><input id="lettrePoste" placeholder="Poste souhaité">
 <label>Contenu</label><textarea id="lettreContenu" placeholder="Contenu"></textarea>
 </section>
+<button id="downloadLettre">📥 Télécharger Lettre</button>
 </div>
 
 <!-- Plan -->
@@ -74,12 +76,10 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <h3>🗺️ Plan de localisation</h3>
 <label>Plan</label><textarea id="planTexte" placeholder="Plan de localisation"></textarea>
 </section>
+<button id="downloadPlan">📥 Télécharger Plan</button>
 </div>
 
-<!-- Boutons PDF / WhatsApp -->
-<button id="downloadCV">📥 Télécharger CV</button>
-<button id="downloadLettre">📥 Télécharger Lettre</button>
-<button id="downloadPlan">📥 Télécharger Plan</button>
+<!-- WhatsApp -->
 <button id="shareBtn">📤 Partager sur WhatsApp</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -87,7 +87,7 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <script>
 const { jsPDF } = window.jspdf;
 
-// Nom et profession dynamiques
+// Nom/profession dynamique
 const cvFullName=document.getElementById('cvFullName');
 const cvProf=document.getElementById('cvProf');
 cvFullName.addEventListener('input',()=>document.getElementById('cvName').textContent=cvFullName.value || "Nom Complet");
@@ -105,7 +105,7 @@ cvPhoto.addEventListener('change', e=>{
   }
 });
 
-// Fonction pour télécharger chaque section en PDF
+// Fonction PDF par section
 function downloadPDF(sectionId, filename){
   const section=document.getElementById(sectionId);
   html2canvas(section,{scale:2,useCORS:true}).then(canvas=>{
