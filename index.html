@@ -8,15 +8,35 @@
 <style>
 body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
 .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
-.handwriting{font-family:'Patrick Hand', cursive;font-weight:bold;font-size:28px;margin:10px 0;} /* titres */
-.paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;display:inline-block;} /* capture exacte */
-.category{font-weight:bold;margin:4px 0;} /* catégories du contenu */
+.handwriting{font-family:'Patrick Hand', cursive;font-weight:bold;font-size:28px;margin:10px 0;} 
+.paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;display:inline-block;} 
+.category{font-weight:bold;margin:4px 0;} 
 button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
+
+/* Popup paiement */
+.popup-bg{
+  position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:0.3s;
+}
+.popup{
+  background:white;padding:20px;border-radius:8px;max-width:300px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.3);
+}
+.popup button{margin:5px;}
+.popup-bg.show{visibility:visible;opacity:1;}
 </style>
 </head>
 <body>
 
 <div id="sections"></div>
+
+<!-- Popup paiement -->
+<div class="popup-bg" id="paymentPopup">
+  <div class="popup">
+    <p>💰 Paiement requis pour télécharger le PDF</p>
+    <button id="payConfirm">✅ Payer</button>
+    <button id="payCancel">❌ Annuler</button>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -31,17 +51,10 @@ const users=[
     cv:{prenom:"Alice", age:"28", ville:"Paris", poste:"Frontend", email:"alice@example.com"},
     lettre:{prenom:"Alice", nom:"Dupont", entreprise:"TechCorp", poste:"Ingénieur", contenu:"Motivation pour rejoindre TechCorp."},
     plan:{plan:"123 Rue de Paris"}
-  },
-  {
-    nom:"Bob Martin",
-    profession:"Designer",
-    cv:{prenom:"Bob", age:"30", ville:"Lyon", poste:"Graphiste", email:"bob@example.com"},
-    lettre:{prenom:"Bob", nom:"Martin", entreprise:"DesignInc", poste:"Graphiste", contenu:"Motivation pour DesignInc."},
-    plan:{plan:"456 Avenue Lyon"}
   }
 ];
 
-// Génération PDF automatique
+// Génération PDF
 function downloadPDFFromElement(element, filename){
   html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
     const imgData = canvas.toDataURL('image/png');
@@ -101,32 +114,51 @@ users.forEach((user,index)=>{
   container.appendChild(pagePlan);
 });
 
-// Boutons PDF → téléchargement automatique
+// Gestion popup paiement pour PDF
+let currentElement = null;
+let currentFilename = null;
+const popup = document.getElementById('paymentPopup');
+const payConfirm = document.getElementById('payConfirm');
+const payCancel = document.getElementById('payCancel');
+
 document.querySelectorAll('.btnPDF').forEach(btn=>{
   btn.onclick = ()=>{
-    const target = document.getElementById(btn.dataset.target);
-    const filename = btn.dataset.filename;
-    downloadPDFFromElement(target, filename); // téléchargement direct
+    currentElement = document.getElementById(btn.dataset.target);
+    currentFilename = btn.dataset.filename;
+    popup.classList.add('show'); // afficher popup paiement
   }
 });
 
-// WhatsApp avec texte bien mis en page
+// Paiement validé → télécharger PDF automatiquement
+payConfirm.onclick = ()=>{
+  if(currentElement && currentFilename){
+    // Ici tu peux intégrer la logique de paiement réelle
+    downloadPDFFromElement(currentElement, currentFilename); // téléchargement automatique
+  }
+  popup.classList.remove('show');
+};
+
+payCancel.onclick = ()=>{
+  popup.classList.remove('show');
+};
+
+// WhatsApp
 function generateWhatsAppText(user){
-  let text = "✏️🖋️ *📄 CV DE " + user.nom.toUpperCase() + "* 🖋️✏️\n";
+  let text = "✏️🖋️ *📄 CV DE " + user.nom.toUpperCase() + "*\n";
   text += "👤 *Prénom:* " + user.cv.prenom + "\n";
   text += "🎂 *Âge:* " + user.cv.age + "\n";
   text += "🏙️ *Ville:* " + user.cv.ville + "\n";
   text += "💼 *Dernier poste:* " + user.cv.poste + "\n";
   text += "📧 *Email:* " + user.cv.email + "\n\n";
 
-  text += "✏️🖋️ *✉️ LETTRE DE MOTIVATION* 🖋️✏️\n";
+  text += "✏️🖋️ *✉️ LETTRE DE MOTIVATION*\n";
   text += "👤 *Prénom:* " + user.lettre.prenom + "\n";
   text += "👤 *Nom:* " + user.lettre.nom + "\n";
   text += "🏢 *Entreprise:* " + user.lettre.entreprise + "\n";
   text += "💼 *Poste:* " + user.lettre.poste + "\n";
   text += "📝 *Contenu:* " + user.lettre.contenu + "\n\n";
 
-  text += "✏️🖋️ *🗺️ PLAN DE LOCALISATION* 🖋️✏️\n";
+  text += "✏️🖋️ *🗺️ PLAN DE LOCALISATION*\n";
   text += "📍 *Plan:* " + user.plan.plan + "\n";
 
   return text;
