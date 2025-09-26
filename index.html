@@ -5,19 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV / Lettre / Plan</title>
 <style>
-body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px}
-section{padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-#cv{background:#fff9c4} /* Jaune clair */
-#lettre{background:#c8e6c9} /* Vert clair */
-#plan{background:#bbdefb} /* Bleu clair */
-input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px}
-button{cursor:pointer}
-button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-size:1rem}
-
-/* Popup paiement */
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center}
-#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px}
-.result{margin:5px 0;font-weight:bold}
+body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
+section{padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+#cv{background:#fff9c4;} /* Jaune clair */
+#lettre{background:#c8e6c9;} /* Vert clair */
+#plan{background:#bbdefb;} /* Bleu clair */
+input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px;}
+button{cursor:pointer;}
+button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-size:1rem;}
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
+#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px;}
+.result{margin:5px 0;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -92,128 +90,54 @@ const validateBtn=popup.querySelector('.validateAdminBtn');
 const verifyBtn=popup.querySelector('.verifyBtn');
 const result=popup.querySelector('.result');
 
-function buildDocumentHTML() {
-  return `
-<section style="background:#fff9c4;padding:10px;border-radius:8px;margin-bottom:10px;">
-<h2>CV</h2>
-<p>Nom: ${document.getElementById('fullName').value}</p>
-<p>Profession: ${document.getElementById('profession').value}</p>
-<p>Prénom: ${document.getElementById('prenom').value}</p>
-<p>Âge: ${document.getElementById('age').value}</p>
-<p>Ville: ${document.getElementById('ville').value}</p>
-<p>Quartier: ${document.getElementById('quartier').value}</p>
-<p>Situation: ${document.getElementById('situation').value}</p>
-<p>Enfants: ${document.getElementById('enfants').value}</p>
-<p>Dernier poste: ${document.getElementById('poste').value}</p>
-<p>Loisirs: ${document.getElementById('loisirs').value}</p>
-<p>Caractère: ${document.getElementById('caractere').value}</p>
-<p>Diplôme: ${document.getElementById('diplome').value}</p>
-<p>Établissement: ${document.getElementById('etablissement').value}</p>
-<p>Alcoolique: ${document.getElementById('alcool').value}</p>
-<p>Salaire: ${document.getElementById('salaire').value}</p>
-<p>Email: ${document.getElementById('email').value}</p>
-<p>Tel MTN: ${document.getElementById('telMtn').value}</p>
-<p>Tel Orange: ${document.getElementById('telOrange').value}</p>
-</section>
-<section style="background:#c8e6c9;padding:10px;border-radius:8px;margin-bottom:10px;">
-<h2>Lettre de motivation</h2>
-<p>Prénom: ${document.getElementById('prenomLetter').value}</p>
-<p>Nom: ${document.getElementById('nomLetter').value}</p>
-<p>Entreprise: ${document.getElementById('entreprise').value}</p>
-<p>Poste: ${document.getElementById('posteLetter').value}</p>
-<p>Contenu: ${document.getElementById('contenu').value}</p>
-</section>
-<section style="background:#bbdefb;padding:10px;border-radius:8px;margin-bottom:10px;">
-<h2>Plan de localisation</h2>
-<p>${document.getElementById('planText').value}</p>
-</section>`;
+function getAllHTML(){
+  const cvFields={"Nom":document.getElementById('fullName').value,"Profession":document.getElementById('profession').value,"Prénom":document.getElementById('prenom').value,"Âge":document.getElementById('age').value,"Ville":document.getElementById('ville').value,"Quartier":document.getElementById('quartier').value,"Situation":document.getElementById('situation').value,"Enfants":document.getElementById('enfants').value,"Dernier poste":document.getElementById('poste').value,"Loisirs":document.getElementById('loisirs').value,"Caractère":document.getElementById('caractere').value,"Diplôme":document.getElementById('diplome').value,"Établissement":document.getElementById('etablissement').value,"Alcoolique":document.getElementById('alcool').value,"Salaire":document.getElementById('salaire').value,"Email":document.getElementById('email').value,"Tel MTN":document.getElementById('telMtn').value,"Tel Orange":document.getElementById('telOrange').value};
+  const lettreFields={"Prénom":document.getElementById('prenomLetter').value,"Nom":document.getElementById('nomLetter').value,"Entreprise":document.getElementById('entreprise').value,"Poste":document.getElementById('posteLetter').value,"Contenu":document.getElementById('contenu').value};
+  const planFields={"Plan":document.getElementById('planText').value};
+
+  function buildSection(title,fields,bg){let s=`<section style="background:${bg};padding:10px;border-radius:8px;margin-bottom:10px;"><h2>${title}</h2>`;for(let k in fields){s+=`<p>${k}: ${fields[k]}</p>`;}s+='</section>';return s;}
+  return buildSection("CV",cvFields,"#fff9c4")+buildSection("Lettre de motivation",lettreFields,"#c8e6c9")+buildSection("Plan de localisation",planFields,"#bbdefb");
 }
 
-function buildDocumentText() {
-  return `📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})
-
-🟨───────── CV ─────────🟨
-Prénom: ${document.getElementById('prenom').value}
-Âge: ${document.getElementById('age').value}
-Ville: ${document.getElementById('ville').value}
-Quartier: ${document.getElementById('quartier').value}
-Situation: ${document.getElementById('situation').value}
-Enfants: ${document.getElementById('enfants').value}
-Dernier poste: ${document.getElementById('poste').value}
-Loisirs: ${document.getElementById('loisirs').value}
-Caractère: ${document.getElementById('caractere').value}
-Diplôme: ${document.getElementById('diplome').value}
-Établissement: ${document.getElementById('etablissement').value}
-Alcoolique: ${document.getElementById('alcool').value}
-Salaire: ${document.getElementById('salaire').value}
-Email: ${document.getElementById('email').value}
-Tel MTN: ${document.getElementById('telMtn').value}
-Tel Orange: ${document.getElementById('telOrange').value}
-
-🟩──── Lettre de motivation ────🟩
-Prénom: ${document.getElementById('prenomLetter').value}
-Nom: ${document.getElementById('nomLetter').value}
-Entreprise: ${document.getElementById('entreprise').value}
-Poste: ${document.getElementById('posteLetter').value}
-Contenu: ${document.getElementById('contenu').value}
-
-🟦──── Plan de localisation ────🟦
-${document.getElementById('planText').value}`;
+function getAllText(){
+  let text=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\n\n`;
+  const inputsCV=document.getElementById('cv').querySelectorAll('input');
+  inputsCV.forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
+  const inputsLet=document.getElementById('lettre').querySelectorAll('input,textarea');
+  inputsLet.forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
+  const plan=document.getElementById('planText').value;
+  text+=`Plan: ${plan}\n`;
+  return text;
 }
 
-// Partage WhatsApp avec popup paiement
-shareBtn.onclick = () => {
-  if(isAdmin){
-    const data = buildDocumentText();
-    window.open(`https://wa.me/?text=${encodeURIComponent(data)}`,'_blank');
-  } else {
-    popup.style.display='flex';
-    result.innerHTML='';
-  }
+// WhatsApp partage
+shareBtn.onclick = ()=>{
+  if(isAdmin){window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');}
+  else popup.style.display='flex';
 };
 
-// Valider code admin
-validateBtn.onclick = () => {
-  if(adminInput.value === EXPECTED.admin){
-    result.innerHTML='<span style="color:green">Code admin correct ✅</span>';
-    isAdmin=true;
-    popup.style.display='none';
-  } else {
-    result.innerHTML='<span style="color:red">Code admin incorrect ❌</span>';
-  }
+// Admin code
+validateBtn.onclick = ()=>{
+  if(adminInput.value===EXPECTED.admin){isAdmin=true;result.innerHTML='<span style="color:green">Code admin correct ✅</span>';popup.style.display='none';}
+  else result.innerHTML='<span style="color:red">Code admin incorrect ❌</span>';
 };
 
-// Vérification Mobile Money
-verifyBtn.onclick = () => {
-  const msg=momoMsg.value.toLowerCase().replace(/\s+/g,'');
-  result.innerHTML='';
-
-  const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
-  if(!phoneMatch){ result.innerHTML='<span style="color:red">Numéro incorrect</span>'; return; }
-
-  const amtMatch=msg.match(/(\d+)/);
-  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){ result.innerHTML='<span style="color:red">Montant incorrect</span>'; return; }
-
+// Mobile Money verify
+verifyBtn.onclick = ()=>{
+  const msg=momoMsg.value.toLowerCase().replace(/\s+/g,''); result.innerHTML='';
+  if(!EXPECTED.phones.some(p=>msg.includes(p))){ result.innerHTML='<span style="color:red">Numéro incorrect</span>'; return; }
+  const amt=msg.match(/(\d+)/); if(!amt || parseInt(amt[0])!==EXPECTED.amount){ result.innerHTML='<span style="color:red">Montant incorrect</span>'; return; }
   result.innerHTML='<span style="color:green">✅ Vérifié ! Partage en cours...</span>';
   popup.style.display='none';
-  const data = buildDocumentText();
-  window.open(`https://wa.me/?text=${encodeURIComponent(data)}`,'_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');
 };
 
 // Télécharger PDF
-downloadBtn.onclick = () => {
+downloadBtn.onclick = ()=>{
   const tempDiv=document.createElement('div');
-  tempDiv.style.position='absolute';
-  tempDiv.style.left='-9999px';
-  tempDiv.innerHTML=buildDocumentHTML();
-  document.body.appendChild(tempDiv);
-
-  html2pdf().from(tempDiv).set({
-    margin:10,
-    filename:'document.pdf',
-    html2canvas:{scale:2,useCORS:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).save().finally(()=>document.body.removeChild(tempDiv));
+  tempDiv.style.position='absolute'; tempDiv.style.left='-9999px';
+  tempDiv.innerHTML=getAllHTML(); document.body.appendChild(tempDiv);
+  html2pdf().from(tempDiv).set({margin:10,filename:'document.pdf',html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).save().finally(()=>document.body.removeChild(tempDiv));
 };
 </script>
 </body>
