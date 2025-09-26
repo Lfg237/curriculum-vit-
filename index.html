@@ -3,25 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre / Plan</title>
+<title>CV / Lettre / Plan réaliste</title>
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
-section{padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-#cv{background:#fff9c4;} /* Jaune clair */
-#lettre{background:#c8e6c9;} /* Vert clair */
-#plan{background:#bbdefb;} /* Bleu clair */
-input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px;}
-button{cursor:pointer;}
-button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-size:1rem;}
+.paper{background:white;padding:20px;margin:0 auto;max-width:800px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
+section{margin-bottom:20px;padding:10px;border:1px solid #ccc;border-radius:5px;}
+h2{color:#1e88e5;margin-bottom:10px;}
+input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
+button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px;}
+#popup{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
 .result{margin:5px 0;font-weight:bold;}
 </style>
 </head>
 <body>
 
-<h1>📄 CV / Lettre de Motivation / Plan</h1>
+<h1>📄 CV / Lettre / Plan réaliste</h1>
 
+<div class="paper" id="paperContent">
 <section id="cv">
 <h2>👤 CV</h2>
 <input id="fullName" placeholder="Nom complet">
@@ -57,9 +56,9 @@ button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-si
 <h2>🗺️ Plan de localisation</h2>
 <textarea id="planText" placeholder="Plan de localisation"></textarea>
 </section>
+</div>
 
-<button id="shareBtn" class="primary">📤 Partager sur WhatsApp</button>
-<button id="downloadPdf" class="primary">📥 Télécharger PDF</button>
+<button id="downloadPdf">📥 Télécharger PDF</button>
 
 <!-- Popup paiement -->
 <div id="popupOverlay">
@@ -70,18 +69,17 @@ button.primary{background:#25D366;color:#fff;font-weight:700;border:none;font-si
 <textarea class="momoMsg" placeholder="Message Mobile Money"></textarea>
 <input class="adminCode" type="password" placeholder="Code admin">
 <div class="result"></div>
-<button class="validateAdminBtn primary">✅ Valider code admin</button>
-<button class="verifyBtn primary">✅ Vérifier & Partager</button>
+<button class="validateAdminBtn">✅ Valider code admin</button>
+<button class="verifyBtn">✅ Vérifier & Partager</button>
 <button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
 </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
+const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233'};
 let isAdmin=false;
 
-const shareBtn=document.getElementById('shareBtn');
 const downloadBtn=document.getElementById('downloadPdf');
 const popup=document.getElementById('popupOverlay');
 const momoMsg=popup.querySelector('.momoMsg');
@@ -89,55 +87,30 @@ const adminInput=popup.querySelector('.adminCode');
 const validateBtn=popup.querySelector('.validateAdminBtn');
 const verifyBtn=popup.querySelector('.verifyBtn');
 const result=popup.querySelector('.result');
+const paper=document.getElementById('paperContent');
 
-function getAllHTML(){
-  const cvFields={"Nom":document.getElementById('fullName').value,"Profession":document.getElementById('profession').value,"Prénom":document.getElementById('prenom').value,"Âge":document.getElementById('age').value,"Ville":document.getElementById('ville').value,"Quartier":document.getElementById('quartier').value,"Situation":document.getElementById('situation').value,"Enfants":document.getElementById('enfants').value,"Dernier poste":document.getElementById('poste').value,"Loisirs":document.getElementById('loisirs').value,"Caractère":document.getElementById('caractere').value,"Diplôme":document.getElementById('diplome').value,"Établissement":document.getElementById('etablissement').value,"Alcoolique":document.getElementById('alcool').value,"Salaire":document.getElementById('salaire').value,"Email":document.getElementById('email').value,"Tel MTN":document.getElementById('telMtn').value,"Tel Orange":document.getElementById('telOrange').value};
-  const lettreFields={"Prénom":document.getElementById('prenomLetter').value,"Nom":document.getElementById('nomLetter').value,"Entreprise":document.getElementById('entreprise').value,"Poste":document.getElementById('posteLetter').value,"Contenu":document.getElementById('contenu').value};
-  const planFields={"Plan":document.getElementById('planText').value};
-
-  function buildSection(title,fields,bg){let s=`<section style="background:${bg};padding:10px;border-radius:8px;margin-bottom:10px;"><h2>${title}</h2>`;for(let k in fields){s+=`<p>${k}: ${fields[k]}</p>`;}s+='</section>';return s;}
-  return buildSection("CV",cvFields,"#fff9c4")+buildSection("Lettre de motivation",lettreFields,"#c8e6c9")+buildSection("Plan de localisation",planFields,"#bbdefb");
-}
-
-function getAllText(){
-  let text=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\n\n`;
-  const inputsCV=document.getElementById('cv').querySelectorAll('input');
-  inputsCV.forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
-  const inputsLet=document.getElementById('lettre').querySelectorAll('input,textarea');
-  inputsLet.forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
-  const plan=document.getElementById('planText').value;
-  text+=`Plan: ${plan}\n`;
-  return text;
-}
-
-// WhatsApp partage
-shareBtn.onclick = ()=>{
-  if(isAdmin){window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');}
-  else popup.style.display='flex';
+downloadBtn.onclick=()=>{
+  html2pdf().from(paper).set({
+    margin:10,
+    filename:'document.pdf',
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  }).save();
 };
 
-// Admin code
-validateBtn.onclick = ()=>{
-  if(adminInput.value===EXPECTED.admin){isAdmin=true;result.innerHTML='<span style="color:green">Code admin correct ✅</span>';popup.style.display='none';}
+// Admin validation
+validateBtn.onclick=()=>{
+  if(adminInput.value===EXPECTED.admin){isAdmin=true; result.innerHTML='<span style="color:green">Code admin correct ✅</span>'; popup.style.display='none';}
   else result.innerHTML='<span style="color:red">Code admin incorrect ❌</span>';
 };
 
-// Mobile Money verify
-verifyBtn.onclick = ()=>{
+// Mobile Money check
+verifyBtn.onclick=()=>{
   const msg=momoMsg.value.toLowerCase().replace(/\s+/g,''); result.innerHTML='';
   if(!EXPECTED.phones.some(p=>msg.includes(p))){ result.innerHTML='<span style="color:red">Numéro incorrect</span>'; return; }
   const amt=msg.match(/(\d+)/); if(!amt || parseInt(amt[0])!==EXPECTED.amount){ result.innerHTML='<span style="color:red">Montant incorrect</span>'; return; }
-  result.innerHTML='<span style="color:green">✅ Vérifié ! Partage en cours...</span>';
+  result.innerHTML='<span style="color:green">✅ Vérifié ! PDF prêt au téléchargement</span>';
   popup.style.display='none';
-  window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');
-};
-
-// Télécharger PDF
-downloadBtn.onclick = ()=>{
-  const tempDiv=document.createElement('div');
-  tempDiv.style.position='absolute'; tempDiv.style.left='-9999px';
-  tempDiv.innerHTML=getAllHTML(); document.body.appendChild(tempDiv);
-  html2pdf().from(tempDiv).set({margin:10,filename:'document.pdf',html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).save().finally(()=>document.body.removeChild(tempDiv));
 };
 </script>
 </body>
