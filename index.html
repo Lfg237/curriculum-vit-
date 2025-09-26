@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre / Plan réaliste</title>
+<title>CV / Lettre / Plan</title>
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
-.paper{background:white;padding:20px;margin:0 auto;max-width:800px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
-section{margin-bottom:20px;padding:10px;border:1px solid #ccc;border-radius:5px;}
-h2{color:#1e88e5;margin-bottom:10px;}
+.paper{background:white;padding:20px;margin:0 auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
+header{text-align:center;margin-bottom:20px;}
+header h1{font-size:2em;font-weight:bold;margin:0;}
+header h2{font-size:1em;color:#555;margin:5px 0;}
+section{margin-bottom:20px;padding:15px;border:1px solid #ccc;border-radius:5px;}
+section h3{margin-top:0;color:#1e88e5;}
 input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
 button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
@@ -18,11 +21,22 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 </head>
 <body>
 
-<h1>📄 CV / Lettre / Plan réaliste</h1>
+<h1>📄 CV / Lettre / Plan</h1>
 
 <div class="paper" id="paperContent">
+<header>
+<h1 id="displayName">Nom Complet</h1>
+<h2 id="displayProfession">Profession</h2>
+</header>
+
+<section id="photoSection">
+<h3>📸 Photo (facultatif)</h3>
+<input type="file" id="photoInput" accept="image/*">
+<img id="photoPreview" style="display:none;width:120px;height:120px;border-radius:10px;margin-top:10px;">
+</section>
+
 <section id="cv">
-<h2>👤 CV</h2>
+<h3>👤 CV</h3>
 <input id="fullName" placeholder="Nom complet">
 <input id="profession" placeholder="Profession / poste">
 <input id="prenom" placeholder="Prénom">
@@ -44,7 +58,7 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 </section>
 
 <section id="lettre">
-<h2>✉️ Lettre de motivation</h2>
+<h3>✉️ Lettre de motivation</h3>
 <input id="prenomLetter" placeholder="Prénom">
 <input id="nomLetter" placeholder="Nom">
 <input id="entreprise" placeholder="Entreprise">
@@ -53,11 +67,12 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 </section>
 
 <section id="plan">
-<h2>🗺️ Plan de localisation</h2>
+<h3>🗺️ Plan de localisation</h3>
 <textarea id="planText" placeholder="Plan de localisation"></textarea>
 </section>
 </div>
 
+<button id="shareBtn">📤 Partager sur WhatsApp</button>
 <button id="downloadPdf">📥 Télécharger PDF</button>
 
 <!-- Popup paiement -->
@@ -80,17 +95,42 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233'};
 let isAdmin=false;
 
-const downloadBtn=document.getElementById('downloadPdf');
-const popup=document.getElementById('popupOverlay');
-const momoMsg=popup.querySelector('.momoMsg');
-const adminInput=popup.querySelector('.adminCode');
-const validateBtn=popup.querySelector('.validateAdminBtn');
-const verifyBtn=popup.querySelector('.verifyBtn');
-const result=popup.querySelector('.result');
-const paper=document.getElementById('paperContent');
+// Affichage Nom et Profession
+const fullNameInput=document.getElementById('fullName');
+const professionInput=document.getElementById('profession');
+fullNameInput.addEventListener('input',()=>document.getElementById('displayName').textContent=fullNameInput.value || "Nom Complet");
+professionInput.addEventListener('input',()=>document.getElementById('displayProfession').textContent=professionInput.value || "Profession");
 
-downloadBtn.onclick=()=>{
-  html2pdf().from(paper).set({
+// Preview photo
+const photoInput=document.getElementById('photoInput');
+const photoPreview=document.getElementById('photoPreview');
+photoInput.addEventListener('change', e=>{
+  const file=e.target.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=function(ev){photoPreview.src=ev.target.result; photoPreview.style.display='block';}
+    reader.readAsDataURL(file);
+  }
+});
+
+// Fonction pour WhatsApp
+function getAllText(){
+  let text=`📄 CV de ${fullNameInput.value} (${professionInput.value})\n\n`;
+  document.querySelectorAll('#cv input').forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
+  document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
+  text+=`Plan: ${document.getElementById('planText').value}\n`;
+  return text;
+}
+
+// Bouton WhatsApp
+document.getElementById('shareBtn').onclick=()=>{
+  if(isAdmin){window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');}
+  else document.getElementById('popupOverlay').style.display='flex';
+};
+
+// PDF
+document.getElementById('downloadPdf').onclick=()=>{
+  html2pdf().from(document.getElementById('paperContent')).set({
     margin:10,
     filename:'document.pdf',
     html2canvas:{scale:2,useCORS:true},
@@ -98,13 +138,19 @@ downloadBtn.onclick=()=>{
   }).save();
 };
 
-// Admin validation
+// Popup paiement
+const popup=document.getElementById('popupOverlay');
+const momoMsg=popup.querySelector('.momoMsg');
+const adminInput=popup.querySelector('.adminCode');
+const validateBtn=popup.querySelector('.validateAdminBtn');
+const verifyBtn=popup.querySelector('.verifyBtn');
+const result=popup.querySelector('.result');
+
 validateBtn.onclick=()=>{
   if(adminInput.value===EXPECTED.admin){isAdmin=true; result.innerHTML='<span style="color:green">Code admin correct ✅</span>'; popup.style.display='none';}
   else result.innerHTML='<span style="color:red">Code admin incorrect ❌</span>';
 };
 
-// Mobile Money check
 verifyBtn.onclick=()=>{
   const msg=momoMsg.value.toLowerCase().replace(/\s+/g,''); result.innerHTML='';
   if(!EXPECTED.phones.some(p=>msg.includes(p))){ result.innerHTML='<span style="color:red">Numéro incorrect</span>'; return; }
