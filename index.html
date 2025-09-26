@@ -1,106 +1,46 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prototype WhatsApp</title>
-<style>
-  body { font-family: Arial, sans-serif; background:#f0f8ff; padding:20px; }
-  section { background:#fff; margin-bottom:20px; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-  h2 { margin-bottom:10px; }
-  .photo-preview { width:100px; height:100px; border:2px dashed #999; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:#fafafa; border-radius:50%; overflow:hidden; }
-  .photo-preview img { width:100%; height:100%; object-fit:cover; }
-  label { display:block; font-weight:bold; margin-top:10px; }
-  input, textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
-  button { margin-top:15px; padding:10px; border:none; background:#25d366; color:#fff; font-weight:bold; border-radius:8px; cursor:pointer; }
-</style>
+  <meta charset="UTF-8">
+  <title>CV WhatsApp + Photo</title>
 </head>
 <body>
-
-<section>
-  <h2>👔 CV</h2>
-  <div class="photo-preview" id="photoPreview">Photo</div>
+  <h3>Importer photo pour le CV</h3>
   <input type="file" id="photoInput" accept="image/*">
-  <label>Nom</label>
-  <input type="text" id="nom">
-  <label>Profession</label>
-  <input type="text" id="profession">
-  <label>Prénom</label>
-  <input type="text" id="prenom">
-  <label>Âge</label>
-  <input type="text" id="age">
-  <label>Ville</label>
-  <input type="text" id="ville">
-</section>
 
-<section style="background:#e6ffe6">
-  <h2>✍️ Lettre de Motivation</h2>
-  <label>Nom</label><input type="text" id="nomLetter">
-  <label>Entreprise</label><input type="text" id="entreprise">
-  <label>Poste</label><input type="text" id="posteLetter">
-  <label>Contenu</label><textarea id="contenu"></textarea>
-</section>
+  <button onclick="partager()">Partager sur WhatsApp</button>
 
-<section style="background:#ffe6f0">
-  <h2>📍 Plan de Localisation</h2>
-  <textarea id="plan"></textarea>
-</section>
+  <script>
+    async function partager() {
+      let nom = "Doe John";
+      let prenom = "John";
+      let poste = "Développeur Web";
 
-<button onclick="shareWhatsApp()">📤 Partager sur WhatsApp</button>
+      let fileInput = document.getElementById("photoInput");
+      let photoURL = "";
 
-<script>
-let photoData = "";
+      if (fileInput.files.length > 0) {
+        let data = new FormData();
+        data.append("file", fileInput.files[0]);
+        data.append("upload_preset", "demo_unsigned"); // ⚠️ ton preset Cloudinary ici
 
-document.getElementById("photoInput").addEventListener("change", function(e){
-  const file = e.target.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      photoData = ev.target.result;
-      document.getElementById("photoPreview").innerHTML = '<img src="'+photoData+'">';
+        let res = await fetch("https://api.cloudinary.com/v1_1/demo/image/upload", {
+          method: "POST",
+          body: data
+        });
+
+        let file = await res.json();
+        photoURL = file.secure_url;
+      }
+
+      let message = `👔 *Curriculum Vitae*\n\nNom: ${nom}\nPrénom: ${prenom}\nPoste: ${poste}`;
+
+      if (photoURL) {
+        message += `\n\n🖼️ Photo: ${photoURL}`;
+      }
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     }
-    reader.readAsDataURL(file);
-  }
-});
-
-function shareWhatsApp(){
-  const nom = document.getElementById("nom").value || "";
-  const profession = document.getElementById("profession").value || "";
-  const prenom = document.getElementById("prenom").value || "";
-  const age = document.getElementById("age").value || "";
-  const ville = document.getElementById("ville").value || "";
-
-  const nomLetter = document.getElementById("nomLetter").value || "";
-  const entreprise = document.getElementById("entreprise").value || "";
-  const posteLetter = document.getElementById("posteLetter").value || "";
-  const contenu = document.getElementById("contenu").value || "";
-
-  const plan = document.getElementById("plan").value || "";
-
-  let message = 
-`👔 *CV*
-*${nom}*
-_${profession}_
-
-Prénom: ${prenom}
-Âge: ${age}
-Ville: ${ville}
-
-✍️ *Lettre de Motivation*
-Nom: ${nomLetter}
-Entreprise: ${entreprise}
-Poste: ${posteLetter}
-Contenu: ${contenu}
-
-📍 *Plan de Localisation*
-${plan}`;
-
-  if(photoData){
-    message += `\n\n🖼️ Photo: (copier/coller ce lien dans le navigateur)\n${photoData}`;
-  }
-
-  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
-}
-</script>
+  </script>
 </body>
 </html>
