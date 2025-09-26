@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV / Lettre Mobile</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+<style>
+body{font-family:Arial,sans-serif;padding:10px;background:#f0f8ff;}
+input,textarea,button{width:100%;margin:5px 0;padding:8px;font-size:1rem;border:1px solid #1e90ff;border-radius:5px;}
+textarea{min-height:100px;resize:vertical;overflow:auto;}
+button{background:#228b22;color:#fff;font-weight:bold;border:none;border-radius:5px;cursor:pointer;}
+section{background:#fff;padding:10px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+h1,h2{margin:10px 0;}
+</style>
+</head>
+<body>
+
+<h1>CV / Lettre de Motivation</h1>
+
+<section>
+<h2>Nom et Profession</h2>
+<input type="text" id="fullName" placeholder="Nom complet">
+<input type="text" id="profession" placeholder="Profession / poste">
+</section>
+
+<section>
+<h2>Informations CV</h2>
+<input type="text" id="prenom" placeholder="Prénom">
+<input type="number" id="age" placeholder="Âge">
+<input type="text" id="ville" placeholder="Ville">
+<input type="text" id="quartier" placeholder="Quartier">
+<input type="text" id="situation" placeholder="Situation matrimoniale">
+<input type="number" id="enfants" placeholder="Nombre d'enfants">
+<input type="text" id="poste" placeholder="Dernier poste occupé">
+<input type="text" id="loisirs" placeholder="Loisirs">
+<input type="text" id="caractere" placeholder="Caractère">
+<input type="text" id="diplome" placeholder="Dernier diplôme">
+<input type="text" id="etablissement" placeholder="Dernier établissement">
+<input type="text" id="alcool" placeholder="Alcoolique Oui/Non">
+<input type="number" id="salaire" placeholder="Salaire">
+<input type="email" id="email" placeholder="Email">
+<input type="tel" id="telMtn" placeholder="Numéro MTN">
+<input type="tel" id="telOrange" placeholder="Numéro Orange/Camtel">
+</section>
+
+<section>
+<h2>Lettre de Motivation</h2>
+<input type="text" id="prenomLetter" placeholder="Prénom">
+<input type="text" id="nomLetter" placeholder="Nom">
+<input type="text" id="entreprise" placeholder="Entreprise">
+<input type="text" id="posteLetter" placeholder="Poste souhaité">
+<textarea id="contenu" placeholder="Contenu de la lettre"></textarea>
+</section>
+
+<section>
+<h2>Plan de localisation</h2>
+<textarea id="plan" placeholder="Rédigez votre plan de localisation ici"></textarea>
+</section>
+
+<button id="downloadBtn">📄 Télécharger Word</button>
+
+<script>
+const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+function getValue(id){ 
+    const val = document.getElementById(id)?.value;
+    return val ? val : ""; 
+}
+
+async function generateWord(){
+    const doc = new Document({
+        sections:[{
+            children:[
+                new Paragraph({children:[new TextRun({text:"Curriculum Vitae",bold:true,size:26})]}),
+                new Paragraph({children:[new TextRun({text:"Nom: "+getValue("fullName"),bold:true})]}),
+                new Paragraph({children:[new TextRun({text:"Profession: "+getValue("profession"),italics:true})]}),
+                new Paragraph({children:[new TextRun({text:"Prénom: "+getValue("prenom")})]}),
+                new Paragraph({children:[new TextRun({text:"Âge: "+getValue("age")})]}),
+                new Paragraph({children:[new TextRun({text:"Ville: "+getValue("ville")})]}),
+                new Paragraph({children:[new TextRun({text:"Quartier: "+getValue("quartier")})]}),
+                new Paragraph({children:[new TextRun({text:"Situation: "+getValue("situation")})]}),
+                new Paragraph({children:[new TextRun({text:"Nombre d'enfants: "+getValue("enfants")})]}),
+                new Paragraph({children:[new TextRun({text:"Dernier poste: "+getValue("poste")})]}),
+                new Paragraph({children:[new TextRun({text:"Loisirs: "+getValue("loisirs")})]}),
+                new Paragraph({children:[new TextRun({text:"Caractère: "+getValue("caractere")})]}),
+                new Paragraph({children:[new TextRun({text:"Diplôme: "+getValue("diplome")})]}),
+                new Paragraph({children:[new TextRun({text:"Établissement: "+getValue("etablissement")})]}),
+                new Paragraph({children:[new TextRun({text:"Alcoolique: "+getValue("alcool")})]}),
+                new Paragraph({children:[new TextRun({text:"Salaire: "+getValue("salaire")})]}),
+                new Paragraph({children:[new TextRun({text:"Email: "+getValue("email")})]}),
+                new Paragraph({children:[new TextRun({text:"Tel MTN: "+getValue("telMtn")})]}),
+                new Paragraph({children:[new TextRun({text:"Tel Orange: "+getValue("telOrange")})]}),
+
+                new Paragraph({children:[new TextRun({text:"Lettre de Motivation",bold:true,size:26})]}),
+                new Paragraph({children:[new TextRun({text:"Prénom: "+getValue("prenomLetter")})]}),
+                new Paragraph({children:[new TextRun({text:"Nom: "+getValue("nomLetter")})]}),
+                new Paragraph({children:[new TextRun({text:"Entreprise: "+getValue("entreprise")})]}),
+                new Paragraph({children:[new TextRun({text:"Poste: "+getValue("posteLetter")})]}),
+                ...getValue("contenu").split('\n').map(l => new Paragraph({children:[new TextRun({text:l})]})),
+
+                new Paragraph({children:[new TextRun({text:"Plan de localisation",bold:true,size:26})]}),
+                ...getValue("plan").split('\n').map(l => new Paragraph({children:[new TextRun({text:l})]})),
+            ]
+        }]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    
+    // Mobile friendly: crée un lien et le clique automatiquement
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dossier_candidature_mobile.docx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+document.getElementById("downloadBtn").addEventListener("click", generateWord);
+</script>
+
+</body>
+  </html>
