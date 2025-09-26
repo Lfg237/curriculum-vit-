@@ -12,31 +12,11 @@ body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
 .paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;display:inline-block;} /* capture exacte */
 .category{font-weight:bold;margin:4px 0;} /* catégories du contenu */
 button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
-
-/* Popup style */
-.popup-bg{
-  position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);
-  display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:0.3s;
-}
-.popup{
-  background:white;padding:20px;border-radius:8px;max-width:300px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.3);
-}
-.popup button{margin:5px;}
-.popup-bg.show{visibility:visible;opacity:1;}
 </style>
 </head>
 <body>
 
 <div id="sections"></div>
-
-<!-- Popup -->
-<div class="popup-bg" id="popupBG">
-  <div class="popup">
-    <p>Voulez-vous vraiment télécharger ce PDF ?</p>
-    <button id="confirmBtn">Oui</button>
-    <button id="cancelBtn">Non</button>
-  </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -61,6 +41,7 @@ const users=[
   }
 ];
 
+// Génération PDF automatique
 function downloadPDFFromElement(element, filename){
   html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
     const imgData = canvas.toDataURL('image/png');
@@ -120,33 +101,16 @@ users.forEach((user,index)=>{
   container.appendChild(pagePlan);
 });
 
-// PDF popup
-let currentTarget = null;
-let currentFilename = null;
-const popupBG = document.getElementById('popupBG');
-const confirmBtn = document.getElementById('confirmBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-
+// Boutons PDF → téléchargement automatique
 document.querySelectorAll('.btnPDF').forEach(btn=>{
   btn.onclick = ()=>{
-    currentTarget = document.getElementById(btn.dataset.target);
-    currentFilename = btn.dataset.filename;
-    popupBG.classList.add('show');
+    const target = document.getElementById(btn.dataset.target);
+    const filename = btn.dataset.filename;
+    downloadPDFFromElement(target, filename); // téléchargement direct
   }
 });
 
-confirmBtn.onclick = ()=>{
-  if(currentTarget && currentFilename){
-    downloadPDFFromElement(currentTarget, currentFilename);
-  }
-  popupBG.classList.remove('show');
-};
-
-cancelBtn.onclick = ()=>{
-  popupBG.classList.remove('show');
-};
-
-// WhatsApp avec mise en page professionnelle
+// WhatsApp avec texte bien mis en page
 function generateWhatsAppText(user){
   let text = "✏️🖋️ *📄 CV DE " + user.nom.toUpperCase() + "* 🖋️✏️\n";
   text += "👤 *Prénom:* " + user.cv.prenom + "\n";
