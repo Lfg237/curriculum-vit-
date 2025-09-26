@@ -62,8 +62,9 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 <textarea id="plan" placeholder="Plan de localisation"></textarea>
 </section>
 
-<button id="shareBtn" class="primary">📤 Partager sur WhatsApp</button>
+<button id="shareBtn" class="primary">📤 Partager sur WhatsApp / Télécharger</button>
 
+<!-- Popup de paiement pour utilisateurs classiques -->
 <div id="popupOverlay">
 <div id="popup">
 <h2>Paiement requis</h2>
@@ -73,55 +74,70 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 <input id="adminCode" type="password" placeholder="Code admin">
 <div id="result"></div>
 
-<!-- Bouton pour valider le code admin -->
 <button id="validateAdminBtn" class="primary">✅ Valider code admin</button>
-
-<!-- Bouton pour vérifier le paiement et partager -->
 <button id="verifyBtn" class="primary" disabled>✅ Vérifier & Partager</button>
 <button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
 </div>
 </div>
 
 <script>
-const EXPECTED={name:'wirnkar loveline',phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
+const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
 const adminInput=document.getElementById('adminCode');
 const validateBtn=document.getElementById('validateAdminBtn');
 const verifyBtn=document.getElementById('verifyBtn');
 const result=document.getElementById('result');
+const shareBtn=document.getElementById('shareBtn');
+let isAdmin=false;
 
-document.getElementById('shareBtn').onclick=()=>{document.getElementById('popupOverlay').style.display='flex';result.innerHTML='';verifyBtn.disabled=true}
+function shareDirect(){
+  const data=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\nPrénom: ${document.getElementById('prenom').value}\nÂge: ${document.getElementById('age').value}\nVille: ${document.getElementById('ville').value}\nQuartier: ${document.getElementById('quartier').value}\nSituation: ${document.getElementById('situation').value}\nEnfants: ${document.getElementById('enfants').value}\nDernier poste: ${document.getElementById('poste').value}\nLoisirs: ${document.getElementById('loisirs').value}\nCaractère: ${document.getElementById('caractere').value}\nDiplôme: ${document.getElementById('diplome').value}\nÉtablissement: ${document.getElementById('etablissement').value}\nAlcoolique: ${document.getElementById('alcool').value}\nSalaire: ${document.getElementById('salaire').value}\nEmail: ${document.getElementById('email').value}\nTel MTN: ${document.getElementById('telMtn').value}\nTel Orange: ${document.getElementById('telOrange').value}\n\n✉️ Lettre de Motivation\nPrénom: ${document.getElementById('prenomLetter').value}\nNom: ${document.getElementById('nomLetter').value}\nEntreprise: ${document.getElementById('entreprise').value}\nPoste: ${document.getElementById('posteLetter').value}\nContenu: ${document.getElementById('contenu').value}\n\n🗺️ Plan de localisation\n${document.getElementById('plan').value}`;
+  const url=`https://wa.me/?text=${encodeURIComponent(data)}`;
+  window.open(url,'_blank');
+}
 
-validateBtn.onclick=()=>{
-  if(adminInput.value===EXPECTED.admin){
+shareBtn.onclick = () => {
+  if(isAdmin){
+    shareDirect();
+  } else {
+    document.getElementById('popupOverlay').style.display='flex';
+    result.innerHTML=''; verifyBtn.disabled=true;
+  }
+}
+
+validateBtn.onclick = () => {
+  if(adminInput.value === EXPECTED.admin){
     result.innerHTML='<div class="success">Code admin correct ✅</div>';
+    isAdmin=true;
     verifyBtn.disabled=false;
   } else {
     result.innerHTML='<div class="error">Code admin incorrect ❌</div>';
+    isAdmin=false;
     verifyBtn.disabled=true;
   }
-};
+}
 
-verifyBtn.onclick=()=>{
-  const msg=document.getElementById('momoMsg').value.toLowerCase();
-  result.innerHTML='';result.className='';
-  if(!msg.includes(EXPECTED.name)){result.innerHTML='<div class="error">Nom du bénéficiaire incorrect</div>';return}
+verifyBtn.onclick = () => {
+  const msg=document.getElementById('momoMsg').value.toLowerCase().replace(/\s+/g,'');
+  result.innerHTML='';
+
   const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
-  if(!phoneMatch){result.innerHTML='<div class="error">Numéro incorrect</div>';return}
-  const amtMatch=msg.match(/(\d+)/);
-  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){result.innerHTML='<div class="error">Montant incorrect</div>';return}
-  const dateMatch=msg.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
-  if(dateMatch){const diff=(new Date()-new Date(dateMatch[1]))/60000;if(diff>EXPECTED.maxDelay){result.innerHTML='<div class="error">Délai dépassé</div>';return}}
-  result.innerHTML='<div class="success">✅ Vérifié ! Partage en cours...</div>';
-  
-  const data=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\nPrénom: ${document.getElementById('prenom').value}\nÂge: ${document.getElementById('age').value}\nVille: ${document.getElementById('ville').value}\nQuartier: ${document.getElementById('quartier').value}\nSituation: ${document.getElementById('situation').value}\nEnfants: ${document.getElementById('enfants').value}\nDernier poste: ${document.getElementById('poste').value}\nLoisirs: ${document.getElementById('loisirs').value}\nCaractère: ${document.getElementById('caractere').value}\nDiplôme: ${document.getElementById('diplome').value}\nÉtablissement: ${document.getElementById('etablissement').value}\nAlcoolique: ${document.getElementById('alcool').value}\nSalaire: ${document.getElementById('salaire').value}\nEmail: ${document.getElementById('email').value}\nTel MTN: ${document.getElementById('telMtn').value}\nTel Orange: ${document.getElementById('telOrange').value}\n\n✉️ Lettre de Motivation\nPrénom: ${document.getElementById('prenomLetter').value}\nNom: ${document.getElementById('nomLetter').value}\nEntreprise: ${document.getElementById('entreprise').value}\nPoste: ${document.getElementById('posteLetter').value}\nContenu: ${document.getElementById('contenu').value}\n\n🗺️ Plan de localisation\n${document.getElementById('plan').value}`;
-  
-  const url=`https://wa.me/?text=${encodeURIComponent(data)}`;
-  window.open(url,'_blank');
-  document.getElementById('popupOverlay').style.display='none';
-};
+  if(!phoneMatch){ result.innerHTML='<div class="error">Numéro du bénéficiaire incorrect</div>'; return; }
 
-// PWA registration
-if('serviceWorker' in navigator){navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered'));}
+  const amtMatch=msg.match(/(\d+)/);
+  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){ result.innerHTML='<div class="error">Montant incorrect</div>'; return; }
+
+  const dateMatch=msg.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+  if(dateMatch){ const diff=(new Date()-new Date(dateMatch[1]))/60000; if(diff>EXPECTED.maxDelay){ result.innerHTML='<div class="error">Délai dépassé</div>'; return; } }
+
+  result.innerHTML='<div class="success">✅ Vérifié ! Partage en cours...</div>';
+  shareDirect();
+  document.getElementById('popupOverlay').style.display='none';
+}
+
+// PWA service worker registration
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered'));
+}
 </script>
 
 </body>
