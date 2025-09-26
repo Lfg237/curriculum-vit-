@@ -104,10 +104,12 @@ shareBtn.onclick = () => {
   window.open(url, '_blank');
 };
 
-// Télécharger PDF
+// Télécharger PDF (fix génération)
 downloadBtn.onclick = () => {
-  const element = document.createElement('div');
-  element.innerHTML = `
+  const tempDiv = document.createElement('div');
+  tempDiv.style.position = 'absolute';
+  tempDiv.style.left = '-9999px';
+  tempDiv.innerHTML = `
     <section style="background:#fff9c4;padding:10px;border-radius:8px;margin-bottom:10px;">
       <h2>CV</h2>
       ${buildDocumentText().split('🟨───────── CV ─────────🟨')[1].split('🟩──── Lettre')[0]}
@@ -121,12 +123,16 @@ downloadBtn.onclick = () => {
       ${buildDocumentText().split('🟦──── Plan de localisation ────🟦')[1]}
     </section>
   `;
-  html2pdf().from(element).set({
+  document.body.appendChild(tempDiv);
+
+  html2pdf().from(tempDiv).set({
     margin:10,
     filename:'document.pdf',
     html2canvas:{scale:2,useCORS:true},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).save();
+  }).save().finally(() => {
+    document.body.removeChild(tempDiv);
+  });
 };
 </script>
 </body>
