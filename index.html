@@ -3,25 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre / Plan</title>
+<title>CV / Lettre / Plan complet</title>
 <style>
 body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
 .paper{background:white;padding:20px;margin:0 auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
 header{text-align:center;margin-bottom:20px;}
 header h1{font-size:2em;font-weight:bold;margin:0;}
 header h2{font-size:1em;color:#555;margin:5px 0;}
-section{margin-bottom:20px;padding:15px;border:1px solid #ccc;border-radius:5px;}
+section{margin-bottom:20px;padding:15px;border:1px solid #ccc;border-radius:5px;page-break-inside:avoid;}
 section h3{margin-top:0;color:#1e88e5;}
 input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
 button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
+.page-break{page-break-before:always;}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
 #popup{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
 .result{margin:5px 0;font-weight:bold;}
+#photoPreview{display:none;width:120px;height:120px;border-radius:10px;margin-top:10px;}
 </style>
 </head>
 <body>
 
-<h1>📄 CV / Lettre / Plan</h1>
+<h1>📄 CV / Lettre / Plan complet</h1>
 
 <div class="paper" id="paperContent">
 <header>
@@ -29,12 +31,14 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <h2 id="displayProfession">Profession</h2>
 </header>
 
+<!-- Photo facultative -->
 <section id="photoSection">
 <h3>📸 Photo (facultatif)</h3>
 <input type="file" id="photoInput" accept="image/*">
-<img id="photoPreview" style="display:none;width:120px;height:120px;border-radius:10px;margin-top:10px;">
+<img id="photoPreview">
 </section>
 
+<!-- CV -->
 <section id="cv">
 <h3>👤 CV</h3>
 <input id="fullName" placeholder="Nom complet">
@@ -57,6 +61,10 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <input id="telOrange" placeholder="Tel Orange">
 </section>
 
+<!-- Page break -->
+<div class="page-break"></div>
+
+<!-- Lettre de motivation -->
 <section id="lettre">
 <h3>✉️ Lettre de motivation</h3>
 <input id="prenomLetter" placeholder="Prénom">
@@ -66,6 +74,10 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 <textarea id="contenu" placeholder="Contenu"></textarea>
 </section>
 
+<!-- Page break -->
+<div class="page-break"></div>
+
+<!-- Plan -->
 <section id="plan">
 <h3>🗺️ Plan de localisation</h3>
 <textarea id="planText" placeholder="Plan de localisation"></textarea>
@@ -95,13 +107,13 @@ button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D36
 const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233'};
 let isAdmin=false;
 
-// Affichage Nom et Profession
+// Nom et profession dynamique
 const fullNameInput=document.getElementById('fullName');
 const professionInput=document.getElementById('profession');
 fullNameInput.addEventListener('input',()=>document.getElementById('displayName').textContent=fullNameInput.value || "Nom Complet");
 professionInput.addEventListener('input',()=>document.getElementById('displayProfession').textContent=professionInput.value || "Profession");
 
-// Preview photo
+// Photo preview
 const photoInput=document.getElementById('photoInput');
 const photoPreview=document.getElementById('photoPreview');
 photoInput.addEventListener('change', e=>{
@@ -113,7 +125,7 @@ photoInput.addEventListener('change', e=>{
   }
 });
 
-// Fonction pour WhatsApp
+// WhatsApp
 function getAllText(){
   let text=`📄 CV de ${fullNameInput.value} (${professionInput.value})\n\n`;
   document.querySelectorAll('#cv input').forEach(i=>text+=`${i.placeholder}: ${i.value}\n`);
@@ -121,18 +133,16 @@ function getAllText(){
   text+=`Plan: ${document.getElementById('planText').value}\n`;
   return text;
 }
-
-// Bouton WhatsApp
 document.getElementById('shareBtn').onclick=()=>{
   if(isAdmin){window.open(`https://wa.me/?text=${encodeURIComponent(getAllText())}`,'_blank');}
   else document.getElementById('popupOverlay').style.display='flex';
 };
 
-// PDF
+// PDF complet avec plusieurs pages
 document.getElementById('downloadPdf').onclick=()=>{
   html2pdf().from(document.getElementById('paperContent')).set({
     margin:10,
-    filename:'document.pdf',
+    filename:'document_complet.pdf',
     html2canvas:{scale:2,useCORS:true},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
   }).save();
