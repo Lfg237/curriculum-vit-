@@ -10,49 +10,53 @@ body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
 h1,h2{margin:10px 0;}
 .paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;}
 button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
+/* Popup style */
+.popup-bg{
+  position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:0.3s;
+}
+.popup{
+  background:white;padding:20px;border-radius:8px;max-width:300px;text-align:center;box-shadow:0 0 15px rgba(0,0,0,0.3);
+}
+.popup button{margin:5px;}
+.popup-bg.show{visibility:visible;opacity:1;}
 </style>
 </head>
 <body>
 
-<!-- Page CV -->
-<div class="page" id="pageCV">
-  <h1>📄 CV</h1>
-  <div class="paper" id="cvSection">
-    <p><b>Prénom:</b> Alice</p>
-    <p><b>Âge:</b> 28</p>
-    <p><b>Ville:</b> Paris</p>
-    <p><b>Dernier poste:</b> Frontend</p>
-    <p><b>Email:</b> alice@example.com</p>
-  </div>
-  <button id="btnDownloadCV">📥 Télécharger CV PDF</button>
-</div>
+<div id="sections"></div>
 
-<!-- Page Lettre de Motivation -->
-<div class="page" id="pageLettre">
-  <h1>✉️ Lettre de Motivation</h1>
-  <div class="paper" id="lettreSection">
-    <p><b>Prénom:</b> Alice</p>
-    <p><b>Nom:</b> Dupont</p>
-    <p><b>Entreprise:</b> TechCorp</p>
-    <p><b>Poste:</b> Ingénieur</p>
-    <p><b>Contenu:</b> Motivation pour rejoindre TechCorp.</p>
+<!-- Popup -->
+<div class="popup-bg" id="popupBG">
+  <div class="popup">
+    <p>Voulez-vous vraiment télécharger ce PDF ?</p>
+    <button id="confirmBtn">Oui</button>
+    <button id="cancelBtn">Non</button>
   </div>
-  <button id="btnDownloadLettre">📥 Télécharger Lettre PDF</button>
-</div>
-
-<!-- Page Plan de Localisation -->
-<div class="page" id="pagePlan">
-  <h1>🗺️ Plan de Localisation</h1>
-  <div class="paper" id="planSection">
-    <p><b>Plan:</b> 123 Rue de Paris</p>
-  </div>
-  <button id="btnDownloadPlan">📥 Télécharger Plan PDF</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const { jsPDF } = window.jspdf;
+
+// Exemple utilisateurs
+const users=[
+  {
+    nom:"Alice Dupont",
+    profession:"Développeuse",
+    cv:{prenom:"Alice", age:"28", ville:"Paris", poste:"Frontend", email:"alice@example.com"},
+    lettre:{prenom:"Alice", nom:"Dupont", entreprise:"TechCorp", poste:"Ingénieur", contenu:"Motivation pour rejoindre TechCorp."},
+    plan:{plan:"123 Rue de Paris"}
+  },
+  {
+    nom:"Bob Martin",
+    profession:"Designer",
+    cv:{prenom:"Bob", age:"30", ville:"Lyon", poste:"Graphiste", email:"bob@example.com"},
+    lettre:{prenom:"Bob", nom:"Martin", entreprise:"DesignInc", poste:"Graphiste", contenu:"Motivation pour DesignInc."},
+    plan:{plan:"456 Avenue Lyon"}
+  }
+];
 
 function downloadPDFFromElement(element, filename){
   html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
@@ -65,10 +69,78 @@ function downloadPDFFromElement(element, filename){
   });
 }
 
-document.getElementById('btnDownloadCV').onclick = () => downloadPDFFromElement(document.getElementById('cvSection'), 'CV_Alice.pdf');
-document.getElementById('btnDownloadLettre').onclick = () => downloadPDFFromElement(document.getElementById('lettreSection'), 'Lettre_Alice.pdf');
-document.getElementById('btnDownloadPlan').onclick = () => downloadPDFFromElement(document.getElementById('planSection'), 'Plan_Alice.pdf');
-</script>
+const container=document.getElementById('sections');
+users.forEach((user,index)=>{
+  // CV
+  const pageCV=document.createElement('div');
+  pageCV.className='page';
+  pageCV.innerHTML=`
+    <h1>📄 CV - ${user.nom}</h1>
+    <div class="paper" id="cv${index}">
+      <p><b>Prénom:</b> ${user.cv.prenom}</p>
+      <p><b>Âge:</b> ${user.cv.age}</p>
+      <p><b>Ville:</b> ${user.cv.ville}</p>
+      <p><b>Dernier poste:</b> ${user.cv.poste}</p>
+      <p><b>Email:</b> ${user.cv.email}</p>
+    </div>
+    <button class="btnPDF" data-target="cv${index}" data-filename="CV_${user.nom}.pdf">📥 Télécharger CV PDF</button>
+  `;
+  container.appendChild(pageCV);
 
+  // Lettre
+  const pageLettre=document.createElement('div');
+  pageLettre.className='page';
+  pageLettre.innerHTML=`
+    <h1>✉️ Lettre de Motivation - ${user.nom}</h1>
+    <div class="paper" id="lettre${index}">
+      <p><b>Prénom:</b> ${user.lettre.prenom}</p>
+      <p><b>Nom:</b> ${user.lettre.nom}</p>
+      <p><b>Entreprise:</b> ${user.lettre.entreprise}</p>
+      <p><b>Poste:</b> ${user.lettre.poste}</p>
+      <p><b>Contenu:</b> ${user.lettre.contenu}</p>
+    </div>
+    <button class="btnPDF" data-target="lettre${index}" data-filename="Lettre_${user.nom}.pdf">📥 Télécharger Lettre PDF</button>
+  `;
+  container.appendChild(pageLettre);
+
+  // Plan
+  const pagePlan=document.createElement('div');
+  pagePlan.className='page';
+  pagePlan.innerHTML=`
+    <h1>🗺️ Plan de Localisation - ${user.nom}</h1>
+    <div class="paper" id="plan${index}">
+      <p><b>Plan:</b> ${user.plan.plan}</p>
+    </div>
+    <button class="btnPDF" data-target="plan${index}" data-filename="Plan_${user.nom}.pdf">📥 Télécharger Plan PDF</button>
+  `;
+  container.appendChild(pagePlan);
+});
+
+// Popup
+let currentTarget = null;
+let currentFilename = null;
+const popupBG = document.getElementById('popupBG');
+const confirmBtn = document.getElementById('confirmBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+
+document.querySelectorAll('.btnPDF').forEach(btn=>{
+  btn.onclick = ()=>{
+    currentTarget = document.getElementById(btn.dataset.target);
+    currentFilename = btn.dataset.filename;
+    popupBG.classList.add('show');
+  }
+});
+
+confirmBtn.onclick = ()=>{
+  if(currentTarget && currentFilename){
+    downloadPDFFromElement(currentTarget, currentFilename);
+  }
+  popupBG.classList.remove('show');
+};
+
+cancelBtn.onclick = ()=>{
+  popupBG.classList.remove('show');
+};
+</script>
 </body>
 </html>
