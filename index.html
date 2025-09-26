@@ -3,112 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre / Plan</title>
+<title>Tableau Utilisateurs</title>
 <style>
-body{font-family:Arial,sans-serif;background:#e0f7fa;margin:0;padding:10px;}
-.paper{background:white;padding:20px;margin:20px auto;max-width:900px;box-shadow:0 0 15px rgba(0,0,0,0.2);border-radius:5px;}
-header{text-align:center;margin-bottom:10px;}
-header h1{font-size:2em;font-weight:bold;margin:0;}
-header h2{font-size:1em;color:#555;margin:5px 0;}
-section{margin-bottom:15px;padding:15px;border:1px solid #ccc;border-radius:5px;}
-section h3{margin-top:0;color:#1e88e5;}
-input,textarea{width:100%;padding:6px;margin:5px 0;border:1px solid #1e88e5;border-radius:4px;}
+body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:20px;}
+table{width:100%;border-collapse:collapse;margin-top:20px;}
+th,td{border:1px solid #1e88e5;padding:8px;text-align:center;vertical-align:top;}
+th{background:#1e88e5;color:white;}
+.paper{background:white;padding:10px;border-radius:5px;box-shadow:0 0 8px rgba(0,0,0,0.1);max-width:250px;margin:auto;}
 label{font-weight:bold;}
-button{padding:10px;margin:5px 0;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
-#photoPreview{display:none;width:120px;height:120px;border-radius:10px;margin-bottom:10px;}
+input,textarea{width:100%;padding:4px;margin:2px 0;border:1px solid #1e88e5;border-radius:4px;}
+button{padding:6px 12px;border:none;border-radius:4px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:4px;}
 </style>
 </head>
 <body>
+<h1>📋 Tableau Utilisateurs</h1>
 
-<h1>📄 CV / Lettre / Plan</h1>
-
-<!-- CV -->
-<div class="paper" id="cv">
-<header>
-<h1 id="cvName">Nom Complet</h1>
-<h2 id="cvProfession">Profession</h2>
-</header>
-<section>
-<h3>📸 Photo (facultatif)</h3>
-<input type="file" id="cvPhoto" accept="image/*">
-<img id="cvPhotoPreview">
-</section>
-<section>
-<h3>👤 CV</h3>
-<label>Nom complet</label><input id="cvFullName" placeholder="Nom complet">
-<label>Profession / poste</label><input id="cvProf" placeholder="Profession / poste">
-<label>Prénom</label><input id="cvPrenom" placeholder="Prénom">
-<label>Âge</label><input id="cvAge" placeholder="Âge">
-<label>Ville</label><input id="cvVille" placeholder="Ville">
-<label>Quartier</label><input id="cvQuartier" placeholder="Quartier">
-<label>Situation matrimoniale</label><input id="cvSituation" placeholder="Situation matrimoniale">
-<label>Nombre d'enfants</label><input id="cvEnfants" placeholder="Nombre d'enfants">
-<label>Dernier poste</label><input id="cvPoste" placeholder="Dernier poste">
-<label>Loisirs</label><input id="cvLoisirs" placeholder="Loisirs">
-<label>Caractère</label><input id="cvCaractere" placeholder="Caractère">
-<label>Dernier diplôme</label><input id="cvDiplome" placeholder="Dernier diplôme">
-<label>Établissement</label><input id="cvEtablissement" placeholder="Établissement">
-<label>Alcoolique Oui/Non</label><input id="cvAlcool" placeholder="Alcoolique Oui/Non">
-<label>Salaire</label><input id="cvSalaire" placeholder="Salaire">
-<label>Email</label><input id="cvEmail" placeholder="Email">
-<label>Tel MTN</label><input id="cvTelMtn" placeholder="Tel MTN">
-<label>Tel Orange</label><input id="cvTelOrange" placeholder="Tel Orange">
-</section>
-<button id="downloadCV">📥 Télécharger CV</button>
-</div>
-
-<!-- Lettre -->
-<div class="paper" id="lettre">
-<section>
-<h3>✉️ Lettre de motivation</h3>
-<label>Prénom</label><input id="lettrePrenom" placeholder="Prénom">
-<label>Nom</label><input id="lettreNom" placeholder="Nom">
-<label>Entreprise</label><input id="lettreEntreprise" placeholder="Entreprise">
-<label>Poste souhaité</label><input id="lettrePoste" placeholder="Poste souhaité">
-<label>Contenu</label><textarea id="lettreContenu" placeholder="Contenu"></textarea>
-</section>
-<button id="downloadLettre">📥 Télécharger Lettre</button>
-</div>
-
-<!-- Plan -->
-<div class="paper" id="plan">
-<section>
-<h3>🗺️ Plan de localisation</h3>
-<label>Plan</label><textarea id="planTexte" placeholder="Plan de localisation"></textarea>
-</section>
-<button id="downloadPlan">📥 Télécharger Plan</button>
-</div>
-
-<!-- WhatsApp -->
-<button id="shareBtn">📤 Partager sur WhatsApp</button>
+<table>
+<thead>
+<tr>
+<th>Nom / Profession</th>
+<th>CV</th>
+<th>Lettre</th>
+<th>Plan</th>
+<th>WhatsApp</th>
+</tr>
+</thead>
+<tbody id="userTable"></tbody>
+</table>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const { jsPDF } = window.jspdf;
 
-// Nom/profession dynamique
-const cvFullName=document.getElementById('cvFullName');
-const cvProf=document.getElementById('cvProf');
-cvFullName.addEventListener('input',()=>document.getElementById('cvName').textContent=cvFullName.value || "Nom Complet");
-cvProf.addEventListener('input',()=>document.getElementById('cvProfession').textContent=cvProf.value || "Profession");
-
-// Photo preview
-const cvPhoto=document.getElementById('cvPhoto');
-const cvPhotoPreview=document.getElementById('cvPhotoPreview');
-cvPhoto.addEventListener('change', e=>{
-  const file=e.target.files[0];
-  if(file){
-    const reader=new FileReader();
-    reader.onload=function(ev){cvPhotoPreview.src=ev.target.result; cvPhotoPreview.style.display='block';}
-    reader.readAsDataURL(file);
+// Exemple utilisateurs
+const users=[
+  {
+    nom:"Alice Dupont",
+    profession:"Développeuse",
+    cv:{prenom:"Alice", age:"28", ville:"Paris", poste:"Frontend", email:"alice@example.com"},
+    lettre:{prenom:"Alice", nom:"Dupont", entreprise:"TechCorp", poste:"Ingénieur", contenu:"Motivation pour rejoindre TechCorp."},
+    plan:{plan:"123 Rue de Paris"}
+  },
+  {
+    nom:"Bob Martin",
+    profession:"Designer",
+    cv:{prenom:"Bob", age:"30", ville:"Lyon", poste:"Graphiste", email:"bob@example.com"},
+    lettre:{prenom:"Bob", nom:"Martin", entreprise:"DesignInc", poste:"Graphiste", contenu:"Motivation pour DesignInc."},
+    plan:{plan:"456 Avenue Lyon"}
   }
-});
+];
 
-// Fonction PDF par section
-function downloadPDF(sectionId, filename){
-  const section=document.getElementById(sectionId);
-  html2canvas(section,{scale:2,useCORS:true}).then(canvas=>{
+// Génération PDF pour une section
+function downloadPDFFromElement(element, filename){
+  html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
     const imgData=canvas.toDataURL('image/png');
     const pdf=new jsPDF('p','mm','a4');
     const pdfWidth=pdf.internal.pageSize.getWidth();
@@ -118,18 +66,81 @@ function downloadPDF(sectionId, filename){
   });
 }
 
-document.getElementById('downloadCV').onclick=()=>downloadPDF('cv','CV.pdf');
-document.getElementById('downloadLettre').onclick=()=>downloadPDF('lettre','Lettre.pdf');
-document.getElementById('downloadPlan').onclick=()=>downloadPDF('plan','Plan.pdf');
+// Crée les lignes du tableau
+const tbody=document.getElementById('userTable');
+users.forEach((user,index)=>{
+  const tr=document.createElement('tr');
 
-// WhatsApp
-document.getElementById('shareBtn').onclick=()=>{
-  let text=`📄 CV de ${cvFullName.value} (${cvProf.value})\n\n`;
-  document.querySelectorAll('#cv input').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
-  document.querySelectorAll('#lettre input, #lettre textarea').forEach(i=>text+=`${i.previousElementSibling.textContent}: ${i.value}\n`);
-  text+=`Plan: ${document.getElementById('planTexte').value}\n`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
-};
+  // Nom / Profession
+  const tdInfo=document.createElement('td');
+  tdInfo.innerHTML=`<b>${user.nom}</b><br>${user.profession}`;
+  tr.appendChild(tdInfo);
+
+  // CV
+  const tdCV=document.createElement('td');
+  const divCV=document.createElement('div');
+  divCV.className='paper';
+  divCV.id=`cv${index}`;
+  divCV.innerHTML=`
+    <label>Prénom:</label> ${user.cv.prenom}<br>
+    <label>Âge:</label> ${user.cv.age}<br>
+    <label>Ville:</label> ${user.cv.ville}<br>
+    <label>Dernier poste:</label> ${user.cv.poste}<br>
+    <label>Email:</label> ${user.cv.email}<br>
+    <button id="btnCV${index}">📥 CV PDF</button>
+  `;
+  tdCV.appendChild(divCV);
+  tr.appendChild(tdCV);
+
+  // Lettre
+  const tdLettre=document.createElement('td');
+  const divLettre=document.createElement('div');
+  divLettre.className='paper';
+  divLettre.id=`lettre${index}`;
+  divLettre.innerHTML=`
+    <label>Prénom:</label> ${user.lettre.prenom}<br>
+    <label>Nom:</label> ${user.lettre.nom}<br>
+    <label>Entreprise:</label> ${user.lettre.entreprise}<br>
+    <label>Poste:</label> ${user.lettre.poste}<br>
+    <label>Contenu:</label> ${user.lettre.contenu}<br>
+    <button id="btnLettre${index}">📥 Lettre PDF</button>
+  `;
+  tdLettre.appendChild(divLettre);
+  tr.appendChild(tdLettre);
+
+  // Plan
+  const tdPlan=document.createElement('td');
+  const divPlan=document.createElement('div');
+  divPlan.className='paper';
+  divPlan.id=`plan${index}`;
+  divPlan.innerHTML=`
+    <label>Plan:</label> ${user.plan.plan}<br>
+    <button id="btnPlan${index}">📥 Plan PDF</button>
+  `;
+  tdPlan.appendChild(divPlan);
+  tr.appendChild(tdPlan);
+
+  // WhatsApp
+  const tdWA=document.createElement('td');
+  const btnWA=document.createElement('button');
+  btnWA.textContent='📤 WhatsApp';
+  btnWA.onclick=()=> {
+    let text=`📄 CV de ${user.nom} (${user.profession})\n`;
+    text+=`CV: Prénom: ${user.cv.prenom}, Âge: ${user.cv.age}, Ville: ${user.cv.ville}, Poste: ${user.cv.poste}, Email: ${user.cv.email}\n`;
+    text+=`Lettre: Prénom: ${user.lettre.prenom}, Nom: ${user.lettre.nom}, Entreprise: ${user.lettre.entreprise}, Poste: ${user.lettre.poste}, Contenu: ${user.lettre.contenu}\n`;
+    text+=`Plan: ${user.plan.plan}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+  };
+  tdWA.appendChild(btnWA);
+  tr.appendChild(tdWA);
+
+  tbody.appendChild(tr);
+
+  // Attache PDF buttons
+  document.getElementById(`btnCV${index}`).onclick=()=>downloadPDFFromElement(divCV, `CV_${user.nom}.pdf`);
+  document.getElementById(`btnLettre${index}`).onclick=()=>downloadPDFFromElement(divLettre, `Lettre_${user.nom}.pdf`);
+  document.getElementById(`btnPlan${index}`).onclick=()=>downloadPDFFromElement(divPlan, `Plan_${user.nom}.pdf`);
+});
 </script>
 </body>
 </html>
