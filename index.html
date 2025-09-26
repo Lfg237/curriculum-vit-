@@ -3,138 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre PWA</title>
+<title>Prototype WhatsApp</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:10px}
-section{background:#fff;padding:10px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-input,textarea,button{width:100%;padding:8px;margin:6px 0;border:1px solid #1e90ff;border-radius:6px}
-button{cursor:pointer}
-button.primary{background:#25D366;color:#fff;font-weight:700;border:none}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center}
-#popup{background:#fff;padding:15px;border-radius:10px;width:100%;max-width:400px}
-.error{color:#b00020}
-.success{color:#006400}
+  body { font-family: Arial, sans-serif; background:#f0f8ff; padding:20px; }
+  section { background:#fff; margin-bottom:20px; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+  h2 { margin-bottom:10px; }
+  .photo-preview { width:100px; height:100px; border:2px dashed #999; display:flex; align-items:center; justify-content:center; margin-bottom:10px; background:#fafafa; border-radius:50%; overflow:hidden; }
+  .photo-preview img { width:100%; height:100%; object-fit:cover; }
+  label { display:block; font-weight:bold; margin-top:10px; }
+  input, textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
+  button { margin-top:15px; padding:10px; border:none; background:#25d366; color:#fff; font-weight:bold; border-radius:8px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<h1>📄 CV / Lettre de Motivation</h1>
-
 <section>
-<h2>Nom & Profession</h2>
-<input id="fullName" placeholder="Nom complet">
-<input id="profession" placeholder="Profession / poste">
+  <h2>👔 CV</h2>
+  <div class="photo-preview" id="photoPreview">Photo</div>
+  <input type="file" id="photoInput" accept="image/*">
+  <label>Nom</label>
+  <input type="text" id="nom">
+  <label>Profession</label>
+  <input type="text" id="profession">
+  <label>Prénom</label>
+  <input type="text" id="prenom">
+  <label>Âge</label>
+  <input type="text" id="age">
+  <label>Ville</label>
+  <input type="text" id="ville">
 </section>
 
-<section>
-<h2>CV</h2>
-<input id="prenom" placeholder="Prénom">
-<input id="age" placeholder="Âge">
-<input id="ville" placeholder="Ville">
-<input id="quartier" placeholder="Quartier">
-<input id="situation" placeholder="Situation matrimoniale">
-<input id="enfants" placeholder="Nombre d'enfants">
-<input id="poste" placeholder="Dernier poste">
-<input id="loisirs" placeholder="Loisirs">
-<input id="caractere" placeholder="Caractère">
-<input id="diplome" placeholder="Dernier diplôme">
-<input id="etablissement" placeholder="Établissement">
-<input id="alcool" placeholder="Alcoolique Oui/Non">
-<input id="salaire" placeholder="Salaire">
-<input id="email" placeholder="Email">
-<input id="telMtn" placeholder="Tel MTN">
-<input id="telOrange" placeholder="Tel Orange">
+<section style="background:#e6ffe6">
+  <h2>✍️ Lettre de Motivation</h2>
+  <label>Nom</label><input type="text" id="nomLetter">
+  <label>Entreprise</label><input type="text" id="entreprise">
+  <label>Poste</label><input type="text" id="posteLetter">
+  <label>Contenu</label><textarea id="contenu"></textarea>
 </section>
 
-<section>
-<h2>Lettre de motivation</h2>
-<input id="prenomLetter" placeholder="Prénom">
-<input id="nomLetter" placeholder="Nom">
-<input id="entreprise" placeholder="Entreprise">
-<input id="posteLetter" placeholder="Poste souhaité">
-<textarea id="contenu" placeholder="Contenu"></textarea>
+<section style="background:#ffe6f0">
+  <h2>📍 Plan de Localisation</h2>
+  <textarea id="plan"></textarea>
 </section>
 
-<section>
-<h2>Plan de localisation</h2>
-<textarea id="plan" placeholder="Plan de localisation"></textarea>
-</section>
-
-<button id="shareBtn" class="primary">📤 Partager sur WhatsApp / Télécharger</button>
-
-<!-- Popup de paiement -->
-<div id="popupOverlay">
-<div id="popup">
-<h2>Paiement requis</h2>
-<p>Bénéficiaire: Wirnkar Loveline</p>
-<p>MTN MoMo: 676353859<br>OM: 640647072<br>Montant: 25 FCFA</p>
-<textarea class="momoMsg" placeholder="Message Mobile Money"></textarea>
-<input class="adminCode" type="password" placeholder="Code admin">
-<div class="result"></div>
-<button class="validateAdminBtn primary">✅ Valider code admin</button>
-<button class="verifyBtn primary">✅ Vérifier & Partager</button>
-<button onclick="document.getElementById('popupOverlay').style.display='none'">Annuler</button>
-</div>
-</div>
+<button onclick="shareWhatsApp()">📤 Partager sur WhatsApp</button>
 
 <script>
-const EXPECTED={phones:['676353859','640647072'],amount:25,admin:'233233',maxDelay:5};
-let isAdmin=false;
+let photoData = "";
 
-// Sélection relative au popup
-const popup=document.getElementById('popup');
-const momoMsg=popup.querySelector('.momoMsg');
-const adminInput=popup.querySelector('.adminCode');
-const validateBtn=popup.querySelector('.validateAdminBtn');
-const verifyBtn=popup.querySelector('.verifyBtn');
-const result=popup.querySelector('.result');
-const shareBtn=document.getElementById('shareBtn');
-
-function shareDirect(){
-  const data=`📄 CV de ${document.getElementById('fullName').value} (${document.getElementById('profession').value})\nPrénom: ${document.getElementById('prenom').value}\nÂge: ${document.getElementById('age').value}\nVille: ${document.getElementById('ville').value}\nQuartier: ${document.getElementById('quartier').value}\nSituation: ${document.getElementById('situation').value}\nEnfants: ${document.getElementById('enfants').value}\nDernier poste: ${document.getElementById('poste').value}\nLoisirs: ${document.getElementById('loisirs').value}\nCaractère: ${document.getElementById('caractere').value}\nDiplôme: ${document.getElementById('diplome').value}\nÉtablissement: ${document.getElementById('etablissement').value}\nAlcoolique: ${document.getElementById('alcool').value}\nSalaire: ${document.getElementById('salaire').value}\nEmail: ${document.getElementById('email').value}\nTel MTN: ${document.getElementById('telMtn').value}\nTel Orange: ${document.getElementById('telOrange').value}\n\n✉️ Lettre de Motivation\nPrénom: ${document.getElementById('prenomLetter').value}\nNom: ${document.getElementById('nomLetter').value}\nEntreprise: ${document.getElementById('entreprise').value}\nPoste: ${document.getElementById('posteLetter').value}\nContenu: ${document.getElementById('contenu').value}\n\n🗺️ Plan de localisation\n${document.getElementById('plan').value}`;
-  const url=`https://wa.me/?text=${encodeURIComponent(data)}`;
-  window.open(url,'_blank');
-}
-
-// Bouton principal
-shareBtn.onclick = () => {
-  if(isAdmin){
-    shareDirect();
-  } else {
-    document.getElementById('popupOverlay').style.display='flex';
-    result.innerHTML='';
+document.getElementById("photoInput").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      photoData = ev.target.result;
+      document.getElementById("photoPreview").innerHTML = '<img src="'+photoData+'">';
+    }
+    reader.readAsDataURL(file);
   }
-}
+});
 
-// Valider code admin
-validateBtn.onclick = () => {
-  if(adminInput.value === EXPECTED.admin){
-    result.innerHTML='<div style="color:green">Code admin correct ✅</div>';
-    isAdmin=true;
-    shareDirect(); // partage immédiat pour admin
-    document.getElementById('popupOverlay').style.display='none';
-  } else {
-    result.innerHTML='<div style="color:red">Code admin incorrect ❌</div>';
+function shareWhatsApp(){
+  const nom = document.getElementById("nom").value || "";
+  const profession = document.getElementById("profession").value || "";
+  const prenom = document.getElementById("prenom").value || "";
+  const age = document.getElementById("age").value || "";
+  const ville = document.getElementById("ville").value || "";
+
+  const nomLetter = document.getElementById("nomLetter").value || "";
+  const entreprise = document.getElementById("entreprise").value || "";
+  const posteLetter = document.getElementById("posteLetter").value || "";
+  const contenu = document.getElementById("contenu").value || "";
+
+  const plan = document.getElementById("plan").value || "";
+
+  let message = 
+`👔 *CV*
+*${nom}*
+_${profession}_
+
+Prénom: ${prenom}
+Âge: ${age}
+Ville: ${ville}
+
+✍️ *Lettre de Motivation*
+Nom: ${nomLetter}
+Entreprise: ${entreprise}
+Poste: ${posteLetter}
+Contenu: ${contenu}
+
+📍 *Plan de Localisation*
+${plan}`;
+
+  if(photoData){
+    message += `\n\n🖼️ Photo: (copier/coller ce lien dans le navigateur)\n${photoData}`;
   }
-}
 
-// Vérification Mobile Money
-verifyBtn.onclick = () => {
-  const msg=momoMsg.value.toLowerCase().replace(/\s+/g,'');
-  result.innerHTML='';
-
-  const phoneMatch=EXPECTED.phones.some(p=>msg.includes(p));
-  if(!phoneMatch){ result.innerHTML='<div style="color:red">Numéro du bénéficiaire incorrect</div>'; return; }
-
-  const amtMatch=msg.match(/(\d+)/);
-  if(!amtMatch || parseInt(amtMatch[0])!==EXPECTED.amount){ result.innerHTML='<div style="color:red">Montant incorrect</div>'; return; }
-
-  const dateMatch=msg.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
-  if(dateMatch){ const diff=(new Date()-new Date(dateMatch[1]))/60000; if(diff>EXPECTED.maxDelay){ result.innerHTML='<div style="color:red">Délai dépassé</div>'; return; } }
-
-  result.innerHTML='<div style="color:green">✅ Vérifié ! Partage en cours...</div>';
-  shareDirect();
-  document.getElementById('popupOverlay').style.display='none';
+  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
 }
 </script>
 </body>
