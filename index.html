@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre - Partage WhatsApp</title>
+<title>CV / Lettre PWA WhatsApp</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#25D366">
 <style>
 body{font-family:Arial,sans-serif;padding:10px;background:#f0f8ff;}
 input,textarea,button{width:100%;margin:5px 0;padding:8px;font-size:1rem;border:1px solid #1e90ff;border-radius:5px;}
@@ -90,14 +92,49 @@ document.getElementById("shareBtn").addEventListener("click", ()=>{
     
     const plan = getValue("plan");
 
-    let message = `📄 CV de ${fullName} (${profession})\n`;
-    message += `Prénom: ${prenom}\nÂge: ${age}\nVille: ${ville}\nQuartier: ${quartier}\nSituation: ${situation}\nEnfants: ${enfants}\nDernier poste: ${poste}\nLoisirs: ${loisirs}\nCaractère: ${caractere}\nDiplôme: ${diplome}\nÉtablissement: ${etablissement}\nAlcoolique: ${alcool}\nSalaire: ${salaire}\nEmail: ${email}\nTel MTN: ${telMtn}\nTel Orange: ${telOrange}\n\n`;
-    message += `✉️ Lettre de Motivation\nPrénom: ${prenomLetter}\nNom: ${nomLetter}\nEntreprise: ${entreprise}\nPoste souhaité: ${posteLetter}\nContenu:\n${contenu}\n\n`;
-    message += `🗺️ Plan de localisation\n${plan}`;
+    const message = `📄 *${fullName}* (_${profession}_)
+
+*Prénom:* ${prenom}
+*Âge:* ${age}
+*Ville:* ${ville}
+*Quartier:* ${quartier}
+*Situation:* ${situation}
+*Enfants:* ${enfants}
+*Dernier poste:* ${poste}
+*Loisirs:* ${loisirs}
+*Caractère:* ${caractere}
+*Diplôme:* ${diplome}
+*Établissement:* ${etablissement}
+*Alcoolique:* ${alcool}
+*Salaire:* ${salaire}
+*Email:* ${email}
+*Tel MTN:* ${telMtn}
+*Tel Orange:* ${telOrange}
+
+✉️ *Lettre de Motivation*
+*Prénom:* ${prenomLetter}
+*Nom:* ${nomLetter}
+*Entreprise:* ${entreprise}
+*Poste souhaité:* ${posteLetter}
+*Contenu:*
+${contenu}
+
+🗺️ *Plan de localisation*
+${plan}`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
 });
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('Service Worker enregistré'))
+    .catch(err => console.log('Erreur SW:', err));
+  });
+}
 </script>
 
 </body>
