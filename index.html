@@ -1,98 +1,281 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre PWA WhatsApp</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#25D366">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CV / Lettre - Partage WhatsApp avec Paiement</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#25D366" />
 <style>
-body{font-family:Arial,sans-serif;padding:10px;background:#f0f8ff;}
-input,textarea,button{width:100%;margin:5px 0;padding:8px;font-size:1rem;border:1px solid #1e90ff;border-radius:5px;}
-textarea{min-height:80px;resize:vertical;overflow:auto;}
-button{background:#25D366;color:#fff;font-weight:bold;border:none;border-radius:5px;cursor:pointer;}
-section{background:#fff;padding:10px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-h1,h2{margin:10px 0;}
+  :root{--green:#25D366;--bg:#f0f8ff;--card:#fff;--blue:#1e90ff;}
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:12px;background:var(--bg);-webkit-font-smoothing:antialiased;}
+  h1{margin:8px 0 12px}
+  section{background:var(--card);padding:10px;border-radius:10px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+  input, textarea, button, select {width:100%;box-sizing:border-box;padding:10px;margin:6px 0;border:1px solid var(--blue);border-radius:8px;font-size:14px;background:#fff;}
+  textarea{min-height:100px;resize:vertical;overflow:auto}
+  button.primary{background:var(--green);color:#fff;border:none;font-weight:700;cursor:pointer}
+  button.ghost{background:#fff;color:var(--blue);border:2px solid var(--blue);cursor:pointer}
+  /* popup */
+  #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;padding:20px;z-index:9999}
+  #popup{max-width:420px;width:100%;background:#fff;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+  #popup h2{margin:0 0 8px;font-size:18px}
+  .row{display:flex;gap:8px}
+  .small{font-size:13px;color:#555}
+  .muted{font-size:13px;color:#666;margin-bottom:8px}
+  .badge{display:inline-block;padding:6px 8px;border-radius:8px;background:#f6f6f6;font-weight:700;color:#333;margin-right:6px}
+  .error{color:#b00020;background:#ffe6e6;padding:8px;border-radius:8px;margin-top:8px}
+  .success{color:#006400;background:#e6ffe6;padding:8px;border-radius:8px;margin-top:8px}
+  .flex-between{display:flex;justify-content:space-between;align-items:center}
+  .helper{font-size:12px;color:#666;margin-top:6px}
 </style>
 </head>
 <body>
 
 <h1>📄 CV / Lettre de Motivation</h1>
 
+<!-- === FORM (inchangé) === -->
 <section>
-<h2>Nom et Profession</h2>
-<input type="text" id="fullName" placeholder="Nom complet">
-<input type="text" id="profession" placeholder="Profession / poste">
+  <h2>Nom et Profession</h2>
+  <input type="text" id="fullName" placeholder="Nom complet">
+  <input type="text" id="profession" placeholder="Profession / poste">
 </section>
 
 <section>
-<h2>Informations CV</h2>
-<input type="text" id="prenom" placeholder="Prénom">
-<input type="number" id="age" placeholder="Âge">
-<input type="text" id="ville" placeholder="Ville">
-<input type="text" id="quartier" placeholder="Quartier">
-<input type="text" id="situation" placeholder="Situation matrimoniale">
-<input type="number" id="enfants" placeholder="Nombre d'enfants">
-<input type="text" id="poste" placeholder="Dernier poste occupé">
-<input type="text" id="loisirs" placeholder="Loisirs">
-<input type="text" id="caractere" placeholder="Caractère">
-<input type="text" id="diplome" placeholder="Dernier diplôme">
-<input type="text" id="etablissement" placeholder="Dernier établissement">
-<input type="text" id="alcool" placeholder="Alcoolique Oui/Non">
-<input type="number" id="salaire" placeholder="Salaire">
-<input type="email" id="email" placeholder="Email">
-<input type="tel" id="telMtn" placeholder="Numéro MTN">
-<input type="tel" id="telOrange" placeholder="Numéro Orange/Camtel">
+  <h2>Informations CV</h2>
+  <input type="text" id="prenom" placeholder="Prénom">
+  <input type="number" id="age" placeholder="Âge">
+  <input type="text" id="ville" placeholder="Ville">
+  <input type="text" id="quartier" placeholder="Quartier">
+  <input type="text" id="situation" placeholder="Situation matrimoniale">
+  <input type="number" id="enfants" placeholder="Nombre d'enfants">
+  <input type="text" id="poste" placeholder="Dernier poste occupé">
+  <input type="text" id="loisirs" placeholder="Loisirs">
+  <input type="text" id="caractere" placeholder="Caractère">
+  <input type="text" id="diplome" placeholder="Dernier diplôme">
+  <input type="text" id="etablissement" placeholder="Dernier établissement">
+  <input type="text" id="alcool" placeholder="Alcoolique Oui/Non">
+  <input type="number" id="salaire" placeholder="Salaire">
+  <input type="email" id="email" placeholder="Email">
+  <input type="tel" id="telMtn" placeholder="Numéro MTN">
+  <input type="tel" id="telOrange" placeholder="Numéro Orange/Camtel">
 </section>
 
 <section>
-<h2>Lettre de Motivation ✉️</h2>
-<input type="text" id="prenomLetter" placeholder="Prénom">
-<input type="text" id="nomLetter" placeholder="Nom">
-<input type="text" id="entreprise" placeholder="Entreprise">
-<input type="text" id="posteLetter" placeholder="Poste souhaité">
-<textarea id="contenu" placeholder="Contenu de la lettre"></textarea>
+  <h2>Lettre de Motivation ✉️</h2>
+  <input type="text" id="prenomLetter" placeholder="Prénom">
+  <input type="text" id="nomLetter" placeholder="Nom">
+  <input type="text" id="entreprise" placeholder="Entreprise">
+  <input type="text" id="posteLetter" placeholder="Poste souhaité">
+  <textarea id="contenu" placeholder="Contenu de la lettre"></textarea>
 </section>
 
 <section>
-<h2>Plan de localisation 🗺️</h2>
-<textarea id="plan" placeholder="Rédigez votre plan de localisation ici"></textarea>
+  <h2>Plan de localisation 🗺️</h2>
+  <textarea id="plan" placeholder="Rédigez votre plan de localisation ici"></textarea>
 </section>
 
-<button id="shareBtn">📤 Partager sur WhatsApp</button>
+<!-- Share button triggers popup -->
+<div class="flex-between" style="gap:8px">
+  <button id="shareTrigger" class="primary">📤 Partager sur WhatsApp</button>
+  <button id="saveBtn" class="ghost" onclick="saveLocal()">💾 Sauvegarder local</button>
+</div>
+
+<p class="helper">Si le paiement n'est pas vérifié, le partage est refusé. L'utilisateur peut reprendre et corriger les erreurs.</p>
+
+<!-- ===== Popup Payment ===== -->
+<div id="popupOverlay">
+  <div id="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+    <div class="flex-between">
+      <h2 id="popupTitle">Paiement requis avant partage</h2>
+      <button onclick="closePopup()" class="ghost" style="padding:6px 10px">Annuler</button>
+    </div>
+
+    <p class="muted">Veuillez envoyer le paiement Mobile Money au bénéficiaire ci‑dessous, puis copiez/collez le message de confirmation dans le champ « Message Mobile Money ». Saisissez aussi le code administrateur.</p>
+
+    <div style="margin-bottom:8px">
+      <div class="badge">Bénéficiaire</div><span style="font-weight:700">Wirnkar Loveline</span><br>
+      <div style="margin-top:6px">
+        <span class="small">MTN MoMo :</span> <strong>676353859</strong><br>
+        <span class="small">Orange Money :</span> <strong>640647072</strong><br>
+        <span class="small">Montant :</span> <strong>25 FCFA</strong>
+      </div>
+    </div>
+
+    <label class="small">Collez ici le message de confirmation Mobile Money (texte complet)</label>
+    <textarea id="momoMessage" placeholder="Ex: Transfert de 30 FCFA effectue ... 2025-09-26 00:10:39 ... transaction Id: 14101710093"></textarea>
+
+    <label class="small">Code administrateur</label>
+    <input id="adminCode" placeholder="Code admin (ex: 233233n)" type="password">
+
+    <div id="verifyResult" style="min-height:26px;"></div>
+
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="verifyBtn" class="primary">✅ Vérifier et Partager</button>
+      <button onclick="closePopup()" class="ghost">❌ Annuler</button>
+    </div>
+
+    <p class="helper" style="margin-top:10px">Remarque : la vérification compare le nom, le numéro, le montant et la date/heure (délai maximal 5 minutes).</p>
+  </div>
+</div>
 
 <script>
-function getValue(id){ return document.getElementById(id)?.value || ""; }
+/* ====== Configuration attendue (changeable) ====== */
+const EXPECTED = {
+  nameTokens: ['wirnkar','loveline'], // tokens to check in beneficiary name
+  momoNumbers: ['676353859','237676353859'], // MoMo numbers (local + with country)
+  omNumbers: ['640647072'], // Orange Money
+  amountFCFA: 25,
+  adminCode: '233233n', // as specified by user; change to '233233' if needed
+  maxDelayMinutes: 5
+};
 
-document.getElementById("shareBtn").addEventListener("click", ()=>{
-    const fullName = getValue("fullName");
-    const profession = getValue("profession");
-    const prenom = getValue("prenom");
-    const age = getValue("age");
-    const ville = getValue("ville");
-    const quartier = getValue("quartier");
-    const situation = getValue("situation");
-    const enfants = getValue("enfants");
-    const poste = getValue("poste");
-    const loisirs = getValue("loisirs");
-    const caractere = getValue("caractere");
-    const diplome = getValue("diplome");
-    const etablissement = getValue("etablissement");
-    const alcool = getValue("alcool");
-    const salaire = getValue("salaire");
-    const email = getValue("email");
-    const telMtn = getValue("telMtn");
-    const telOrange = getValue("telOrange");
-    
-    const prenomLetter = getValue("prenomLetter");
-    const nomLetter = getValue("nomLetter");
-    const entreprise = getValue("entreprise");
-    const posteLetter = getValue("posteLetter");
-    const contenu = getValue("contenu");
-    
-    const plan = getValue("plan");
+/* Helper: open/close popup */
+function showPopup(){ document.getElementById('popupOverlay').style.display='flex'; document.getElementById('verifyResult').innerHTML=''; }
+function closePopup(){ document.getElementById('popupOverlay').style.display='none'; }
 
-    const message = `📄 *${fullName}* (_${profession}_)
+/* Save local (simple) */
+function saveLocal(){
+  const data = {};
+  document.querySelectorAll('input,textarea').forEach(el=>{
+    if(el.id) data[el.id] = el.value;
+  });
+  localStorage.setItem('cvData', JSON.stringify(data));
+  alert('Données sauvegardées localement.');
+}
+
+/* Attach share button */
+document.getElementById('shareTrigger').addEventListener('click', ()=>{
+  // show popup instead of immediate share
+  showPopup();
+});
+
+/* Verify & Share */
+document.getElementById('verifyBtn').addEventListener('click', ()=>{
+  const rawMsg = (document.getElementById('momoMessage').value || '').trim();
+  const admin = (document.getElementById('adminCode').value || '').trim();
+
+  const resultBox = document.getElementById('verifyResult');
+  resultBox.innerHTML = ''; resultBox.className='';
+
+  // Basic admin code check
+  if(admin !== EXPECTED.adminCode){
+    resultBox.innerHTML = '<div class="error">Code administrateur incorrect.</div>';
+    return;
+  }
+
+  if(!rawMsg){
+    resultBox.innerHTML = '<div class="error">Veuillez coller le message Mobile Money reçu.</div>';
+    return;
+  }
+
+  // Parse message: try to extract amount, name, phone, timestamp
+  const lower = rawMsg.toLowerCase();
+
+  // 1) amount (digits) e.g. "30 FCFA" or "30 fcfa" or "30.0"
+  const amtMatch = rawMsg.match(/(\d+(?:[.,]\d+)?)\s*(fcf?a?|cfa|xfaf?)/i) || rawMsg.match(/amount[:\s]*([0-9]+)\b/i);
+  const amount = amtMatch ? parseFloat( (amtMatch[1]||amtMatch[0]).toString().replace(',', '.') ) : null;
+
+  // 2) phone: find sequences of 8-12 digits
+  const phoneMatch = rawMsg.match(/(\b\d{8,13}\b)/g) || [];
+  // sanitize phones: remove leading + if any
+  const phones = phoneMatch.map(s => s.replace(/^\+/, ''));
+
+  // 3) timestamp: look for yyyy-mm-dd hh:mm:ss or dd/mm/yyyy hh:mm:ss variants
+  let timeStamp = null;
+  const isoMatch = rawMsg.match(/(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2})/);
+  if(isoMatch){ timeStamp = isoMatch[1]; }
+  else {
+    const altMatch = rawMsg.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/);
+    if(altMatch) {
+      // convert dd/mm/yyyy hh:mm:ss to yyyy-mm-dd hh:mm:ss
+      const parts = altMatch[1].split(' ');
+      const dparts = parts[0].split('/');
+      timeStamp = `${dparts[2]}-${dparts[1]}-${dparts[0]} ${parts[1]}`;
+    } else {
+      // small chance: yyyy/mm/dd
+      const iso2 = rawMsg.match(/(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2})/);
+      if(iso2) timeStamp = iso2[1].replace(/\//g,'-');
+    }
+  }
+
+  // 4) name: try to detect beneficiary name tokens
+  const hasNameTokens = EXPECTED.nameTokens.every(tok => lower.includes(tok.toLowerCase()));
+
+  // 5) phone matching expected numbers
+  const normalizedPhones = phones.map(p => p.replace(/^0+|^\+|^237/, '') ); // strip leading zeros, +, country code 237
+  // normalized expected numbers (strip country code)
+  function norm(p){ return p.replace(/^0+|^\+|^237/, ''); }
+  const expectedPhones = [...EXPECTED.momoNumbers, ...EXPECTED.omNumbers].map(norm);
+  const phoneMatchesExpected = normalizedPhones.some(p => expectedPhones.includes(p));
+
+  // 6) amount matching
+  const amountMatchOk = (amount !== null) && (Math.round(amount) === EXPECTED.amountFCFA);
+
+  // 7) timestamp check within window
+  let timeOk = false;
+  let parsedDate = null;
+  if(timeStamp){
+    // parse as local time or attempt Date parse
+    // Accept formats "YYYY-MM-DD HH:MM:SS"
+    const iso = timeStamp.replace(' ', 'T');
+    parsedDate = new Date(iso);
+    if(isNaN(parsedDate.getTime())){
+      // fallback: try Date.parse raw
+      parsedDate = new Date(timeStamp);
+    }
+    if(!isNaN(parsedDate.getTime())){
+      const now = new Date();
+      const diffMs = Math.abs(now - parsedDate);
+      const diffMin = diffMs / 1000 / 60;
+      timeOk = diffMin <= EXPECTED.maxDelayMinutes;
+    }
+  }
+
+  // Build detailed feedback
+  const feedback = [];
+  if(!hasNameTokens) feedback.push('✖ Le nom du bénéficiaire ne correspond pas.');
+  if(!phoneMatchesExpected) feedback.push('✖ Le numéro détecté ne correspond pas aux numéros attendus.');
+  if(!amountMatchOk) feedback.push(`✖ Montant incorrect (attendu ${EXPECTED.amountFCFA} FCFA). Détecté: ${amount!==null?amount+' FCFA':'non trouvé'}.`);
+  if(!timeStamp) feedback.push('✖ Date/heure introuvable dans le message. (format attendu: YYYY-MM-DD HH:MM:SS)');
+  else if(!timeOk) feedback.push('✖ La date/heure du message est trop ancienne (> '+EXPECTED.maxDelayMinutes+' minutes).');
+  // admin already checked earlier
+
+  if(feedback.length){
+    resultBox.innerHTML = '<div class="error">' + feedback.join('<br>') + '</div>';
+    return;
+  }
+
+  // All checks passed: share on WhatsApp
+  resultBox.innerHTML = '<div class="success">✅ Vérification OK — partage en cours...</div>';
+
+  // prepare the WhatsApp message (use the CV form content)
+  const fullName = getValue('fullName');
+  const profession = getValue('profession');
+  const prenom = getValue('prenom');
+  const age = getValue('age');
+  const ville = getValue('ville');
+  const quartier = getValue('quartier');
+  const situation = getValue('situation');
+  const enfants = getValue('enfants');
+  const poste = getValue('poste');
+  const loisirs = getValue('loisirs');
+  const caractere = getValue('caractere');
+  const diplome = getValue('diplome');
+  const etablissement = getValue('etablissement');
+  const alcool = getValue('alcool');
+  const salaire = getValue('salaire');
+  const email = getValue('email');
+  const telMtn = getValue('telMtn');
+  const telOrange = getValue('telOrange');
+
+  const prenomLetter = getValue('prenomLetter');
+  const nomLetter = getValue('nomLetter');
+  const entreprise = getValue('entreprise');
+  const posteLetter = getValue('posteLetter');
+  const contenu = getValue('contenu');
+  const plan = getValue('plan');
+
+  const messageToShare = `📄 *${fullName}* (_${profession}_)
 
 *Prénom:* ${prenom}
 *Âge:* ${age}
@@ -120,21 +303,31 @@ document.getElementById("shareBtn").addEventListener("click", ()=>{
 ${contenu}
 
 🗺️ *Plan de localisation*
-${plan}`;
+${plan}
 
-    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
+✅ Paiement confirmé via message : "${rawMsg}"`;
+
+  // open WhatsApp share
+  const url = `https://wa.me/?text=${encodeURIComponent(messageToShare)}`;
+  // small delay so user sees the success message
+  setTimeout(()=> {
+    window.open(url, '_blank');
+  }, 700);
 });
-</script>
 
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js')
-    .then(reg => console.log('Service Worker enregistré'))
-    .catch(err => console.log('Erreur SW:', err));
-  });
-}
+/* Utility: get form values by id */
+function getValue(id){ return document.getElementById(id)?.value || ""; }
+
+/* Onload: try to restore saved data */
+window.addEventListener('load', ()=>{
+  try{
+    const saved = JSON.parse(localStorage.getItem('cvData') || '{}');
+    Object.keys(saved).forEach(k => {
+      const el = document.getElementById(k);
+      if(el) el.value = saved[k];
+    });
+  }catch(e){/* ignore */ }
+});
 </script>
 
 </body>
