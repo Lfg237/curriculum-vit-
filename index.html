@@ -1,165 +1,103 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tableau Utilisateurs</title>
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-<style>
-body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:0;}
-.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;border-bottom:2px solid #ccc;}
-.handwriting{font-family:'Patrick Hand', cursive;font-weight:bold;font-size:28px;margin:10px 0;text-align:center;}
-.paper{background:white;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);max-width:600px;width:100%;display:inline-block;margin-bottom:10px;} 
-.category{font-weight:bold;margin:4px 0;font-size:16px;} 
-button{padding:10px 16px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;margin-top:10px;}
-
-/* Popup paiement style WhatsApp */
-.popup-bg{
-  position: fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);
-  display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:opacity 0.3s ease;z-index:999;
-}
-.popup-bg.show{visibility:visible;opacity:1;}
-.popup{
-  background:#25D366;color:white;padding:25px;border-radius:12px;max-width:350px;text-align:center;
-  box-shadow:0 0 20px rgba(0,0,0,0.4);transform:scale(0.8);transition:transform 0.3s ease;
-}
-.popup-bg.show .popup{transform:scale(1);}
-.popup button{
-  margin:8px;
-  padding:10px 16px;
-  border:none;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
-  font-size:16px;
-}
-#payConfirm{background:white;color:#25D366;}
-#payCancel{background:#d32f2f;color:white;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau Utilisateurs - CV / Lettre / Plan</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+    th { background: #333; color: #fff; }
+    .doc { padding: 10px; margin: 5px; border-radius: 8px; }
+    .cv { background: #fdf6e3; }
+    .lettre { background: #e6f7ff; }
+    .plan { background: #f0fff0; }
+    h3 { margin: 0 0 10px 0; }
+    button { background: #25D366; border: none; padding: 8px 12px; color: #fff; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #128C7E; }
+  </style>
 </head>
 <body>
 
-<div id="sections"></div>
+<h1>📋 Tableau Utilisateurs</h1>
 
-<!-- Popup paiement -->
-<div class="popup-bg" id="paymentPopup">
-  <div class="popup">
-    <p style="font-size:18px;">💰 Paiement requis pour télécharger le PDF</p>
-    <button id="payConfirm">✅ Payer</button>
-    <button id="payCancel">❌ Annuler</button>
-  </div>
-</div>
+<table>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>CV</th>
+      <th>Lettre de Motivation</th>
+      <th>Plan de Localisation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Jean Dupont</strong></td>
+      <td>
+        <div id="cv1" class="doc cv">
+          <h3>Jean Dupont</h3>
+          <p><strong>Profession :</strong> Développeur</p>
+          <p><strong>Email :</strong> jean@mail.com</p>
+          <p><strong>Tél MTN :</strong> 670000000</p>
+          <p><strong>Tél Orange :</strong> 690000000</p>
+        </div>
+        <button onclick="downloadPDFFromElement(document.getElementById('cv1'),'CV_Jean.pdf')">📄 Télécharger CV</button>
+      </td>
+      <td>
+        <div id="lettre1" class="doc lettre">
+          <h3>Lettre de Motivation</h3>
+          <p>Je souhaite rejoindre votre entreprise pour mettre en valeur mes compétences en développement web et contribuer à vos projets innovants.</p>
+        </div>
+        <button onclick="downloadPDFFromElement(document.getElementById('lettre1'),'Lettre_Jean.pdf')">📄 Télécharger Lettre</button>
+      </td>
+      <td>
+        <div id="plan1" class="doc plan">
+          <h3>Plan de Localisation</h3>
+          <p>Quartier Bastos, Yaoundé. Face au supermarché X.</p>
+        </div>
+        <button onclick="downloadPDFFromElement(document.getElementById('plan1'),'Plan_Jean.pdf')">📄 Télécharger Plan</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const { jsPDF } = window.jspdf;
-
-const users=[
-  {
-    nom:"Alice Dupont",
-    profession:"Développeuse",
-    cv:{prenom:"Alice", age:"28", ville:"Paris", poste:"Frontend", email:"alice@example.com"},
-    lettre:{prenom:"Alice", nom:"Dupont", entreprise:"TechCorp", poste:"Ingénieur", contenu:"Motivation pour rejoindre TechCorp."},
-    plan:{plan:"123 Rue de Paris"}
-  }
-];
-
-// Fonction PDF
-function downloadPDFFromElement(element, filename){
-  html2canvas(element,{scale:2,useCORS:true}).then(canvas=>{
+function downloadPDFFromElement(element, filename) {
+  html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p','mm','a4');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    if (imgHeight <= pdfHeight) {
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    } else {
+      let position = 0;
+      let heightLeft = imgHeight;
+
+      while (heightLeft > 0) {
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+        position -= pdfHeight;
+
+        if (heightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+    }
+
     pdf.save(filename);
   });
 }
-
-// Génération des pages
-const container = document.getElementById('sections');
-users.forEach((user,index)=>{
-  // CV
-  const pageCV = document.createElement('div');
-  pageCV.className='page';
-  pageCV.innerHTML=`
-    <h1 class="handwriting">📄 CV - ${user.nom}</h1>
-    <div class="paper" id="cv${index}">
-      <p class="category">Prénom: ${user.cv.prenom}</p>
-      <p class="category">Âge: ${user.cv.age}</p>
-      <p class="category">Ville: ${user.cv.ville}</p>
-      <p class="category">Dernier poste: ${user.cv.poste}</p>
-      <p class="category">Email: ${user.cv.email}</p>
-    </div>
-    <button class="btnPDF" data-target="cv${index}" data-filename="CV_${user.nom}.pdf">📥 Télécharger CV PDF</button>
-    <button class="btnWA" data-index="${index}">📤 WhatsApp</button>
-  `;
-  container.appendChild(pageCV);
-
-  // Lettre
-  const pageLettre = document.createElement('div');
-  pageLettre.className='page';
-  pageLettre.innerHTML=`
-    <h1 class="handwriting">✉️ LETTRE DE MOTIVATION - ${user.nom}</h1>
-    <div class="paper" id="lettre${index}">
-      <p class="category">Prénom: ${user.lettre.prenom}</p>
-      <p class="category">Nom: ${user.lettre.nom}</p>
-      <p class="category">Entreprise: ${user.lettre.entreprise}</p>
-      <p class="category">Poste: ${user.lettre.poste}</p>
-      <p class="category">Contenu: ${user.lettre.contenu}</p>
-    </div>
-    <button class="btnPDF" data-target="lettre${index}" data-filename="Lettre_${user.nom}.pdf">📥 Télécharger Lettre PDF</button>
-    <button class="btnWA" data-index="${index}">📤 WhatsApp</button>
-  `;
-  container.appendChild(pageLettre);
-
-  // Plan
-  const pagePlan = document.createElement('div');
-  pagePlan.className='page';
-  pagePlan.innerHTML=`
-    <h1 class="handwriting">🗺️ PLAN DE LOCALISATION - ${user.nom}</h1>
-    <div class="paper" id="plan${index}">
-      <p class="category">Plan: ${user.plan.plan}</p>
-    </div>
-    <button class="btnPDF" data-target="plan${index}" data-filename="Plan_${user.nom}.pdf">📥 Télécharger Plan PDF</button>
-    <button class="btnWA" data-index="${index}">📤 WhatsApp</button>
-  `;
-  container.appendChild(pagePlan);
-});
-
-// Gestion popup PDF
-let currentElement = null;
-let currentFilename = null;
-const popup = document.getElementById('paymentPopup');
-const payConfirm = document.getElementById('payConfirm');
-const payCancel = document.getElementById('payCancel');
-
-document.querySelectorAll('.btnPDF').forEach(btn=>{
-  btn.onclick = ()=>{
-    currentElement = document.getElementById(btn.dataset.target);
-    currentFilename = btn.dataset.filename;
-    popup.classList.add('show'); // affiche le popup
-  }
-});
-
-payConfirm.onclick = ()=>{
-  if(currentElement && currentFilename){
-    downloadPDFFromElement(currentElement, currentFilename); // téléchargement après paiement
-  }
-  popup.classList.remove('show');
-};
-
-payCancel.onclick = ()=>{ popup.classList.remove('show'); };
-
-// WhatsApp
-document.querySelectorAll('.btnWA').forEach(btn=>{
-  btn.onclick = ()=>{
-    const user = users[parseInt(btn.dataset.index)];
-    const text = `📄 CV de ${user.nom}\nPrénom: ${user.cv.prenom}\nÂge: ${user.cv.age}\nVille: ${user.cv.ville}\nPoste: ${user.cv.poste}\nEmail: ${user.cv.email}\n\n✉️ Lettre: Prénom: ${user.lettre.prenom}, Nom: ${user.lettre.nom}, Entreprise: ${user.lettre.entreprise}, Poste: ${user.lettre.poste}\nContenu: ${user.lettre.contenu}\n\n🗺️ Plan: ${user.plan.plan}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
-  }
-});
 </script>
+
 </body>
 </html>
