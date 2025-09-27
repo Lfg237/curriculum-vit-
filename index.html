@@ -7,26 +7,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-body { font-family: Arial, sans-serif; background: #f7f7f7; margin:0; padding:20px; }
-h1 { text-align:center; margin-bottom:20px; }
-section { margin-bottom:50px; }
-.doc { padding:20px; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
-.cv { background:#e6f7ff; }
-.lettre { background:#fff0f6; }
-.plan { background:#f0fff0; }
-.photo-box { width:120px; height:140px; border:2px dashed #999; margin:0 auto 10px auto; display:flex; align-items:center; justify-content:center; font-size:12px; color:#777; border-radius:8px; background-size:cover; background-position:center; }
-h2 { text-align:center; font-size:22px; margin-bottom:10px; }
-h3 { margin-top:10px; font-size:18px; }
-p { margin:5px 0; line-height:1.4; }
-strong { color:#333; }
-textarea, input[type=text], input[type=password], input[type=file] { width:100%; padding:6px; margin:5px 0; border-radius:6px; border:1px solid #ccc; resize:vertical; }
-button { margin:5px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; }
-.pdfBtn { background:#007BFF; color:#fff; }
-.waBtn { background:#25D366; color:#fff; }
-.primary { background:#2980b9; color:#fff; }
-canvas { display:block; margin:10px auto; border-radius:8px; }
-#popupOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
-#popup { background:#fff;padding:20px;border-radius:12px; max-width:400px; }
+body{font-family:Arial,sans-serif;background:#f0f0f0;margin:0;padding:20px;}
+h1{text-align:center;margin-bottom:20px;}
+section{margin-bottom:40px;}
+.doc{padding:20px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,0.1);}
+.cv{background:#e6f7ff;}
+.lettre{background:#fff0f6;}
+.plan{background:#f0fff0;}
+.photo-box{width:120px;height:140px;border:2px dashed #999;margin:0 auto 10px auto;display:flex;align-items:center;justify-content:center;font-size:12px;color:#777;border-radius:8px;background-size:cover;background-position:center;}
+h2{text-align:center;font-size:22px;margin-bottom:10px;}
+p, span{margin:5px 0;line-height:1.4;}
+strong{color:#333;}
+textarea,input[type=text],input[type=password],input[type=file]{width:100%;padding:6px;margin:5px 0;border-radius:6px;border:1px solid #ccc;resize:vertical;}
+button{margin:5px;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
+.pdfBtn{background:#007BFF;color:#fff;}
+.waBtn{background:#25D366;color:#fff;}
+.primary{background:#2980b9;color:#fff;}
+canvas{display:block;margin:10px auto;border-radius:8px;}
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
+#popup{background:#fff;padding:20px;border-radius:12px;max-width:400px;}
 </style>
 </head>
 <body>
@@ -35,62 +34,51 @@ canvas { display:block; margin:10px auto; border-radius:8px; }
 <!-- ================== CV ================== -->
 <section>
 <h2>📄 CV</h2>
-<h3>📷 Importer votre photo :</h3>
 <input type="file" id="cvPhotoInput" accept="image/*">
 <div id="cvPhotoPreview" class="photo-box">📷 Photo</div>
-
 <div id="cvDoc" class="doc cv">
-  <h1 contenteditable="true" id="cvNom">Nom Utilisateur</h1>
-  <h3 contenteditable="true" id="cvProfession">Profession</h3>
-  <p><strong>📧 Email :</strong> <span contenteditable="true" id="cvEmail">exemple@mail.com</span></p>
-  <p><strong>📱 Tel MTN :</strong> <span contenteditable="true" id="cvTel">677000000</span></p>
-  <p><strong>📱 Tel Orange :</strong> <span contenteditable="true" id="cvTelOrange">699000000</span></p>
-  <p><strong>📍 Adresse :</strong> <span contenteditable="true" id="cvAdresse">Ville, Quartier</span></p>
-  <p><strong>❤️ Situation matrimoniale :</strong> <span contenteditable="true" id="cvSituation">Célibataire</span></p>
-  <p><strong>🍺 Alcoolique :</strong> <span contenteditable="true" id="cvAlcool">Non</span></p>
-  <p><strong>🎓 Dernier diplôme :</strong> <span contenteditable="true" id="cvDiplome">Licence</span></p>
-  <p><strong>🎯 Loisirs :</strong> <span contenteditable="true" id="cvLoisirs">Lecture</span></p>
-  <p><strong>✨ Caractère :</strong> <span contenteditable="true" id="cvCaractere">Sociable</span></p>
-  <p><strong>🕌 Religion :</strong> <span contenteditable="true" id="cvReligion">Chrétien</span></p>
-  <p><strong>🌍 Région d'origine :</strong> <span contenteditable="true" id="cvRegion">Centre</span></p>
-  <p><strong>🎂 Âge :</strong> <span contenteditable="true" id="cvAge">25</span></p>
-  <p><strong>👨 Nom du père :</strong> <span contenteditable="true" id="cvNomPere">Père</span></p>
-  <p><strong>👩 Nom de la mère :</strong> <span contenteditable="true" id="cvNomMere">Mère</span></p>
-  <p><strong>💰 Dernier salaire :</strong> <span contenteditable="true" id="cvSalaire">200.000 FCFA</span></p>
-
-  <h3>✍️ Signature / annotations :</h3>
-  <canvas id="cvCanvas" width="300" height="100" style="border:2px dashed #2c3e50; background:#fff;"></canvas>
-  <div style="text-align:center; margin-top:5px;">
-    <button onclick="clearCanvas('cvCanvas')" class="btn">🧹 Effacer</button>
-  </div>
-
-  <div class="doc-buttons">
-    <button class="btn pdfBtn" onclick="openPaymentPopup('cvDoc','pdf')">📥 Télécharger PDF</button>
-    <button class="btn waBtn" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
-  </div>
+<h1 contenteditable="true" id="cvNom">Nom Utilisateur</h1>
+<h3 contenteditable="true" id="cvProfession">Profession</h3>
+<p><strong>📧 Email :</strong> <span contenteditable="true" id="cvEmail">exemple@mail.com</span></p>
+<p><strong>📱 Tel MTN :</strong> <span contenteditable="true" id="cvTel">677000000</span></p>
+<p><strong>📱 Tel Orange :</strong> <span contenteditable="true" id="cvTelOrange">699000000</span></p>
+<p><strong>❤️ Situation matrimoniale :</strong> <span contenteditable="true" id="cvSituation">Célibataire</span></p>
+<p><strong>🍺 Alcoolique :</strong> <span contenteditable="true" id="cvAlcool">Non</span></p>
+<p><strong>🎓 Dernier diplôme :</strong> <span contenteditable="true" id="cvDiplome">Licence</span></p>
+<p><strong>🎯 Loisirs :</strong> <span contenteditable="true" id="cvLoisirs">Lecture</span></p>
+<p><strong>✨ Caractère :</strong> <span contenteditable="true" id="cvCaractere">Sociable</span></p>
+<p><strong>🕌 Religion :</strong> <span contenteditable="true" id="cvReligion">Chrétien</span></p>
+<p><strong>🌍 Région d'origine :</strong> <span contenteditable="true" id="cvRegion">Centre</span></p>
+<p><strong>🎂 Âge :</strong> <span contenteditable="true" id="cvAge">25</span></p>
+<p><strong>👨 Nom du père :</strong> <span contenteditable="true" id="cvNomPere">Père</span></p>
+<p><strong>👩 Nom de la mère :</strong> <span contenteditable="true" id="cvNomMere">Mère</span></p>
+<p><strong>💰 Dernier salaire :</strong> <span contenteditable="true" id="cvSalaire">200.000 FCFA</span></p>
+<h3>✍️ Signature / annotations :</h3>
+<canvas id="cvCanvas" width="300" height="100" style="border:2px dashed #2c3e50; background:#fff;"></canvas>
+<div style="text-align:center; margin-top:5px;"><button onclick="clearCanvas('cvCanvas')" class="btn">🧹 Effacer</button></div>
+<div class="doc-buttons">
+<button class="btn pdfBtn" onclick="openPaymentPopup('cvDoc','pdf')">📥 Télécharger PDF</button>
+<button class="btn waBtn" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
 </div>
-</section><!-- ================== Lettre ================== -->
+</div>
+</section>
+
+<!-- ================== Lettre ================== -->
 <section>
 <h2>✉️ Lettre de Motivation</h2>
 <div id="lettreDoc" class="doc lettre">
-  <h1 style="text-align:center; font-size:24px; font-weight:bold; color:#2980b9;">💌 Lettre de Motivation</h1>
-  <p><strong>👤 Nom :</strong> <span contenteditable="true" id="lettreNom">Jean Dupont</span></p>
-  <p><strong>🏢 Entreprise :</strong> <span contenteditable="true" id="lettreEntreprise">Exemple SARL</span></p>
-  <p><strong>💼 Poste :</strong> <span contenteditable="true" id="lettrePoste">Développeur Web</span></p>
-  <p contenteditable="true" id="lettreContenu" style="margin-top:10px; line-height:1.6;">
-    Je suis motivé à rejoindre votre équipe...
-  </p>
-
-  <h3>✍️ Signature / annotations :</h3>
-  <canvas id="lettreCanvas" width="300" height="100" style="border:2px dashed #2980b9; background:#fff;"></canvas>
-  <div style="text-align:center; margin-top:5px;">
-    <button onclick="clearCanvas('lettreCanvas')" class="btn">🧹 Effacer</button>
-  </div>
-
-  <div class="doc-buttons">
-    <button class="btn pdfBtn" onclick="openPaymentPopup('lettreDoc','pdf')">📥 Télécharger PDF</button>
-    <button class="btn waBtn" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
-  </div>
+<h1 style="text-align:center;font-size:24px;font-weight:bold;color:#2980b9;">💌 Lettre de Motivation</h1>
+<p><strong>👤 Nom :</strong> <span contenteditable="true" id="lettreNom">Jean Dupont</span></p>
+<p><strong>🏢 Entreprise :</strong> <span contenteditable="true" id="lettreEntreprise">Exemple SARL</span></p>
+<p><strong>💼 Poste :</strong> <span contenteditable="true" id="lettrePoste">Développeur Web</span></p>
+<p contenteditable="true" id="lettreContenu" style="margin-top:10px;line-height:1.6;">Je suis motivé à rejoindre votre équipe...</p>
+<h3>✍️ Signature / annotations :</h3>
+<canvas id="lettreCanvas" width="300" height="100" style="border:2px dashed #2980b9; background:#fff;"></canvas>
+<div style="text-align:center; margin-top:5px;"><button onclick="clearCanvas('lettreCanvas')" class="btn">🧹 Effacer</button></div>
+<div class="doc-buttons">
+<button class="btn pdfBtn" onclick="openPaymentPopup('lettreDoc','pdf')">📥 Télécharger PDF</button>
+<button class="btn waBtn" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
+</div>
 </div>
 </section>
 
@@ -98,85 +86,91 @@ canvas { display:block; margin:10px auto; border-radius:8px; }
 <section>
 <h2>🗺️ Plan de Localisation</h2>
 <div id="planDoc" class="doc plan">
-  <h1 style="text-align:center; font-size:24px; font-weight:bold; color:#8e44ad;">🗺️ Plan de Localisation</h1>
-  <p><strong>🏠 Adresse :</strong> <span contenteditable="true" id="planLieu">Quartier XYZ</span></p>
-  <p contenteditable="true" id="planDetails">Près du marché central</p>
-
-  <h3>✍️ Signature / annotations :</h3>
-  <canvas id="planCanvas" width="300" height="100" style="border:2px dashed #8e44ad; background:#fff;"></canvas>
-  <div style="text-align:center; margin-top:5px;">
-    <button onclick="clearCanvas('planCanvas')" class="btn">🧹 Effacer</button>
-  </div>
-
-  <div class="doc-buttons">
-    <button class="btn pdfBtn" onclick="openPaymentPopup('planDoc','pdf')">📥 Télécharger PDF</button>
-    <button class="btn waBtn" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
-  </div>
+<h1 style="text-align:center;font-size:24px;font-weight:bold;color:#8e44ad;">🗺️ Plan de Localisation</h1>
+<p><strong>🏠 Adresse :</strong> <span contenteditable="true" id="planLieu">Quartier XYZ</span></p>
+<p contenteditable="true" id="planDetails">Près du marché central</p>
+<h3>✍️ Signature / annotations :</h3>
+<canvas id="planCanvas" width="300" height="100" style="border:2px dashed #8e44ad; background:#fff;"></canvas>
+<div style="text-align:center; margin-top:5px;"><button onclick="clearCanvas('planCanvas')" class="btn">🧹 Effacer</button></div>
+<div class="doc-buttons">
+<button class="btn pdfBtn" onclick="openPaymentPopup('planDoc','pdf')">📥 Télécharger PDF</button>
+<button class="btn waBtn" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
+</div>
 </div>
 </section>
 
 <!-- ================== Popup Paiement ================== -->
 <div id="popupOverlay">
-  <div id="popup">
-    <h2>Paiement requis 💳</h2>
-    <p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-    <p>MTN MoMo: 676353859 | OM: 640647072 | Montant: 100 FCFA</p>
-    <p>Durée de validité : 1h</p>
-    <textarea id="momoMsg" placeholder="Message Mobile Money reçu"></textarea>
-    <input type="text" id="transactionId" placeholder="ID Transaction">
-    <input type="text" id="additionalTime" placeholder="Ajouter du temps (min)">
-    <input type="password" id="adminCode" placeholder="Code Admin (optionnel)">
-    <div id="popupResult"></div>
-    <button onclick="validatePayment()" class="btn primary">✅ Valider Paiement</button>
-    <button onclick="closePopup()" class="btn">❌ Annuler</button>
-  </div>
+<div id="popup">
+<h2>Paiement requis 💳</h2>
+<p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
+<p>MTN MoMo: 676353859 | OM: 640647072 | Prix unitaire: 100 FCFA / 1h</p>
+<p>Temps restant actuel: <span id="remainingTime">0 min</span></p>
+<textarea id="momoMsg" placeholder="Message Mobile Money reçu"></textarea>
+<input type="text" id="transactionId" placeholder="ID Transaction">
+<button onclick="addTimeUnit()" class="btn">➕ Ajouter un unité</button>
+<span id="multiplier">1</span> × 100 FCFA
+<input type="password" id="adminCode" placeholder="Code Admin (optionnel)">
+<div id="popupResult"></div>
+<button onclick="validatePayment()" class="btn primary">✅ Valider Paiement</button>
+<button onclick="closePopup()" class="btn">❌ Annuler</button>
+</div>
 </div>
 
 <script>
 // ===== Variables =====
-let currentAction = null;
-let currentDocId = null;
-const PAYMENT_INFO = {nom:'Wirnkar Loveline', montant:100, phones:['676353859','640647072'], validTime:10}; // minutes
+let currentAction=null;
+let currentDocId=null;
+const PAYMENT_INFO={nom:'Wirnkar Loveline', montant:100, phones:['676353859','640647072'], validTime:10};
+let currentMultiplier=1;
 
 // ===== Photo CV =====
-const photoInput = document.getElementById('cvPhotoInput');
-const photoPreview = document.getElementById('cvPhotoPreview');
-photoInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    photoPreview.style.backgroundImage = `url(${ev.target.result})`;
-    photoPreview.textContent = '';
-  };
+const photoInput=document.getElementById('cvPhotoInput');
+const photoPreview=document.getElementById('cvPhotoPreview');
+photoInput.addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{photoPreview.style.backgroundImage=`url(${ev.target.result})`; photoPreview.textContent='';};
   reader.readAsDataURL(file);
 });
 
-// ===== Canevas =====
+// ===== Canevas signature =====
 function initCanvas(id){
-  const canvas = document.getElementById(id);
-  const ctx = canvas.getContext("2d");
-  let drawing=false;
+  const canvas=document.getElementById(id);
+  const ctx=canvas.getContext("2d"); let drawing=false;
   canvas.addEventListener("mousedown",()=>drawing=true);
   canvas.addEventListener("mouseup",()=>{drawing=false; ctx.beginPath();});
   canvas.addEventListener("mouseleave",()=>{drawing=false; ctx.beginPath();});
-  canvas.addEventListener("mousemove", e => {
+  canvas.addEventListener("mousemove", e=>{
     if(!drawing) return;
     ctx.lineWidth=2; ctx.lineCap="round"; ctx.strokeStyle="#2c3e50";
     ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY);
   });
 }
-function clearCanvas(id){
-  const c=document.getElementById(id);
-  c.getContext("2d").clearRect(0,0,c.width,c.height);
-}
+function clearCanvas(id){const c=document.getElementById(id); c.getContext("2d").clearRect(0,0,c.width,c.height);}
 initCanvas('cvCanvas'); initCanvas('lettreCanvas'); initCanvas('planCanvas');
 
-// ===== PDF / WhatsApp =====
+// ===== Popup Paiement =====
+function openPaymentPopup(docId, action){
+  currentDocId=docId; currentAction=action;
+  document.getElementById('popupOverlay').style.display='flex';
+  updateRemainingTimeDisplay();
+  document.getElementById('popupResult').innerHTML='';
+}
+function closePopup(){document.getElementById('popupOverlay').style.display='none'; currentMultiplier=1; document.getElementById('multiplier').innerText='1';}
+
+function addTimeUnit(){currentMultiplier++; document.getElementById('multiplier').innerText=currentMultiplier;}
+
+function updateRemainingTimeDisplay(){
+  const now=new Date().getTime();
+  const remaining=Math.max(0,(localStorage.getItem('abonnement')||now)-now);
+  document.getElementById('remainingTime').innerText=Math.ceil(remaining/60000)+' min';
+}
+
 async function downloadPDF(docId){
   const doc=document.getElementById(docId);
-  const canvas=await html2canvas(doc, {scale:2});
+  const canvas=await html2canvas(doc,{scale:2});
   const imgData=canvas.toDataURL('image/png');
   const pdf=new jspdf.jsPDF('p','pt','a4');
   const width=pdf.internal.pageSize.getWidth();
@@ -184,63 +178,34 @@ async function downloadPDF(docId){
   pdf.addImage(imgData,'PNG',20,20,width-40,height-40);
   pdf.save(docId+'.pdf');
 }
+
 function shareWhatsApp(docId){
   const doc=document.getElementById(docId);
-  const text=doc.innerText || doc.textContent;
+  const text=doc.innerText||doc.textContent;
   const url=`https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(url,'_blank');
 }
 
-// ===== Popup Paiement =====
-function openPaymentPopup(docId, action){
-  currentDocId = docId;
-  currentAction = action; // 'pdf' ou 'wa'
-  document.getElementById('popupOverlay').style.display='flex';
-  document.getElementById('popupResult').innerHTML='';
-}
-function closePopup(){ document.getElementById('popupOverlay').style.display='none'; }
-
 function validatePayment(){
-  const admin = document.getElementById('adminCode').value;
-  if(admin === 'xz233233'){ // Code admin
-    closePopup();
-    if(currentAction==='pdf') downloadPDF(currentDocId);
-    else if(currentAction==='wa') shareWhatsApp(currentDocId);
-    return;
-  }
-
-  const msg = document.getElementById('momoMsg').value.toLowerCase();
-  const txId = document.getElementById('transactionId').value;
-  const addTime = parseInt(document.getElementById('additionalTime').value) || 0;
-  const now = new Date();
-
+  const admin=document.getElementById('adminCode').value;
+  if(admin==='xz233233'){ closePopup(); if(currentAction==='pdf') downloadPDF(currentDocId); else shareWhatsApp(currentDocId); return;}
+  const msg=document.getElementById('momoMsg').value.toLowerCase();
+  const txId=document.getElementById('transactionId').value;
+  const now=new Date();
   if(!msg.includes(PAYMENT_INFO.nom.toLowerCase())){
-    document.getElementById('popupResult').innerHTML='<span style="color:red;">Nom incorrect ❌</span>';
-    return;
+    document.getElementById('popupResult').innerHTML='<span style="color:red;">Nom incorrect ❌</span>'; return;
   }
-  const amtMatch = msg.match(/\d+/);
-  if(!amtMatch || parseInt(amtMatch[0])!==PAYMENT_INFO.montant){
-    document.getElementById('popupResult').innerHTML='<span style="color:red;">Montant incorrect ❌</span>';
-    return;
-  }
-  const dateMatch = msg.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
-  if(dateMatch){
-    const diff = (now - new Date(dateMatch[0]))/60000;
-    if(diff > PAYMENT_INFO.validTime){
-      document.getElementById('popupResult').innerHTML='<span style="color:red;">Temps écoulé ❌</span>';
-      return;
-    }
-  }
-
-  const currentExpiry = localStorage.getItem('abonnement') || 0;
-  const newExpiry = Math.max(currentExpiry, now.getTime()) + (PAYMENT_INFO.validTime+addTime)*60*1000;
-  localStorage.setItem('abonnement', newExpiry);
-
-  document.getElementById('popupResult').innerHTML='<span style="color:green;">✅ Vérifié !</span>';
+  const amtMatch=msg.match(/\d+/); const expectedAmt=PAYMENT_INFO.montant*currentMultiplier;
+  if(!amtMatch||parseInt(amtMatch[0])!==expectedAmt){ document.getElementById('popupResult').innerHTML='<span style="color:red;">Montant incorrect ❌ (attendu '+expectedAmt+' FCFA)</span>'; return;}
+  const dateMatch=msg.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
+  if(dateMatch){ const diff=(now-new Date(dateMatch[0]))/60000; if(diff>PAYMENT_INFO.validTime){ document.getElementById('popupResult').innerHTML='<span style="color:red;">Temps écoulé ❌</span>'; return;}}
+  const currentExpiry=parseInt(localStorage.getItem('abonnement')||now.getTime());
+  const newExpiry=currentExpiry+currentMultiplier*60*60*1000;
+  localStorage.setItem('abonnement',newExpiry);
+  document.getElementById('popupResult').innerHTML='<span style="color:green;">✅ Vérifié ! Nouveau temps restant: '+Math.ceil((newExpiry-now.getTime())/60000)+' min</span>';
+  updateRemainingTimeDisplay();
   closePopup();
-
-  if(currentAction==='pdf') downloadPDF(currentDocId);
-  else if(currentAction==='wa') shareWhatsApp(currentDocId);
+  if(currentAction==='pdf') downloadPDF(currentDocId); else shareWhatsApp(currentDocId);
 }
 </script>
 </body>
