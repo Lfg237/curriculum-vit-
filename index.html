@@ -103,6 +103,9 @@ canvas.signature-canvas {
 <input id="cvTelMtn" placeholder="Tel MTN">
 <input id="cvTelOrange" placeholder="Tel Orange">
 <canvas id="cvCanvas" class="signature-canvas"></canvas>
+<div class="flex-row" style="margin-top:5px;">
+  <button class="primary" onclick="clearCanvas('cvCanvas')">🧹 Effacer Signature</button>
+</div>
 <div class="flex-row">
 <button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
 <button class="primary" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
@@ -118,15 +121,23 @@ canvas.signature-canvas {
 <input id="lettrePoste" placeholder="Poste souhaité">
 <textarea id="lettreContenu" placeholder="Contenu de la lettre"></textarea>
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
+<div class="flex-row" style="margin-top:5px;">
+  <button class="primary" onclick="clearCanvas('lettreCanvas')">🧹 Effacer Signature</button>
+</div>
 <div class="flex-row">
 <button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
 <button class="primary" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
 </div>
-</section><!-- Plan de localisation -->
+</section>
+
+<!-- Plan de localisation -->
 <section id="planDoc">
 <h2>🗺️ Plan de Localisation</h2>
 <textarea id="planContenu" placeholder="Saisir le plan de localisation"></textarea>
 <canvas id="planCanvas" class="signature-canvas"></canvas>
+<div class="flex-row" style="margin-top:5px;">
+  <button class="primary" onclick="clearCanvas('planCanvas')">🧹 Effacer Signature</button>
+</div>
 <div class="flex-row">
 <button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
 <button class="primary" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
@@ -170,25 +181,71 @@ function initSignatureCanvas(canvasId){
   const ctx = canvas.getContext('2d');
   ctx.lineWidth = 2; ctx.lineCap = 'round';
   let drawing = false;
-  function getPos(e){ const rect = canvas.getBoundingClientRect();
-    if(e.touches && e.touches.length){ return { x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top }; }
-    return { x:e.clientX-rect.left, y:e.clientY-rect.top }; }
-  function start(e){ drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.(); }
-  function move(e){ if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.(); }
-  function end(){ drawing=false; ctx.beginPath(); }
-  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-  canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseleave', end);
+
+  function getPos(e){ 
+    const rect = canvas.getBoundingClientRect();
+    if(e.touches && e.touches.length){ 
+      return { x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top }; 
+    }
+    return { x:e.clientX-rect.left, y:e.clientY-rect.top }; 
+  }
+
+  function start(e){ 
+    drawing=true; 
+    const p=getPos(e); 
+    ctx.beginPath(); 
+    ctx.moveTo(p.x,p.y); 
+    e.preventDefault?.(); 
+  }
+
+  function move(e){ 
+    if(!drawing) return; 
+    const p=getPos(e); 
+    ctx.lineTo(p.x,p.y); 
+    ctx.stroke(); 
+    ctx.beginPath(); 
+    ctx.moveTo(p.x,p.y); 
+    e.preventDefault?.(); 
+  }
+
+  function end(){ 
+    drawing=false; 
+    ctx.beginPath(); 
+  }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
   canvas.addEventListener('touchstart', start, {passive:false});
   canvas.addEventListener('touchmove', move, {passive:false});
   canvas.addEventListener('touchend', end);
 }
+
 ['cvCanvas','lettreCanvas','planCanvas'].forEach(initSignatureCanvas);
-function clearCanvas(id){ const c=document.getElementById(id); if(!c) return; const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); }
+
+function clearCanvas(id){
+  const c=document.getElementById(id); 
+  if(!c) return; 
+  const ctx=c.getContext('2d'); 
+  ctx.clearRect(0,0,c.width,c.height); 
+}
 
 // ===== Photo CV =====
 const cvPhotoInput=document.getElementById('cvPhotoInput');
 const cvPhotoPreview=document.getElementById('cvPhotoPreview');
-if(cvPhotoInput && cvPhotoPreview){ cvPhotoInput.addEventListener('change', (e)=>{ const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ cvPhotoPreview.style.backgroundImage=`url(${ev.target.result})`; cvPhotoPreview.textContent=''; }; reader.readAsDataURL(file); }); }
+if(cvPhotoInput && cvPhotoPreview){ 
+  cvPhotoInput.addEventListener('change', (e)=>{
+    const file=e.target.files?.[0]; 
+    if(!file) return; 
+    const reader=new FileReader(); 
+    reader.onload=ev=>{
+      cvPhotoPreview.style.backgroundImage=`url(${ev.target.result})`; 
+      cvPhotoPreview.textContent=''; 
+    }; 
+    reader.readAsDataURL(file); 
+  }); 
+}
 
 // ===== Popup paiement =====
 let multiplier=1, currentDocId='', currentAction='';
