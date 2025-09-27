@@ -15,15 +15,14 @@ h2 {color: #424242; font-size: 22px; margin-bottom: 10px;}
 input, textarea {width: 100%; padding: 10px; margin: 6px 0; border: 2px solid #1e88e5; border-radius: 8px; font-size: 14px;}
 button.primary {background: linear-gradient(45deg,#00c853,#b2ff59); color: #fff; font-weight: bold; border: none; padding: 10px; border-radius: 8px; margin-top: 5px; cursor:pointer;}
 .cv-photo-preview {width: 180px; height: 180px; border: 3px dashed #ff6f00; border-radius: 50%; margin: 0 auto 10px auto; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; color: #ff6f00; font-size: 14px; font-weight: bold;}
-canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 100%; height: 120px;}
+canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 100%; height: 120px; touch-action: none;}
 #popupOverlay {display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;}
 #popup {border:3px solid #1e88e5; background:#fffde7; padding:15px; border-radius:10px; width:100%; max-width:400px;}
-.error {color:#b00020;}
-.success {color:#006400;}
 .flex-row {display:flex; justify-content:space-between; align-items:center; margin-top:5px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 <h1>📄 Mes Documents</h1>
@@ -33,8 +32,8 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <h2>CV</h2>
 <div class="cv-photo-preview" id="cvPhotoPreview">Importer photo</div>
 <input type="file" id="cvPhotoInput" accept="image/*">
-<h3 style="text-align:center;font-weight:bold;font-size:20px;" id="cvName">Nom Complet</h3>
-<p style="text-align:center;font-size:14px;" id="cvProfession">Profession</p>
+<h3 id="cvName" style="text-align:center;font-weight:bold;font-size:20px;">Nom Complet</h3>
+<p id="cvProfession" style="text-align:center;font-size:14px;">Profession</p>
 <input id="cvPrenom" placeholder="Prénom">
 <input id="cvNom" placeholder="Nom">
 <input id="cvAge" placeholder="Âge">
@@ -55,7 +54,7 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <canvas id="cvCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
 <button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="openPaymentPopup('cvDoc','word')">💾 Télécharger Word</button>
 </div>
 </section>
 
@@ -70,7 +69,7 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
 <button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="openPaymentPopup('lettreDoc','word')">💾 Télécharger Word</button>
 </div>
 </section>
 
@@ -81,7 +80,7 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <canvas id="planCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
 <button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="openPaymentPopup('planDoc','word')">💾 Télécharger Word</button>
 </div>
 </section>
 
@@ -112,107 +111,81 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 
 <script>
 // ===== CONFIG =====
-const ADMIN_CODE = 'xz233233';
-const UNIT_PRICE = 100;
-const UNIT_HOURS = 1;
-const VALID_TIME_MINUTES = 10;
-const PAYMENT_BENEF = 'Wirnkar Loveline';
+const ADMIN_CODE='xz233233';
+const UNIT_PRICE=100;
+const UNIT_HOURS=1;
+const PAYMENT_BENEF='Wirnkar Loveline';
 
-// ===== Signature Canvas =====
-function initSignatureCanvas(canvasId){
-  const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 2; ctx.lineCap = 'round';
-  let drawing = false;
-  function getPos(e){
-    const rect = canvas.getBoundingClientRect();
-    if(e.touches && e.touches.length){
-      return { x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top };
-    }
-    return { x:e.clientX-rect.left, y:e.clientY-rect.top };
-  }
-  function start(e){ drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.(); }
-  function move(e){ if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.(); }
-  function end(){ drawing=false; ctx.beginPath(); }
-  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-  canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseleave', end);
-  canvas.addEventListener('touchstart', start, {passive:false});
-  canvas.addEventListener('touchmove', move, {passive:false});
-  canvas.addEventListener('touchend', end);
+// ===== Canvas signature =====
+function initSignatureCanvas(id){
+  const c=document.getElementById(id);
+  if(!c) return;
+  c.width=c.offsetWidth; c.height=c.offsetHeight;
+  const ctx=c.getContext('2d'); ctx.lineWidth=2; ctx.lineCap='round';
+  let draw=false;
+  function pos(e){const r=c.getBoundingClientRect(); if(e.touches&&e.touches.length)return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}; return{x:e.clientX-r.left,y:e.clientY-r.top};}
+  c.addEventListener('mousedown',e=>{draw=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y);});
+  c.addEventListener('mousemove',e=>{if(!draw)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y);});
+  c.addEventListener('mouseup',()=>{draw=false; ctx.beginPath();});
+  c.addEventListener('mouseleave',()=>{draw=false; ctx.beginPath();});
+  c.addEventListener('touchstart',e=>{draw=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault();},{passive:false});
+  c.addEventListener('touchmove',e=>{if(!draw)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault();},{passive:false});
+  c.addEventListener('touchend',()=>{draw=false; ctx.beginPath();});
 }
 ['cvCanvas','lettreCanvas','planCanvas'].forEach(initSignatureCanvas);
-function clearCanvas(id){ const c=document.getElementById(id); if(!c) return; const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); }
 
 // ===== Photo CV =====
 const cvPhotoInput=document.getElementById('cvPhotoInput');
 const cvPhotoPreview=document.getElementById('cvPhotoPreview');
-cvPhotoInput.addEventListener('change', (e)=>{
-  const file=e.target.files?.[0]; 
-  if(!file) return;
-  const reader=new FileReader(); 
-  reader.onload=ev=>{
-    cvPhotoPreview.style.backgroundImage=`url(${ev.target.result})`;
-    cvPhotoPreview.textContent='';
-  }; 
-  reader.readAsDataURL(file); 
-});
+cvPhotoInput.addEventListener('change',e=>{const f=e.target.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{cvPhotoPreview.style.backgroundImage=`url(${ev.target.result})`; cvPhotoPreview.textContent='';}; r.readAsDataURL(f);});
 
 // ===== Popup paiement =====
-let multiplier=1, currentDocId='', currentAction='';
-function incrementMultiplier(){ multiplier++; updatePopup(); }
-function decrementMultiplier(){ if(multiplier>1){multiplier--; updatePopup();} }
-function updatePopup(){
-  document.getElementById('multiplierDisplay').innerText = multiplier;
-  document.getElementById('totalAmount').innerText = multiplier*UNIT_PRICE;
-}
-function resetMultiplier(){ multiplier=1; updatePopup(); }
-function openPaymentPopup(docId,action){ currentDocId=docId; currentAction=action; resetMultiplier(); document.getElementById('momoMsg').value=''; document.getElementById('transactionId').value=''; document.getElementById('adminCode').value=''; document.getElementById('popupResult').innerHTML=''; updateRemainingTimeDisplay(); document.getElementById('popupOverlay').style.display='flex'; }
-function closePopup(){ document.getElementById('popupOverlay').style.display='none'; resetMultiplier(); }
-function updateRemainingTimeDisplay(){ const now=Date.now(); const expiry=parseInt(localStorage.getItem('abonnementExpiry')||'0',10); let remainingMin=0; if(expiry>now) remainingMin=Math.ceil((expiry-now)/60000); document.getElementById('remainingTime')?.innerText=(remainingMin>0?`${remainingMin} min`:'0 min'); }
+let multiplier=1,currentDocId='',currentAction='';
+function incrementMultiplier(){multiplier++; updatePopup();}
+function decrementMultiplier(){if(multiplier>1){multiplier--; updatePopup();}}
+function updatePopup(){document.getElementById('multiplierDisplay').innerText=multiplier; document.getElementById('totalAmount').innerText=multiplier*UNIT_PRICE;}
+function resetMultiplier(){multiplier=1; updatePopup();}
+function openPaymentPopup(docId,action){currentDocId=docId; currentAction=action; resetMultiplier(); document.getElementById('momoMsg').value=''; document.getElementById('transactionId').value=''; document.getElementById('adminCode').value=''; document.getElementById('popupResult').innerHTML=''; document.getElementById('popupOverlay').style.display='flex';}
+function closePopup(){document.getElementById('popupOverlay').style.display='none'; resetMultiplier();}
 
 // ===== Validation paiement =====
 function validatePayment(){
-  const admin=(document.getElementById('adminCode')?.value||'').trim();
-  if(admin===ADMIN_CODE){ document.getElementById('popupResult').innerHTML='<span style="color:green">Code admin accepté ✅</span>'; setTimeout(()=>{ proceedAction(); },600); return; }
-  const msg=(document.getElementById('momoMsg')?.value||'').trim();
-  const txId=(document.getElementById('transactionId')?.value||'').trim();
-  if(!msg||!txId){ document.getElementById('popupResult').innerHTML='<span style="color:red">Merci d’entrer le message Mobile Money et l’ID de transaction.</span>'; return; }
-  if(!msg.toLowerCase().includes(PAYMENT_BENEF.toLowerCase())){ document.getElementById('popupResult').innerHTML='<span style="color:red">Nom bénéficiaire non trouvé.</span>'; return; }
-  const expectedAmount = UNIT_PRICE*multiplier;
-  const amountMatch = msg.match(/(\d{2,})/);
-  if(!amountMatch || parseInt(amountMatch[1],10)!==expectedAmount){ document.getElementById('popupResult').innerHTML=`<span style="color:red">Montant incorrect (attendu ${expectedAmount} FCFA).</span>`; return; }
-  const now=Date.now(); const currentExpiry=parseInt(localStorage.getItem('abonnementExpiry')||'0',10); const base=Math.max(currentExpiry,now); const addMs=multiplier*UNIT_HOURS*60*60*1000; const newExpiry=base+addMs; localStorage.setItem('abonnementExpiry',String(newExpiry));
-  document.getElementById('popupResult').innerHTML=`<span style="color:green">Paiement validé ✅ Vous pouvez télécharger le document.</span>`;
-  setTimeout(()=>{ proceedAction(); },600);
+  const admin=document.getElementById('adminCode').value.trim();
+  if(admin===ADMIN_CODE){document.getElementById('popupResult').innerHTML='<span style="color:green">Code admin accepté ✅</span>'; setTimeout(proceedAction,500); return;}
+  const msg=document.getElementById('momoMsg').value.trim();
+  const tx=document.getElementById('transactionId').value.trim();
+  if(!msg||!tx){document.getElementById('popupResult').innerHTML='<span style="color:red">Message Mobile Money et ID requis.</span>'; return;}
+  if(!msg.toLowerCase().includes(PAYMENT_BENEF.toLowerCase())){document.getElementById('popupResult').innerHTML='<span style="color:red">Bénéficiaire incorrect.</span>'; return;}
+  const expected=UNIT_PRICE*multiplier; const match=msg.match(/(\d{2,})/);
+  if(!match||parseInt(match[1],10)!==expected){document.getElementById('popupResult').innerHTML=`<span style="color:red">Montant attendu ${expected} FCFA.</span>`; return;}
+  const now=Date.now(); const expiry=parseInt(localStorage.getItem('abonnementExpiry')||'0',10);
+  localStorage.setItem('abonnementExpiry',String(Math.max(now,expiry)+multiplier*UNIT_HOURS*3600*1000));
+  document.getElementById('popupResult').innerHTML='<span style="color:green">Paiement validé ✅</span>';
+  setTimeout(proceedAction,500);
 }
 
 // ===== Actions après paiement =====
 function proceedAction(){
-  closePopup();
-  if(currentDocId && currentAction){
-    const section=document.getElementById(currentDocId);
-    if(!section) return;
-    html2canvas(section).then(canvas=>{
-      const imgData = canvas.toDataURL('image/png');
-      if(currentAction==='pdf'){
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p','mm','a4');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-        pdf.save('document.pdf');
-      } else if(currentAction==='wa'){
-        const textLines = Array.from(section.querySelectorAll('input, textarea')).map(el=>`${el.placeholder||el.id}: ${el.value}`).join('%0A');
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textLines)}`);
-      }
-    });
-  }
+  closePopup(); if(!currentDocId||!currentAction) return;
+  const section=document.getElementById(currentDocId);
+  // remplacer canvas par image pour Word
+  const canvases=section.querySelectorAll('canvas.signature-canvas');
+  canvases.forEach(c=>{const img=document.createElement('img'); img.src=c.toDataURL(); img.style.width='100%'; img.style.height='auto'; c.parentNode.replaceChild(img,c);});
+  html2canvas(section).then(canvas=>{
+    const imgData=canvas.toDataURL('image/png');
+    if(currentAction==='pdf'){
+      const { jsPDF }=window.jspdf; const pdf=new jsPDF('p','mm','a4'); const imgProps=pdf.getImageProperties(imgData);
+      const pdfWidth=pdf.internal.pageSize.getWidth();
+      const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+      pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+      pdf.save('document.pdf');
+    } else if(currentAction==='word'){
+      let htmlContent=section.innerHTML;
+      const blob=new Blob(['<html><body>'+htmlContent+'</body></html>'],{type:'application/msword'});
+      saveAs(blob,'document.doc');
+    }
+  });
 }
-
-// ===== Timer =====
-setInterval(updateRemainingTimeDisplay,30000);
 </script>
 </body>
 </html>
