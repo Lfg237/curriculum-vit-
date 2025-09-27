@@ -3,60 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Documents A5 Stables</title>
+<title>Documents A6 PWA</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00695c">
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
 section{background:#fff;border-radius:10px;padding:12px;margin:10px auto;max-width:780px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
-h2{margin:0 0 12px;font-size:18px;color:#333;}
-.photo{width:120px;height:120px;border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;object-fit:cover;}
-.signature{height:28px;border-radius:6px;border:1px solid #43a047;width:100%;margin-top:8px;}
-.actions{display:flex;gap:8px;margin-top:8px;}
+h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
+.photo{width:120px;height:120px;border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;float:left;margin-right:12px;margin-bottom:6px;object-fit:cover;}
+.signature{border-radius:6px;border:1px solid #43a047;margin-top:4px; display:block;}
+.actions{display:flex;gap:8px;margin-top:8px; clear:both;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
 #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999;}
 #popup{width:100%;max-width:420px;background:#fff;border-radius:10px;padding:12px;border:3px solid #1e88e5;box-sizing:border-box;}
 label{font-size:13px;display:block;margin-top:6px;}
 .muted{color:#666;font-size:13px;}
-.text-area{resize:none;width:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;min-height:100px;}
-.text-img{float:left;width:100px;height:100px;margin-right:8px;margin-bottom:8px;object-fit:cover;border:1px solid #aaa;border-radius:4px;}
+.text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
 </style>
 </head>
 <body>
-<h1>📄 Mes Documents A5</h1>
+<h1>📄 Mes Documents A6 PWA</h1>
 
 <!-- CV -->
 <section id="cvDoc">
 <h2>Curriculum Vitae</h2>
-<div style="display:flex; gap:12px; align-items:flex-start;">
-  <div style="flex:0 0 120px;">
-    <img id="cvPhoto" class="photo" src="" alt="Photo">
-    <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
+<div style="position:relative; width:100%;">
+  <img id="cvPhoto" class="photo" src="" alt="Photo">
+  <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
+  <div contenteditable="true" id="cvNomPrenom" style="font-weight:700;font-size:22px;">Nom Prénom</div>
+  <div contenteditable="true" id="cvFonctionAge" style="font-size:14px;margin-top:4px;">Fonction - Âge</div>
+  <div id="cvInfos" style="margin-top:12px;">
+    <div contenteditable="true">Situation matrimoniale: </div>
+    <div contenteditable="true">Nombre d'enfants: </div>
+    <div contenteditable="true">Région: </div>
+    <div contenteditable="true">Nationalité: </div>
+    <div contenteditable="true">Ville de résidence: </div>
+    <div contenteditable="true">Quartier: </div>
+    <div contenteditable="true">Alcoolique (oui/non): </div>
+    <div contenteditable="true">Religion: </div>
+    <div contenteditable="true">Autres expériences: </div>
+    <div contenteditable="true">Dernier diplôme: </div>
+    <div contenteditable="true">Dernier établissement: </div>
+    <div contenteditable="true">Dernier poste occupé: </div>
+    <div contenteditable="true">Dernier salaire: </div>
   </div>
-  <div style="flex:1;">
-    <div contenteditable="true" id="cvNomPrenom" style="font-weight:700;font-size:22px;">Nom Prénom</div>
-    <div contenteditable="true" id="cvFonctionAge" style="font-size:14px;margin-top:4px;">Fonction - Âge</div>
-    <div id="cvInfos" style="margin-top:12px;">
-      <div contenteditable="true">Situation matrimoniale: </div>
-      <div contenteditable="true">Nombre d'enfants: </div>
-      <div contenteditable="true">Région: </div>
-      <div contenteditable="true">Nationalité: </div>
-      <div contenteditable="true">Ville de résidence: </div>
-      <div contenteditable="true">Quartier: </div>
-      <div contenteditable="true">Alcoolique (oui/non): </div>
-      <div contenteditable="true">Religion: </div>
-      <div contenteditable="true">Autres expériences: </div>
-      <div contenteditable="true">Dernier diplôme: </div>
-      <div contenteditable="true">Dernier établissement: </div>
-      <div contenteditable="true">Dernier poste occupé: </div>
-      <div contenteditable="true">Dernier salaire: </div>
-    </div>
-    <label class="muted">Signature</label>
-    <canvas id="cvSign" class="signature"></canvas>
-    <div class="actions">
-      <button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
-      <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
-    </div>
+  <label class="muted">Signature</label>
+  <canvas id="cvSign" class="signature" style="height:100px; clear:both;"></canvas>
+  <div class="actions">
+    <button class="btn" data-doc="cvDoc" data-act="pdf">PDF</button>
+    <button class="btn" data-doc="cvDoc" data-act="word">Word</button>
   </div>
 </div>
 </section>
@@ -64,32 +61,34 @@ label{font-size:13px;display:block;margin-top:6px;}
 <!-- Lettre de Motivation -->
 <section id="lettreDoc">
 <h2>Lettre de Motivation</h2>
-<div style="position:relative;">
+<div style="position:relative; width:100%; min-height:300px;">
+  <img id="lettrePhoto" class="photo" src="" alt="Photo">
   <input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
-  <img id="lettrePhoto" class="text-img" src="" alt="Photo">
-  <div id="lettreTexte" contenteditable="true" class="text-area" style="height:400px;" placeholder="Tapez votre lettre ici..."></div>
-</div>
-<label class="muted">Signature</label>
-<canvas id="lettreSign" class="signature"></canvas>
-<div class="actions">
-  <button class="btn" onclick="openPayment('lettreDoc','pdf')">PDF</button>
-  <button class="btn" onclick="openPayment('lettreDoc','word')">Word</button>
+  <div id="lettreTexte" contenteditable="true" class="text-area" style="width:100%; padding:10px; background-color:#e3f2fd; min-height:200px;" data-placeholder="Cliquez ici pour taper votre lettre…">
+    Cliquez ici pour taper votre lettre…
+  </div>
+  <canvas id="lettreSign" class="signature" style="width:120px;height:60px; clear:both; margin-top:8px;"></canvas>
+  <div class="actions">
+    <button class="btn" data-doc="lettreDoc" data-act="pdf">PDF</button>
+    <button class="btn" data-doc="lettreDoc" data-act="word">Word</button>
+  </div>
 </div>
 </section>
 
 <!-- Plan de Localisation -->
 <section id="planDoc">
 <h2>Plan de Localisation</h2>
-<div style="position:relative;">
+<div style="position:relative; width:100%; min-height:300px;">
+  <img id="planPhoto" class="photo" src="" alt="Photo">
   <input type="file" id="planPhotoInput" accept="image/*" style="display:none">
-  <img id="planPhoto" class="text-img" src="" alt="Photo">
-  <div id="planTexte" contenteditable="true" class="text-area" style="height:400px;" placeholder="Décrivez le plan ici..."></div>
-</div>
-<label class="muted">Signature</label>
-<canvas id="planSign" class="signature"></canvas>
-<div class="actions">
-  <button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
-  <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
+  <div id="planTexte" contenteditable="true" class="text-area" style="width:100%; padding:10px; background-color:#e8f5e9; min-height:200px;" data-placeholder="Cliquez ici pour décrire le plan…">
+    Cliquez ici pour décrire le plan…
+  </div>
+  <canvas id="planSign" class="signature" style="width:120px;height:60px; clear:both; margin-top:8px;"></canvas>
+  <div class="actions">
+    <button class="btn" data-doc="planDoc" data-act="pdf">PDF</button>
+    <button class="btn" data-doc="planDoc" data-act="word">Word</button>
+  </div>
 </div>
 </section>
 
@@ -122,152 +121,93 @@ label{font-size:13px;display:block;margin-top:6px;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-// Photos CV/Lettre/Plan
+// ---------- Photos ----------
 function handlePhoto(imgId,inputId){
-  const el=document.getElementById(imgId);
+  const img=document.getElementById(imgId);
   const input=document.getElementById(inputId);
-  el.addEventListener('click',()=>input.click());
+  img.addEventListener('click',()=>input.click());
   input.addEventListener('change',e=>{
-    const f=e.target.files[0]; if(!f) return;
+    const file=e.target.files[0]; if(!file) return;
     const reader=new FileReader();
-    reader.onload=ev=>{el.src=ev.target.result;};
-    reader.readAsDataURL(f);
+    reader.onload=ev=>{img.src=ev.target.result;};
+    reader.readAsDataURL(file);
   });
 }
 handlePhoto('cvPhoto','cvPhotoInput');
 handlePhoto('lettrePhoto','lettrePhotoInput');
 handlePhoto('planPhoto','planPhotoInput');
 
-// Canevas signature
+// ---------- Signatures ----------
 function makeSign(id){
   const c=document.getElementById(id);
-  if(!c)return;
   c.width=c.clientWidth*devicePixelRatio;
   c.height=c.clientHeight*devicePixelRatio;
   const ctx=c.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
   ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
   let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect(); if(e.touches && e.touches[0]) return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}; return{x:e.clientX-r.left,y:e.clientY-r.top};}
-  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
+  function pos(e){const r=c.getBoundingClientRect();return e.touches?[{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}][0]:{x:e.clientX-r.left,y:e.clientY-r.top};}
+  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y);}
   function move(e){if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();}
   function end(){drawing=false; ctx.closePath();}
-  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move);
-  c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
+  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
   c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
 }
 makeSign('cvSign'); makeSign('lettreSign'); makeSign('planSign');
 
-// Popup paiement
-let multiplier=1,UNIT=100,BENEF='Wirnkar Loveline',ADMIN='xz233233';
-let usedTransactions = []; // Stocke IDs et heure
+// ---------- Placeholder ----------
+function setupPlaceholder(id){
+  const el=document.getElementById(id); const ph=el.dataset.placeholder;
+  el.addEventListener('focus',()=>{if(el.innerText===ph) el.innerText='';});
+  el.addEventListener('blur',()=>{if(el.innerText.trim()==='') el.innerText=ph;});
+}
+setupPlaceholder('lettreTexte'); setupPlaceholder('planTexte');
 
-function multPlus(){multiplier++;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function multMinus(){if(multiplier>1) multiplier--;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function openPayment(id,act){window.__doc=id;window.__act=act;document.getElementById('popupOverlay').style.display='flex';}
+// ---------- Popup paiement ----------
+let multiplier=1, UNIT=100, BENEF='Wirnkar Loveline', ADMIN='xz233233', usedTx=[];
+function multPlus(){multiplier++; updateTotal();}
+function multMinus(){if(multiplier>1){multiplier--; updateTotal();}}
+function updateTotal(){document.getElementById('mult').innerText=multiplier; document.getElementById('total').innerText=UNIT*multiplier;}
+function openPayment(doc,act){window.__doc=doc;window.__act=act;document.getElementById('popupOverlay').style.display='flex';}
 function closePopup(){document.getElementById('popupOverlay').style.display='none';}
-
 function validatePay(){
   const admin=document.getElementById('admin').value.trim();
   const msg=document.getElementById('momo').value.trim();
   const tx=document.getElementById('tx').value.trim();
-  const now = new Date();
-
-  if(admin===ADMIN){
-    exportDoc();
-    closePopup();
-    return;
-  }
-
-  if(!msg || !tx){
-    alert("Message et ID requis");
-    return;
-  }
-
-  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){
-    alert("Nom bénéficiaire incorrect");
-    return;
-  }
-
+  const now=new Date();
+  if(admin===ADMIN){exportDoc(); closePopup(); return;}
+  if(!msg||!tx){alert("Message et ID requis"); return;}
+  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){alert("Nom bénéficiaire incorrect"); return;}
   const amt=parseInt(msg.match(/\d+/)?.[0],10);
-  if(amt !== UNIT*multiplier){
-    alert("Montant incorrect");
-    return;
-  }
-
-  if(usedTransactions.some(t => t.id === tx)){
-    alert("Cette transaction a déjà été utilisée !");
-    return;
-  }
-
-  const timeMatch = msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
-  if(timeMatch){
-    const msgTime = new Date(timeMatch[0]);
-    const diffMinutes = Math.abs(now - msgTime)/60000;
-    if(diffMinutes > 10){
-      alert("L'heure de la transaction est incorrecte (>10 min de différence)");
-      return;
-    }
-  }
-
-  // Tout correct
-  usedTransactions.push({id: tx, time: now});
-  exportDoc();
-  closePopup();
+  if(amt!==UNIT*multiplier){alert("Montant incorrect"); return;}
+  if(usedTx.some(t=>t.id===tx)){alert("Transaction déjà utilisée !"); return;}
+  usedTx.push({id:tx,time:now});
+  exportDoc(); closePopup();
 }
 
-// Export PDF/Word avec signatures visibles
+// ---------- Export PDF / Word ----------
 async function exportDoc(){
-  const id=window.__doc,act=window.__act; if(!id) return; 
-  const node=document.getElementById(id); if(!node) return;
-
-  let format = (id==='lettreDoc' || id==='planDoc') ? 'a6' : 'a5';
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm',format);
-  const pageW = pdf.internal.pageSize.getWidth(),
-        pageH = pdf.internal.pageSize.getHeight();
-
-  const clone = node.cloneNode(true);
-
-  // Remplace chaque canvas par image pour inclure signature
-  clone.querySelectorAll('canvas').forEach(c => {
-    const img = document.createElement('img');
-    img.src = c.toDataURL();
-    img.style.width = c.style.width || c.width/2 + 'px';
-    img.style.height = c.style.height || c.height/2 + 'px';
-    c.parentNode.replaceChild(img, c);
-  });
-
-  clone.style.width = pageW + "mm";
-  clone.style.fontSize = "10px";
-  clone.style.lineHeight = "1.2";
-  clone.style.padding = "4px";
-  clone.style.position = "fixed";
-  clone.style.left = "-9999px";
-  document.body.appendChild(clone);
-
-  const canvas = await html2canvas(clone,{scale:2,useCORS:true});
-  document.body.removeChild(clone);
-
-  const imgData = canvas.toDataURL("image/png");
-  const imgW = pageW, 
-        imgH = (canvas.height * imgW) / canvas.width;
-
+  const id=window.__doc, act=window.__act;
+  if(!id) return;
+  let node=document.getElementById(id);
+  if(id==='lettreDoc') node=document.getElementById('lettreTexte');
+  if(id==='planDoc') node=document.getElementById('planTexte');
+  const canvas=await html2canvas(node,{scale:2,useCORS:true});
+  const imgData=canvas.toDataURL('image/png');
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF('p','mm','a6');
+  const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
+  let imgW=w,imgH=(canvas.height*imgW)/canvas.width;
+  if(imgH>h){ const r=h/imgH; imgH*=r; imgW*=r; }
   pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
-
-  if(act==='pdf'){ 
-    pdf.save(id + '.pdf'); 
-    return; 
-  }
-
-  const blob=new Blob(
-    ['<html><body>'+node.innerHTML+'</body></html>'],
-    {type:'application/msword'}
-  );
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=id+'.doc';
-  a.click();
+  if(act==='pdf'){pdf.save(id+'.pdf'); return;}
+  const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.doc'; a.click();
 }
+
+// ---------- Boutons PDF / Word ----------
+document.querySelectorAll('.actions .btn').forEach(b=>{
+  b.addEventListener('click',()=>openPayment(b.dataset.doc,b.dataset.act));
+});
 </script>
 </body>
 </html>
