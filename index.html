@@ -1,89 +1,156 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tableau Utilisateurs - Lettre & Plan</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-    th { background: #333; color: #fff; }
-    .doc { padding: 10px; margin: 5px; border-radius: 8px; }
-    .lettre { background: #e6f7ff; }
-    .plan { background: #f0fff0; }
-    h3 { margin: 0 0 10px 0; }
-    button { background: #25D366; border: none; padding: 8px 12px; color: #fff; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #128C7E; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documents Utilisateurs</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; }
+h1 { text-align:center; margin-bottom:20px; }
+section { margin-bottom:50px; }
+.doc { padding:20px; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
+.cv { background:#e6f7ff; }
+.lettre { background:#fff0f6; }
+.plan { background:#f0fff0; }
+.photo-box { width:120px; height:140px; border:2px dashed #999; margin:0 auto 10px auto; display:flex; align-items:center; justify-content:center; font-size:12px; color:#777; border-radius:8px; }
+h2 { text-align:center; font-size:22px; margin-bottom:10px; }
+h3 { margin-top:10px; font-size:18px; }
+p { margin:5px 0; line-height:1.4; }
+strong { color:#333; }
+textarea { width:100%; padding:6px; margin:5px 0; border-radius:6px; border:1px solid #ccc; resize:vertical; }
+button { margin:5px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; }
+.pdfBtn { background:#007BFF; color:#fff; }
+.waBtn { background:#25D366; color:#fff; }
+canvas { display:block; margin:10px auto; border-radius:8px; }
+</style>
 </head>
 <body>
 
-<h1>📋 Tableau Utilisateurs</h1>
+<h1>📋 Documents Utilisateurs</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Nom</th>
-      <th>Lettre de Motivation</th>
-      <th>Plan de Localisation</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Jean Dupont</strong></td>
-      <td>
-        <div id="lettre1" class="doc lettre">
-          <h3>Lettre de Motivation</h3>
-          <p>Je souhaite rejoindre votre entreprise pour mettre en valeur mes compétences en développement web et contribuer à vos projets innovants.</p>
-        </div>
-        <button onclick="downloadPDFFromElement(document.getElementById('lettre1'),'Lettre_Jean.pdf')">📄 Télécharger Lettre</button>
-      </td>
-      <td>
-        <div id="plan1" class="doc plan">
-          <h3>Plan de Localisation</h3>
-          <p>Quartier Bastos, Yaoundé. Face au supermarché X.</p>
-        </div>
-        <button onclick="downloadPDFFromElement(document.getElementById('plan1'),'Plan_Jean.pdf')">📄 Télécharger Plan</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<!-- ================== CV ================== -->
+<section>
+<h2>📄 CV</h2>
+<div id="cvDoc" class="doc cv">
+  <div class="photo-box">📷 Photo</div>
+  <h1 contenteditable="true" id="cvNom">Nom Utilisateur</h1>
+  <h3 contenteditable="true" id="cvProfession">Profession</h3>
+  <p><strong>📧 Email :</strong> <span contenteditable="true" id="cvEmail">exemple@mail.com</span></p>
+  <p><strong>📱 Tel MTN :</strong> <span contenteditable="true" id="cvTel">677000000</span></p>
+  <p><strong>📱 Tel Orange :</strong> <span contenteditable="true" id="cvTelOrange">699000000</span></p>
+  <p><strong>📍 Adresse :</strong> <span contenteditable="true" id="cvAdresse">Ville, Quartier</span></p>
+  <p><strong>❤️ Situation matrimoniale :</strong> <span contenteditable="true" id="cvSituation">Célibataire</span></p>
+  <p><strong>🍺 Alcoolique :</strong> <span contenteditable="true" id="cvAlcool">Non</span></p>
+  <p><strong>🎓 Dernier diplôme :</strong> <span contenteditable="true" id="cvDiplome">Licence</span></p>
+  <p><strong>🎯 Loisirs :</strong> <span contenteditable="true" id="cvLoisirs">Lecture</span></p>
+  <p><strong>✨ Caractère :</strong> <span contenteditable="true" id="cvCaractere">Sociable</span></p>
+  <p><strong>🕌 Religion :</strong> <span contenteditable="true" id="cvReligion">Chrétien</span></p>
+  <p><strong>🌍 Région d'origine :</strong> <span contenteditable="true" id="cvRegion">Centre</span></p>
+  <p><strong>🎂 Âge :</strong> <span contenteditable="true" id="cvAge">25</span></p>
+  <p><strong>👨 Nom du père :</strong> <span contenteditable="true" id="cvNomPere">Père</span></p>
+  <p><strong>👩 Nom de la mère :</strong> <span contenteditable="true" id="cvNomMere">Mère</span></p>
+  <p><strong>💰 Dernier salaire :</strong> <span contenteditable="true" id="cvSalaire">200.000 FCFA</span></p>
+
+  <h3>✍️ Signature / annotations :</h3>
+  <canvas id="cvCanvas" width="300" height="100" style="border:2px dashed #2c3e50; background:#fff;"></canvas>
+  <div style="text-align:center; margin-top:5px;">
+    <button onclick="clearCanvas('cvCanvas')" class="btn">🧹 Effacer</button>
+  </div>
+
+  <div class="doc-buttons">
+    <button class="btn pdfBtn" onclick="downloadPDF('cvDoc')">📥 Télécharger PDF</button>
+    <button class="btn waBtn" onclick="shareWhatsApp('cvDoc')">📤 Partager WhatsApp</button>
+  </div>
+</div>
+</section>
+
+<!-- ================== Lettre ================== -->
+<section>
+<h2>✉️ Lettre de Motivation</h2>
+<div id="lettreDoc" class="doc lettre">
+  <h1 style="text-align:center; font-size:24px; font-weight:bold; color:#2980b9;">💌 Lettre de Motivation</h1>
+  <p><strong>👤 Nom :</strong> <span contenteditable="true" id="lettreNom">Jean Dupont</span></p>
+  <p><strong>🏢 Entreprise :</strong> <span contenteditable="true" id="lettreEntreprise">Exemple SARL</span></p>
+  <p><strong>💼 Poste :</strong> <span contenteditable="true" id="lettrePoste">Développeur Web</span></p>
+  <p contenteditable="true" id="lettreContenu" style="margin-top:10px; line-height:1.6;">
+    Je suis motivé à rejoindre votre équipe...
+  </p>
+
+  <h3>✍️ Signature / annotations :</h3>
+  <canvas id="lettreCanvas" width="300" height="100" style="border:2px dashed #2980b9; background:#fff;"></canvas>
+  <div style="text-align:center; margin-top:5px;">
+    <button onclick="clearCanvas('lettreCanvas')" class="btn">🧹 Effacer</button>
+  </div>
+
+  <div class="doc-buttons">
+    <button class="btn pdfBtn" onclick="downloadPDF('lettreDoc')">📥 Télécharger PDF</button>
+    <button class="btn waBtn" onclick="shareWhatsApp('lettreDoc')">📤 Partager WhatsApp</button>
+  </div>
+</div>
+</section>
+
+<!-- ================== Plan ================== -->
+<section>
+<h2>🗺️ Plan de Localisation</h2>
+<div id="planDoc" class="doc plan">
+  <h1 style="text-align:center; font-size:24px; font-weight:bold; color:#8e44ad;">🗺️ Plan de Localisation</h1>
+  <p><strong>🏠 Adresse :</strong> <span contenteditable="true" id="planLieu">Quartier XYZ</span></p>
+  <p contenteditable="true" id="planDetails">Près du marché central</p>
+
+  <h3>✍️ Signature / annotations :</h3>
+  <canvas id="planCanvas" width="300" height="100" style="border:2px dashed #8e44ad; background:#fff;"></canvas>
+  <div style="text-align:center; margin-top:5px;">
+    <button onclick="clearCanvas('planCanvas')" class="btn">🧹 Effacer</button>
+  </div>
+
+  <div class="doc-buttons">
+    <button class="btn pdfBtn" onclick="downloadPDF('planDoc')">📥 Télécharger PDF</button>
+    <button class="btn waBtn" onclick="shareWhatsApp('planDoc')">📤 Partager WhatsApp</button>
+  </div>
+</div>
+</section>
 
 <script>
-function downloadPDFFromElement(element, filename) {
-  html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
+// ================== Canevas Signature ==================
+function initCanvas(canvasId){
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+  canvas.addEventListener("mousedown",()=>drawing=true);
+  canvas.addEventListener("mouseup",()=>{drawing=false;ctx.beginPath();});
+  canvas.addEventListener("mouseout",()=>{drawing=false;ctx.beginPath();});
+  canvas.addEventListener("mousemove",(e)=>{if(!drawing)return; ctx.lineWidth=2; ctx.lineCap="round"; ctx.strokeStyle="#2c3e50"; ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY);});
+  // tactile
+  canvas.addEventListener("touchstart",(e)=>{e.preventDefault();drawing=true;});
+  canvas.addEventListener("touchend",()=>{drawing=false; ctx.beginPath();});
+  canvas.addEventListener("touchcancel",()=>{drawing=false; ctx.beginPath();});
+  canvas.addEventListener("touchmove",(e)=>{e.preventDefault(); if(!drawing)return; let rect=canvas.getBoundingClientRect(); let x=e.touches[0].clientX-rect.left; let y=e.touches[0].clientY-rect.top; ctx.lineWidth=2; ctx.lineCap="round"; ctx.strokeStyle="#2c3e50"; ctx.lineTo(x,y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x,y);});
+}
+function clearCanvas(id){const c=document.getElementById(id); c.getContext("2d").clearRect(0,0,c.width,c.height);}
+initCanvas('cvCanvas'); initCanvas('lettreCanvas'); initCanvas('planCanvas');
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+// ================== PDF ==================
+async function downloadPDF(docId){
+  const doc = document.getElementById(docId);
+  const canvas = await html2canvas(doc, { scale:2 });
+  const imgData = canvas.toDataURL('image/png');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({orientation:"p",unit:"pt",format:[canvas.width,canvas.height]});
+  pdf.addImage(imgData,'PNG',0,0,canvas.width,canvas.height);
+  pdf.save(docId+'.pdf');
+}
 
-    const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    if (imgHeight <= pdfHeight) {
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    } else {
-      let position = 0;
-      let heightLeft = imgHeight;
-
-      while (heightLeft > 0) {
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-        position -= pdfHeight;
-
-        if (heightLeft > 0) {
-          pdf.addPage();
-        }
-      }
-    }
-
-    pdf.save(filename);
-  });
+// ================== WhatsApp ==================
+async function shareWhatsApp(docId){
+  const doc = document.getElementById(docId);
+  const canvas = await html2canvas(doc, { scale:2 });
+  const imgData = canvas.toDataURL('image/png');
+  // encode en base64 pour WhatsApp Web
+  const text = "Voici mon document :\n\n";
+  const url = `https://wa.me/?text=${encodeURIComponent(text+imgData)}`;
+  window.open(url,'_blank');
 }
 </script>
 
