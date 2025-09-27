@@ -3,22 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Documents A6 Stables</title>
+<title>Documents A6 PWA</title>
+<link rel="manifest" id="manifest-placeholder">
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
 section{background:#fff;border-radius:10px;padding:12px;margin:10px auto;max-width:780px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
 h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
-.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;float:left;margin-right:12px;margin-bottom:6px;object-fit:cover;}
-.signature{border-radius:6px;border:1px solid #43a047;margin-top:4px;display:block;}
-.actions{display:flex;gap:8px;margin-top:8px;clear:both;}
+.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;object-fit:cover; float:left; margin-right:12px; margin-bottom:6px;}
+.signature{border-radius:6px;border:1px solid #43a047;margin-top:4px; display:block;}
+.actions{display:flex;gap:8px;margin-top:8px; clear:both;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
 .text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;overflow:auto;}
-#popup{width:90%;max-width:350px;background:#fff;border-radius:10px;padding:15px;border:2px solid #1e88e5;box-sizing:border-box;text-align:center;}
-#popup input,#popup textarea{width:100%;margin:6px 0;padding:6px;border-radius:4px;border:1px solid #ccc;}
-#popup button{margin-top:8px;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -27,11 +24,13 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 <!-- CV -->
 <section id="cvDoc">
 <h2>Curriculum Vitae</h2>
-<div style="position:relative;width:100%;">
-  <img id="cvPhoto" class="photo" src="" alt="Photo" style="width:120px;height:120px;">
+<div style="position:relative; width:100%;">
+  <img id="cvPhoto" class="photo" src="" alt="Photo" style="width:120px; height:120px;">
   <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
+  
   <div contenteditable="true" id="cvNomPrenom" style="font-weight:700;font-size:22px;">Nom Prénom</div>
   <div contenteditable="true" id="cvFonctionAge" style="font-size:14px;margin-top:4px;">Fonction - Âge</div>
+  
   <div id="cvInfos" style="margin-top:12px;">
     <div contenteditable="true">Situation matrimoniale: </div>
     <div contenteditable="true">Nombre d'enfants: </div>
@@ -39,16 +38,16 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
     <div contenteditable="true">Nationalité: </div>
     <div contenteditable="true">Ville de résidence: </div>
     <div contenteditable="true">Quartier: </div>
-    <div contenteditable="true">Alcoolique (oui/non): </div>
     <div contenteditable="true">Religion: </div>
-    <div contenteditable="true">Autres expériences: </div>
     <div contenteditable="true">Dernier diplôme: </div>
     <div contenteditable="true">Dernier établissement: </div>
     <div contenteditable="true">Dernier poste occupé: </div>
     <div contenteditable="true">Dernier salaire: </div>
   </div>
+
   <label class="muted">Signature</label>
-  <canvas id="cvSign" class="signature" style="height:100px;clear:both;"></canvas>
+  <canvas id="cvSign" class="signature" style="height:100px; clear:both;"></canvas>
+
   <div class="actions">
     <button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
     <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
@@ -59,13 +58,16 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 <!-- Lettre -->
 <section id="lettreDoc">
 <h2>Lettre de Motivation</h2>
-<div style="position:relative;width:100%;min-height:300px;">
-  <img id="lettrePhoto" class="photo" src="" alt="Photo" style="width:100px;height:100px;">
+<div style="position:relative; width:100%; min-height:300px;">
+  <img id="lettrePhoto" class="photo" src="" alt="Photo" style="width:100px; height:100px;">
   <input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
-  <div id="lettreTexte" contenteditable="true" class="text-area" style="min-height:200px;padding:10px;background-color:#e3f2fd;" data-placeholder="Cliquez ici pour taper votre lettre…">
+  
+  <div id="lettreTexte" contenteditable="true" class="text-area" style="min-height:200px; padding:10px; background-color:#e3f2fd;" data-placeholder="Cliquez ici pour taper votre lettre…">
     Cliquez ici pour taper votre lettre…
   </div>
-  <canvas id="lettreSign" class="signature" style="width:120px;height:60px;margin-top:8px;"></canvas>
+
+  <canvas id="lettreSign" class="signature" style="width:120px;height:60px; margin-top:8px;"></canvas>
+
   <div class="actions">
     <button class="btn" onclick="openPayment('lettreDoc','pdf')">PDF</button>
     <button class="btn" onclick="openPayment('lettreDoc','word')">Word</button>
@@ -76,62 +78,52 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 <!-- Plan -->
 <section id="planDoc">
 <h2>Plan de Localisation</h2>
-<div style="position:relative;width:100%;min-height:300px;">
-  <img id="planPhoto" class="photo" src="" alt="Photo" style="width:100px;height:100px;">
+<div style="position:relative; width:100%; min-height:300px;">
+  <img id="planPhoto" class="photo" src="" alt="Photo" style="width:100px; height:100px;">
   <input type="file" id="planPhotoInput" accept="image/*" style="display:none">
-  <div id="planTexte" contenteditable="true" class="text-area" style="min-height:200px;padding:10px;background-color:#e8f5e9;" data-placeholder="Cliquez ici pour décrire le plan…">
+
+  <div id="planTexte" contenteditable="true" class="text-area" style="min-height:200px; padding:10px; background-color:#e8f5e9;" data-placeholder="Cliquez ici pour décrire le plan…">
     Cliquez ici pour décrire le plan…
   </div>
-  <canvas id="planSign" class="signature" style="width:120px;height:60px;margin-top:8px;"></canvas>
+
+  <canvas id="planSign" class="signature" style="width:120px;height:60px; margin-top:8px;"></canvas>
+
   <div class="actions">
     <button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
     <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
   </div>
 </div>
-</section><!-- Popup Paiement -->
-<div id="popupOverlay">
-  <div id="popup">
-    <h3>Paiement requis</h3>
-    <p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-    <p>Prix unitaire: <strong>100 FCFA / unité</strong></p>
+</section>
 
-    <label>Quantité</label>
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-      <button type="button" id="minus" class="btn secondary">-</button>
-      <div id="mult">1</div>
-      <button type="button" id="plus" class="btn secondary">+</button>
-      <div style="margin-left:auto;">Total: <strong><span id="total">100</span> FCFA</strong></div>
-    </div>
-
-    <label>Message Mobile Money</label>
-    <textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
-
-    <label>ID Transaction</label>
-    <input id="tx" type="text" placeholder="ID transaction">
-
-    <label>Code admin (optionnel)</label>
-    <input id="admin" type="password" placeholder="Code admin">
-
-    <div class="actions" style="margin-top:10px;">
-      <button class="btn" id="validateBtn">Valider</button>
-      <button class="btn secondary" onclick="closePopup()">Annuler</button>
-    </div>
+<!-- Popup modèle -->
+<div id="popup" style="display:none;">
+  <h3>Paiement requis</h3>
+  <p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
+  <p>Prix unitaire: <strong>100 FCFA / unité</strong></p>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+    <button type="button" id="minus" class="btn secondary">-</button>
+    <div id="mult">1</div>
+    <button type="button" id="plus" class="btn secondary">+</button>
+    <div style="margin-left:auto;">Total: <strong><span id="total">100</span> FCFA</strong></div>
+  </div>
+  <label>Message Mobile Money</label>
+  <textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00" style="width:100%;margin:6px 0;padding:6px;"></textarea>
+  <label>ID Transaction</label>
+  <input id="tx" type="text" placeholder="ID transaction" style="width:100%;margin:6px 0;padding:6px;">
+  <label>Code admin (optionnel)</label>
+  <input id="admin" type="password" placeholder="Code admin" style="width:100%;margin:6px 0;padding:6px;">
+  <div class="actions" style="margin-top:10px;">
+    <button class="btn" id="validateBtn">Valider</button>
+    <button class="btn secondary" onclick="parent.closeIframe()">Annuler</button>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
-// --- Variables ---
-let currentDoc='', currentAct='';
-const UNIT=100, BENEF='Wirnkar Loveline', ADMIN='xz233233';
-let usedTransactions=[], multiplier=1;
-
-// --- Photos ---
+// Photo
 function handlePhoto(imgId,inputId){
-  const el=document.getElementById(imgId);
-  const input=document.getElementById(inputId);
+  const el=document.getElementById(imgId), input=document.getElementById(inputId);
   el.addEventListener('click',()=>input.click());
   input.addEventListener('change',e=>{
     const f=e.target.files[0]; if(!f) return;
@@ -140,87 +132,75 @@ function handlePhoto(imgId,inputId){
     reader.readAsDataURL(f);
   });
 }
-['cv','lettre','plan'].forEach(p=>handlePhoto(p+'Photo',p+'PhotoInput'));
+handlePhoto('cvPhoto','cvPhotoInput');
+handlePhoto('lettrePhoto','lettrePhotoInput');
+handlePhoto('planPhoto','planPhotoInput');
 
-// --- Signatures ---
+// Signature
 function makeSign(id){
   const c=document.getElementById(id); if(!c) return;
-  c.width=c.clientWidth*devicePixelRatio;
-  c.height=(id==='cvSign')?100*devicePixelRatio:60*devicePixelRatio;
+  c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio;
   const ctx=c.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
   ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
   let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect();return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
-  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
-  function move(e){if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();}
-  function end(){drawing=false; ctx.closePath();}
-  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move);
-  c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
-  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
+  function pos(e){const r=c.getBoundingClientRect(); if(e.touches) return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}; return{x:e.clientX-r.left,y:e.clientY-r.top};}
+  c.addEventListener('mousedown',e=>{drawing=true; ctx.beginPath(); ctx.moveTo(pos(e).x,pos(e).y);});
+  c.addEventListener('mousemove',e=>{if(drawing){ctx.lineTo(pos(e).x,pos(e).y); ctx.stroke();}});
+  c.addEventListener('mouseup',()=>drawing=false);
+  c.addEventListener('touchstart',e=>{drawing=true; ctx.beginPath(); ctx.moveTo(pos(e).x,pos(e).y);},{passive:false});
+  c.addEventListener('touchmove',e=>{if(drawing){ctx.lineTo(pos(e).x,pos(e).y); ctx.stroke();}},{passive:false});
+  c.addEventListener('touchend',()=>drawing=false);
 }
-['cvSign','lettreSign','planSign'].forEach(makeSign);
+makeSign('cvSign'); makeSign('lettreSign'); makeSign('planSign');
 
-// --- Placeholder ---
+// Placeholder
 function setupPlaceholder(id){
-  const el=document.getElementById(id);
-  const placeholder=el.getAttribute('data-placeholder');
+  const el=document.getElementById(id), placeholder=el.getAttribute('data-placeholder');
   el.addEventListener('focus',()=>{if(el.innerText===placeholder) el.innerText='';});
   el.addEventListener('blur',()=>{if(el.innerText.trim()==='') el.innerText=placeholder;});
 }
-['lettreTexte','planTexte'].forEach(setupPlaceholder);
+setupPlaceholder('lettreTexte'); setupPlaceholder('planTexte');
 
-// --- Export PDF/Word ---
-async function exportDoc(){
-  if(!currentDoc) return;
-  const node=document.getElementById(currentDoc);
-  if(!node) return;
-  const canvas=await html2canvas(node,{scale:2,useCORS:true,allowTaint:true});
-  const imgData=canvas.toDataURL('image/png');
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF('p','mm','a6');
-  const w=pdf.internal.pageSize.getWidth(), h=pdf.internal.pageSize.getHeight();
-  let imgW=w, imgH=(canvas.height*imgW)/canvas.width;
-  if(imgH>h){ const r=h/imgH; imgH*=r; imgW*=r; }
-  pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
-  if(currentAct==='pdf'){ pdf.save(currentDoc+'.pdf'); return; }
-  const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=currentDoc+'.doc'; a.click();
-}
-
-// --- Popup ---
+// Paiement via iframe
+let currentDoc='', currentAct='', multiplier=1, UNIT=100, BENEF='Wirnkar Loveline', ADMIN='xz233233', usedTransactions=[];
+function updateTotal(iframe){iframe.contentDocument.getElementById('mult').innerText=multiplier;iframe.contentDocument.getElementById('total').innerText=UNIT*multiplier;}
 function openPayment(doc,act){
-  currentDoc=doc; currentAct=act;
-  multiplier=1; updateTotal();
-  document.getElementById('msg').value=''; document.getElementById('tx').value=''; document.getElementById('admin').value='';
-  document.getElementById('popupOverlay').style.display='flex';
+  currentDoc=doc; currentAct=act; multiplier=1;
+  let iframe=document.createElement('iframe');
+  iframe.id='payFrame'; iframe.style.position='fixed'; iframe.style.top='10%'; iframe.style.left='50%'; iframe.style.transform='translateX(-50%)'; iframe.style.width='90%'; iframe.style.height='420px'; iframe.style.border='2px solid #1e88e5'; iframe.style.zIndex='9999'; iframe.style.background='#fff';
+  document.body.appendChild(iframe);
+  iframe.contentDocument.body.innerHTML=document.getElementById('popup').innerHTML;
+  iframe.contentDocument.getElementById('plus').onclick=()=>{multiplier++;updateTotal(iframe);};
+  iframe.contentDocument.getElementById('minus').onclick=()=>{if(multiplier>1) multiplier--;updateTotal(iframe);};
+  iframe.contentDocument.getElementById('validateBtn').onclick=()=>{validatePay(iframe);};
+  updateTotal(iframe);
 }
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
-
-// --- Multiplicateur ---
-function updateTotal(){ document.getElementById('mult').innerText=multiplier; document.getElementById('total').innerText=UNIT*multiplier; }
-document.getElementById('plus').onclick=function(){ multiplier++; updateTotal(); }
-document.getElementById('minus').onclick=function(){ if(multiplier>1) multiplier--; updateTotal(); }
-
-// --- Validation Paiement ---
-document.getElementById('validateBtn').onclick=function(){
-  const qty=multiplier;
-  const msg=document.getElementById('msg').value.trim();
-  const tx=document.getElementById('tx').value.trim();
-  const admin=document.getElementById('admin').value.trim();
-  const now=new Date();
-
-  if(admin===ADMIN){ exportDoc(); closePopup(); return; }
-
-  if(!msg || !tx){ alert("Message et ID requis"); return; }
-  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){ alert("Nom bénéficiaire incorrect"); return; }
-  const amt=parseInt(msg.match(/\d+/)?.[0],10);
-  if(amt!==UNIT*qty){ alert("Montant incorrect"); return; }
-  if(usedTransactions.some(t=>t.id===tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
-  const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
-  if(timeMatch){ const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("Heure transaction incorrecte (>10 min)"); return; } }
-  usedTransactions.push({id:tx,time:now});
-  exportDoc(); closePopup();
+function closeIframe(){const f=document.getElementById('payFrame'); if(f) f.remove();}
+function validatePay(iframe){
+  const d=iframe.contentDocument, msg=d.getElementById('msg').value.trim(), tx=d.getElementById('tx').value.trim(), admin=d.getElementById('admin').value.trim(), now=new Date();
+  if(admin===ADMIN){ exportDoc(); closeIframe(); return; }
+  if(!msg||!tx){alert("Message et ID requis"); return;}
+  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){alert("Nom bénéficiaire incorrect"); return;}
+  const amt=parseInt(msg.match(/\d+/)?.[0],10); if(amt!==UNIT*multiplier){alert("Montant incorrect"); return;}
+  if(usedTransactions.some(t=>t.id===tx)){alert("Transaction déjà utilisée !"); return;}
+  const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/); if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){alert("Heure incorrecte"); return;}}
+  usedTransactions.push({id:tx,time:now}); exportDoc(); closeIframe();
 }
+async function exportDoc(){
+  const node=document.getElementById(currentDoc); if(!node) return;
+  const canvas=await html2canvas(node,{scale:2,useCORS:true});
+  const imgData=canvas.toDataURL('image/png'); const {jsPDF}=window.jspdf; const pdf=new jsPDF('p','mm','a6');
+  const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
+  let imgW=w,imgH=(canvas.height*imgW)/canvas.width; if(imgH>h){const r=h/imgH; imgH*=r; imgW*=r;}
+  pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
+  if(currentAct==='pdf'){pdf.save(currentDoc+'.pdf');}
+  else{const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=currentDoc+'.doc'; a.click();}
+}
+
+// PWA manifest
+const manifest={"name":"Documents A6","short_name":"DocsA6","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#1e88e5","icons":[{"src":"https://via.placeholder.com/192","sizes":"192x192","type":"image/png"},{"src":"https://via.placeholder.com/512","sizes":"512x512","type":"image/png"}]};
+const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'}); const manifestURL=URL.createObjectURL(blob); document.getElementById('manifest-placeholder').setAttribute('href',manifestURL);
+if('serviceWorker' in navigator){navigator.serviceWorker.register(URL.createObjectURL(new Blob([`self.addEventListener('install',e=>self.skipWaiting()); self.addEventListener('fetch',e=>{});`],{type:'application/javascript'})));}
 </script>
 </body>
 </html>
