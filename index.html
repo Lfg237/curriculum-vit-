@@ -19,15 +19,17 @@ h2 { text-align:center; font-size:22px; margin-bottom:10px; }
 h3 { margin-top:10px; font-size:18px; }
 p { margin:5px 0; line-height:1.4; }
 strong { color:#333; }
-textarea, input[type=text] { width:100%; padding:6px; margin:5px 0; border-radius:6px; border:1px solid #ccc; resize:vertical; }
+textarea, input[type=text], input[type=password], input[type=file] { width:100%; padding:6px; margin:5px 0; border-radius:6px; border:1px solid #ccc; resize:vertical; }
 button { margin:5px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; }
 .pdfBtn { background:#007BFF; color:#fff; }
 .waBtn { background:#25D366; color:#fff; }
+.primary { background:#2980b9; color:#fff; }
 canvas { display:block; margin:10px auto; border-radius:8px; }
+#popupOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+#popup { background:#fff;padding:20px;border-radius:12px; max-width:400px; }
 </style>
 </head>
 <body>
-
 <h1>📋 Documents Utilisateurs</h1>
 
 <!-- ================== CV ================== -->
@@ -63,13 +65,11 @@ canvas { display:block; margin:10px auto; border-radius:8px; }
   </div>
 
   <div class="doc-buttons">
-    <button class="btn pdfBtn" onclick="downloadPDF('cvDoc')">📥 Télécharger PDF</button>
-    <button class="btn waBtn" onclick="shareWhatsApp('cvDoc')">📤 Partager WhatsApp</button>
+    <button class="btn pdfBtn" onclick="openPaymentPopup('cvDoc','pdf')">📥 Télécharger PDF</button>
+    <button class="btn waBtn" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
   </div>
 </div>
-</section>
-
-<!-- ================== Lettre ================== -->
+</section><!-- ================== Lettre ================== -->
 <section>
 <h2>✉️ Lettre de Motivation</h2>
 <div id="lettreDoc" class="doc lettre">
@@ -88,11 +88,13 @@ canvas { display:block; margin:10px auto; border-radius:8px; }
   </div>
 
   <div class="doc-buttons">
-    <button class="btn pdfBtn" onclick="downloadPDF('lettreDoc')">📥 Télécharger PDF</button>
-    <button class="btn waBtn" onclick="shareWhatsApp('lettreDoc')">📤 Partager WhatsApp</button>
+    <button class="btn pdfBtn" onclick="openPaymentPopup('lettreDoc','pdf')">📥 Télécharger PDF</button>
+    <button class="btn waBtn" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
   </div>
 </div>
-</section><!-- ================== Plan ================== -->
+</section>
+
+<!-- ================== Plan ================== -->
 <section>
 <h2>🗺️ Plan de Localisation</h2>
 <div id="planDoc" class="doc plan">
@@ -107,13 +109,35 @@ canvas { display:block; margin:10px auto; border-radius:8px; }
   </div>
 
   <div class="doc-buttons">
-    <button class="btn pdfBtn" onclick="downloadPDF('planDoc')">📥 Télécharger PDF</button>
-    <button class="btn waBtn" onclick="shareWhatsApp('planDoc')">📤 Partager WhatsApp</button>
+    <button class="btn pdfBtn" onclick="openPaymentPopup('planDoc','pdf')">📥 Télécharger PDF</button>
+    <button class="btn waBtn" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
   </div>
 </div>
 </section>
 
+<!-- ================== Popup Paiement ================== -->
+<div id="popupOverlay">
+  <div id="popup">
+    <h2>Paiement requis 💳</h2>
+    <p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
+    <p>MTN MoMo: 676353859 | OM: 640647072 | Montant: 100 FCFA</p>
+    <p>Durée de validité : 1h</p>
+    <textarea id="momoMsg" placeholder="Message Mobile Money reçu"></textarea>
+    <input type="text" id="transactionId" placeholder="ID Transaction">
+    <input type="text" id="additionalTime" placeholder="Ajouter du temps (min)">
+    <input type="password" id="adminCode" placeholder="Code Admin (optionnel)">
+    <div id="popupResult"></div>
+    <button onclick="validatePayment()" class="btn primary">✅ Valider Paiement</button>
+    <button onclick="closePopup()" class="btn">❌ Annuler</button>
+  </div>
+</div>
+
 <script>
+// ===== Variables =====
+let currentAction = null;
+let currentDocId = null;
+const PAYMENT_INFO = {nom:'Wirnkar Loveline', montant:100, phones:['676353859','640647072'], validTime:10}; // minutes
+
 // ===== Photo CV =====
 const photoInput = document.getElementById('cvPhotoInput');
 const photoPreview = document.getElementById('cvPhotoPreview');
@@ -128,7 +152,7 @@ photoInput.addEventListener('change', e => {
   reader.readAsDataURL(file);
 });
 
-// ===== Canevas signature =====
+// ===== Canevas =====
 function initCanvas(id){
   const canvas = document.getElementById(id);
   const ctx = canvas.getContext("2d");
@@ -147,11 +171,9 @@ function clearCanvas(id){
   const c=document.getElementById(id);
   c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
-initCanvas('cvCanvas');
-initCanvas('lettreCanvas');
-initCanvas('planCanvas');
+initCanvas('cvCanvas'); initCanvas('lettreCanvas'); initCanvas('planCanvas');
 
-// ===== Télécharger PDF =====
+// ===== PDF / WhatsApp =====
 async function downloadPDF(docId){
   const doc=document.getElementById(docId);
   const canvas=await html2canvas(doc, {scale:2});
@@ -162,13 +184,63 @@ async function downloadPDF(docId){
   pdf.addImage(imgData,'PNG',20,20,width-40,height-40);
   pdf.save(docId+'.pdf');
 }
-
-// ===== Partager WhatsApp =====
 function shareWhatsApp(docId){
   const doc=document.getElementById(docId);
   const text=doc.innerText || doc.textContent;
   const url=`https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(url,'_blank');
+}
+
+// ===== Popup Paiement =====
+function openPaymentPopup(docId, action){
+  currentDocId = docId;
+  currentAction = action; // 'pdf' ou 'wa'
+  document.getElementById('popupOverlay').style.display='flex';
+  document.getElementById('popupResult').innerHTML='';
+}
+function closePopup(){ document.getElementById('popupOverlay').style.display='none'; }
+
+function validatePayment(){
+  const admin = document.getElementById('adminCode').value;
+  if(admin === 'xz233233'){ // Code admin
+    closePopup();
+    if(currentAction==='pdf') downloadPDF(currentDocId);
+    else if(currentAction==='wa') shareWhatsApp(currentDocId);
+    return;
+  }
+
+  const msg = document.getElementById('momoMsg').value.toLowerCase();
+  const txId = document.getElementById('transactionId').value;
+  const addTime = parseInt(document.getElementById('additionalTime').value) || 0;
+  const now = new Date();
+
+  if(!msg.includes(PAYMENT_INFO.nom.toLowerCase())){
+    document.getElementById('popupResult').innerHTML='<span style="color:red;">Nom incorrect ❌</span>';
+    return;
+  }
+  const amtMatch = msg.match(/\d+/);
+  if(!amtMatch || parseInt(amtMatch[0])!==PAYMENT_INFO.montant){
+    document.getElementById('popupResult').innerHTML='<span style="color:red;">Montant incorrect ❌</span>';
+    return;
+  }
+  const dateMatch = msg.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
+  if(dateMatch){
+    const diff = (now - new Date(dateMatch[0]))/60000;
+    if(diff > PAYMENT_INFO.validTime){
+      document.getElementById('popupResult').innerHTML='<span style="color:red;">Temps écoulé ❌</span>';
+      return;
+    }
+  }
+
+  const currentExpiry = localStorage.getItem('abonnement') || 0;
+  const newExpiry = Math.max(currentExpiry, now.getTime()) + (PAYMENT_INFO.validTime+addTime)*60*1000;
+  localStorage.setItem('abonnement', newExpiry);
+
+  document.getElementById('popupResult').innerHTML='<span style="color:green;">✅ Vérifié !</span>';
+  closePopup();
+
+  if(currentAction==='pdf') downloadPDF(currentDocId);
+  else if(currentAction==='wa') shareWhatsApp(currentDocId);
 }
 </script>
 </body>
