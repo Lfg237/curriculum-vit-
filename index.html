@@ -5,88 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bureau de Documents</title>
 <style>
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 0;
-}
-header {
-    background: #00695c;
-    color: #fff;
-    text-align: center;
-    padding: 15px;
-    font-size: 22px;
-    font-weight: bold;
-}
-nav {
-    display: flex;
-    background: #004d40;
-}
-nav button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: #004d40;
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-}
-nav button.active {
-    background: #00796b;
-}
-section {
-    display: none;
-    padding: 20px;
-    margin: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-section.active {display: block;}
-#cvDoc {background: #fff3e0; border-left: 8px solid #ff6f00;}
-#lettreDoc {background: #e8f5e9; border-left: 8px solid #43a047;}
-#planDoc {background: #e3f2fd; border-left: 8px solid #1e88e5;}
-h2 {margin-top: 0; color: #333;}
-input, textarea {
-    width: 100%; padding: 8px; margin: 6px 0;
-    border: 2px solid #1e88e5; border-radius: 8px;
-}
-button.primary {
-    background: linear-gradient(45deg,#00c853,#b2ff59);
-    color: #fff; font-weight: bold;
-    border: none; padding: 10px 15px;
-    border-radius: 8px; margin-top: 10px;
-    cursor: pointer;
-}
-.cv-photo-preview {
-    width: 130px; height: 130px;
-    border: 3px dashed #ff6f00;
-    border-radius: 50%;
-    margin: 0 auto 10px auto;
-    background-size: cover;
-    background-position: center;
-    display: flex; align-items: center; justify-content: center;
-    color: #ff6f00; font-size: 13px; font-weight: bold;
-}
-canvas.signature-canvas {
-    border: 2px solid #43a047;
-    border-radius: 5px;
-    width: 100%; height: 100px;
-    margin-top: 10px;
-}
-.flex-row {display: flex; gap: 10px; justify-content: space-between;}
-/* Popup */
-#popupOverlay {
-    display:none; position:fixed; inset:0;
-    background:rgba(0,0,0,0.6);
-    justify-content:center; align-items:center; z-index:9999;
-}
-#popup {
-    border:3px solid #1e88e5; background:#fffde7;
-    padding:15px; border-radius:10px;
-    width:100%; max-width:400px;
-}
-#popup h2 {margin-top:0;}
+body{font-family:Arial,sans-serif;margin:0;background:#f5f5f5;}
+header{background:#00695c;color:#fff;text-align:center;padding:15px;font-size:22px;font-weight:bold;}
+nav{display:flex;background:#004d40;}
+nav button{flex:1;padding:12px;border:none;background:#004d40;color:white;cursor:pointer;font-weight:bold;}
+nav button.active{background:#00796b;}
+section{display:none;padding:20px;margin:20px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.2);}
+section.active{display:block;}
+h2{margin-top:0;color:#333;}
+input,textarea{width:100%;padding:8px;margin:6px 0;border:2px solid #1e88e5;border-radius:8px;}
+button.primary{background:linear-gradient(45deg,#00c853,#b2ff59);color:#fff;font-weight:bold;border:none;padding:10px 15px;border-radius:8px;margin-top:10px;cursor:pointer;}
+.cv-photo-preview{width:130px;height:130px;border:3px dashed #ff6f00;border-radius:50%;margin:0 auto 10px auto;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-size:13px;font-weight:bold;}
+canvas.signature-canvas{border:2px solid #43a047;border-radius:5px;width:100%;height:100px;margin-top:10px;}
+.flex-row{display:flex;gap:10px;justify-content:space-between;align-items:center;}
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:9999;}
+#popup{border:3px solid #1e88e5;background:#fffde7;padding:15px;border-radius:10px;width:100%;max-width:400px;}
+#popup h2{margin-top:0;}
+#timeDisplay{font-weight:bold;color:#d32f2f;margin-left:10px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -94,18 +29,19 @@ canvas.signature-canvas {
 <body>
 <header>📑 Bureau de Documents</header>
 <nav>
-    <button class="active" onclick="showSection('cvDoc',this)">CV</button>
-    <button onclick="showSection('lettreDoc',this)">Lettre</button>
-    <button onclick="showSection('planDoc',this)">Plan</button>
+<button class="active" onclick="showSection('cvDoc',this)">CV</button>
+<button onclick="showSection('lettreDoc',this)">Lettre</button>
+<button onclick="showSection('planDoc',this)">Plan</button>
 </nav>
+<div style="text-align:center;padding:5px;">Temps restant: <span id="timeDisplay">0</span> min</div>
 
 <!-- CV -->
 <section id="cvDoc" class="active">
 <h2>📄 CV</h2>
 <div class="cv-photo-preview" id="cvPhotoPreview">Importer photo</div>
 <input type="file" id="cvPhotoInput" accept="image/*">
-<h3 id="cvName" style="text-align:center;font-weight:bold;font-size:20px;">Nom Complet</h3>
-<p id="cvProfession" style="text-align:center;">Profession</p>
+<h3 id="cvName" style="text-align:center;font-weight:bold;font-size:20px;">Jean Dupont</h3>
+<p id="cvProfession" style="text-align:center;">Développeur Web</p>
 <input id="cvPrenom" placeholder="Prénom" value="Jean">
 <input id="cvNom" placeholder="Nom" value="Dupont">
 <input id="cvAge" placeholder="Âge" value="30 ans">
@@ -116,12 +52,12 @@ canvas.signature-canvas {
 <input id="cvDiplome" placeholder="Diplôme" value="Licence en Informatique">
 <input id="cvEtablissement" placeholder="Établissement" value="Université de Douala">
 <input id="cvEmail" placeholder="Email" value="jean.dupont@mail.com">
-<input id="cvTelMtn" placeholder="Tel MTN" value="+237 670000000">
-<input id="cvTelOrange" placeholder="Tel Orange" value="+237 690000000">
+<input id="cvTelMtn" placeholder="Tel MTN" value="+237670000000">
+<input id="cvTelOrange" placeholder="Tel Orange" value="+237690000000">
 <canvas id="cvCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="requestPayment('cvDoc','pdf')">📄 Télécharger PDF</button>
+<button class="primary" onclick="requestPayment('cvDoc','wa')">📤 Partager WhatsApp</button>
 </div>
 </section>
 
@@ -134,28 +70,28 @@ canvas.signature-canvas {
 <textarea id="lettreContenu" rows="6">Je vous écris afin de postuler au poste...</textarea>
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="requestPayment('lettreDoc','pdf')">📄 Télécharger PDF</button>
+<button class="primary" onclick="requestPayment('lettreDoc','wa')">📤 Partager WhatsApp</button>
 </div>
 </section>
 
 <!-- Plan -->
 <section id="planDoc">
 <h2>🗺️ Plan de Localisation</h2>
-<textarea id="planContenu" rows="6">Dessinez ou décrivez ici le plan de localisation...</textarea>
+<textarea id="planContenu" rows="6">Dessinez ou décrivez ici le plan...</textarea>
 <canvas id="planCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="requestPayment('planDoc','pdf')">📄 Télécharger PDF</button>
+<button class="primary" onclick="requestPayment('planDoc','wa')">📤 Partager WhatsApp</button>
 </div>
 </section>
 
-<!-- Popup -->
+<!-- Popup paiement -->
 <div id="popupOverlay">
 <div id="popup">
 <h2>Paiement requis</h2>
 <p>Bénéficiaire: Wirnkar Loveline</p>
-<p>Numéros: MTN +237 670000000 | Orange +237 690000000</p>
+<p>Numéros: MTN +237670000000 | Orange +237690000000</p>
 <p>Prix unitaire: <span id="unitPrice">100</span> FCFA / heure</p>
 <div class="flex-row">
 <label>Multiplier: <span id="multiplierDisplay">1</span></label>
@@ -163,7 +99,7 @@ canvas.signature-canvas {
 </div>
 <p>Total à payer: <span id="totalPrice">100</span> FCFA</p>
 <textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
-<input id="transactionId" placeholder="ID de transaction">
+<input id="transactionId" placeholder="ID transaction">
 <input id="adminCode" type="password" placeholder="Code admin">
 <div id="popupResult"></div>
 <div class="flex-row">
@@ -173,90 +109,82 @@ canvas.signature-canvas {
 </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-// ====== Navigation ======
+// Navigation
 function showSection(id,btn){
   document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
 }
-// ===== Signature =====
-function initSignatureCanvas(canvasId){
-  const canvas=document.getElementById(canvasId); if(!canvas) return;
-  const ctx=canvas.getContext('2d'); ctx.lineWidth=2; ctx.lineCap='round';
-  let drawing=false;
-  function getPos(e){const rect=canvas.getBoundingClientRect();
-    if(e.touches&&e.touches.length){return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};}
-    return {x:e.clientX-rect.left,y:e.clientY-rect.top};}
-  function start(e){drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault?.();}
-  function move(e){if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault?.();}
-  function end(){drawing=false;ctx.beginPath();}
-  canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);
-  canvas.addEventListener('mouseup',end);canvas.addEventListener('mouseleave',end);
-  canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',end);
-}
-['cvCanvas','lettreCanvas','planCanvas'].forEach(initSignatureCanvas);
 
-// ===== Photo CV =====
-document.getElementById('cvPhotoInput').addEventListener('change',(e)=>{
+// Signature
+function initSignature(canvasId){
+  const c=document.getElementById(canvasId); if(!c)return;
+  const ctx=c.getContext('2d'); ctx.lineWidth=2; ctx.lineCap='round';
+  let drawing=false;
+  function pos(e){const r=c.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
+  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.();}
+  function move(e){if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.();}
+  function end(){drawing=false; ctx.beginPath();}
+  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move);
+  c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
+  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
+}
+['cvCanvas','lettreCanvas','planCanvas'].forEach(initSignature);
+
+// Photo CV
+document.getElementById('cvPhotoInput').addEventListener('change',e=>{
   const file=e.target.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{document.getElementById('cvPhotoPreview').style.backgroundImage=`url(${ev.target.result})`;document.getElementById('cvPhotoPreview').textContent='';};
-  reader.readAsDataURL(file);
+  const reader=new FileReader(); reader.onload=ev=>{
+    document.getElementById('cvPhotoPreview').style.backgroundImage=`url(${ev.target.result})`;
+    document.getElementById('cvPhotoPreview').textContent='';
+  }; reader.readAsDataURL(file);
 });
 
-// ===== Popup paiement =====
-const ADMIN_CODE='xz233233'; const UNIT_PRICE=100;
-let multiplier=1, currentDocId='', currentAction='';
-function incrementMultiplier(){multiplier++;updatePopup();}
+// Paiement
+const ADMIN_CODE='xz233233';
+let multiplier=1, currentDoc='', currentAction='', remainingTime=0, timer=null;
+function incrementMultiplier(){multiplier++; updatePopup();}
 function updatePopup(){
   document.getElementById('multiplierDisplay').innerText=multiplier;
-  document.getElementById('totalPrice').innerText=UNIT_PRICE*multiplier;
+  document.getElementById('totalPrice').innerText=multiplier*100;
 }
-function openPaymentPopup(docId,action){
-  currentDocId=docId; currentAction=action; multiplier=1; updatePopup();
-  document.getElementById('momoMsg').value='';document.getElementById('transactionId').value='';document.getElementById('adminCode').value='';
-  document.getElementById('popupResult').innerHTML='';
-  document.getElementById('popupOverlay').style.display='flex';
+function requestPayment(doc,action){
+  if(remainingTime>0){proceed(doc,action); return;}
+  currentDoc=doc; currentAction=action; multiplier=1; updatePopup();
+  document.getElementById('momoMsg').value=''; document.getElementById('transactionId').value=''; document.getElementById('adminCode').value='';
+  document.getElementById('popupResult').innerHTML=''; document.getElementById('popupOverlay').style.display='flex';
 }
 function closePopup(){document.getElementById('popupOverlay').style.display='none';}
 function validatePayment(){
   const admin=document.getElementById('adminCode').value.trim();
-  if(admin===ADMIN_CODE){proceedAction();return;}
+  if(admin===ADMIN_CODE){setTime(10); closePopup(); proceed(currentDoc,currentAction); return;}
   const msg=document.getElementById('momoMsg').value.trim();
   const tx=document.getElementById('transactionId').value.trim();
-  if(!msg||!tx){document.getElementById('popupResult').innerHTML="<span style='color:red'>Message et ID requis.</span>";return;}
-  if(!msg.includes("Wirnkar")){document.getElementById('popupResult').innerHTML="<span style='color:red'>Bénéficiaire incorrect.</span>";return;}
-  const amount=UNIT_PRICE*multiplier;
-  if(!msg.includes(amount)){document.getElementById('popupResult').innerHTML="<span style='color:red'>Montant incorrect.</span>";return;}
-  proceedAction();
+  if(!msg||!tx){document.getElementById('popupResult').innerText='Entrez le message et l’ID.'; return;}
+  setTime(10); closePopup(); proceed(currentDoc,currentAction);
 }
-function proceedAction(){
-  closePopup();
-  const doc=document.getElementById(currentDocId);
-  if(currentAction==='pdf') generatePDF(doc,currentDocId);
-  else if(currentAction==='wa') shareWhatsApp(doc);
-}
+function setTime(min){remainingTime=min; document.getElementById('timeDisplay').innerText=remainingTime; if(timer) clearInterval(timer);
+timer=setInterval(()=>{remainingTime--; document.getElementById('timeDisplay').innerText=remainingTime; if(remainingTime<=0){clearInterval(timer);timer=null;}},60000);}
 
-// ===== PDF & WhatsApp =====
-function generatePDF(element,docIdForName){
-  const clone=element.cloneNode(true);
-  clone.querySelectorAll("button").forEach(b=>b.remove());
-  html2canvas(clone,{scale:2}).then(canvas=>{
+// PDF & WhatsApp
+function proceed(doc,action){
+  const el=document.getElementById(doc); if(!el) return;
+  if(action==='pdf'){html2canvas(el,{scale:2}).then(canvas=>{
     const img=canvas.toDataURL('image/png');
-    const {jsPDF}=window.jspdf;
+    const { jsPDF }=window.jspdf;
     const pdf=new jsPDF('p','mm','a4');
     const w=pdf.internal.pageSize.getWidth();
     const h=(canvas.height* w)/canvas.width;
-    pdf.addImage(img,'PNG',0,0,w,h);
-    pdf.save(docIdForName+'.pdf');
-  });
-}
-function shareWhatsApp(element){
-  const text=element.innerText.slice(0,500);
-  const url=`https://wa.me/?text=${encodeURIComponent(text)}`;
-  window.open(url,'_blank');
+    pdf.addImage(img,'PNG',0,0,w,h); pdf.save(doc+'.pdf');
+  });}else if(action==='wa'){html2canvas(el,{scale:2}).then(c=>{
+    const text=el.innerText.slice(0,1000);
+    const img=c.toDataURL(); window.open(`https://wa.me/?text=${encodeURIComponent(text+'\n'+img)}`,'_blank');
+  });}
 }
 </script>
 </body>
