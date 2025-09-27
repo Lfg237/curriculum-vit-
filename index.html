@@ -9,23 +9,11 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
 section{background:#fff;border-radius:10px;padding:12px;margin:10px auto;max-width:780px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
 h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
-.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;object-fit:cover; float:left; margin-right:12px; margin-bottom:6px;}
-.signature{border-radius:6px;border:1px solid #43a047;margin-top:4px; display:block;}
-.actions{display:flex;gap:8px;margin-top:8px; clear:both;}
+.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;float:left;margin-right:12px;margin-bottom:6px;object-fit:cover;}
+.signature{border-radius:6px;border:1px solid #43a047;margin-top:4px;display:block;}
+.actions{display:flex;gap:8px;margin-top:8px;clear:both;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
-#popupOverlay{
-  display:none !important;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-#popup{width:100%;max-width:420px;background:#fff;border-radius:10px;padding:12px;border:3px solid #1e88e5;box-sizing:border-box;text-align:center;}
-label{font-size:13px;display:block;margin-top:6px;}
-.muted{color:#666;font-size:13px;}
 .text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
 </style>
 </head>
@@ -35,8 +23,8 @@ label{font-size:13px;display:block;margin-top:6px;}
 <!-- CV -->
 <section id="cvDoc">
 <h2>Curriculum Vitae</h2>
-<div style="position:relative; width:100%;">
-  <img id="cvPhoto" class="photo" src="" alt="Photo" style="width:120px; height:120px;">
+<div style="position:relative;width:100%;">
+  <img id="cvPhoto" class="photo" src="" alt="Photo" style="width:120px;height:120px;">
   <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
   <div contenteditable="true" id="cvNomPrenom" style="font-weight:700;font-size:22px;">Nom Prénom</div>
   <div contenteditable="true" id="cvFonctionAge" style="font-size:14px;margin-top:4px;">Fonction - Âge</div>
@@ -56,81 +44,56 @@ label{font-size:13px;display:block;margin-top:6px;}
     <div contenteditable="true">Dernier salaire: </div>
   </div>
   <label class="muted">Signature</label>
-  <canvas id="cvSign" class="signature" style="height:100px; clear:both;"></canvas>
+  <canvas id="cvSign" class="signature" style="height:100px;clear:both;"></canvas>
   <div class="actions">
-    <button class="btn">PDF</button>
-    <button class="btn">Word</button>
+    <button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
   </div>
 </div>
 </section>
 
-<!-- Lettre de Motivation -->
+<!-- Lettre -->
 <section id="lettreDoc">
 <h2>Lettre de Motivation</h2>
-<div style="position:relative; width:100%; min-height:300px;">
-  <img id="lettrePhoto" class="photo" src="" alt="Photo" style="width:100px; height:100px;">
+<div style="position:relative;width:100%;min-height:300px;">
+  <img id="lettrePhoto" class="photo" src="" alt="Photo" style="width:100px;height:100px;">
   <input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
-  <div id="lettreTexte" contenteditable="true" class="text-area" style="min-height:200px; padding:10px; background-color:#e3f2fd;" data-placeholder="Cliquez ici pour taper votre lettre…">
+  <div id="lettreTexte" contenteditable="true" class="text-area" style="min-height:200px;padding:10px;background-color:#e3f2fd;" data-placeholder="Cliquez ici pour taper votre lettre…">
     Cliquez ici pour taper votre lettre…
   </div>
-  <canvas id="lettreSign" class="signature" style="width:120px;height:60px; margin-top:8px;"></canvas>
+  <canvas id="lettreSign" class="signature" style="width:120px;height:60px;margin-top:8px;"></canvas>
   <div class="actions">
-    <button class="btn">PDF</button>
-    <button class="btn">Word</button>
+    <button class="btn" onclick="openPayment('lettreDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('lettreDoc','word')">Word</button>
   </div>
 </div>
 </section>
 
-<!-- Plan de Localisation -->
+<!-- Plan -->
 <section id="planDoc">
 <h2>Plan de Localisation</h2>
-<div style="position:relative; width:100%; min-height:300px;">
-  <img id="planPhoto" class="photo" src="" alt="Photo" style="width:100px; height:100px;">
+<div style="position:relative;width:100%;min-height:300px;">
+  <img id="planPhoto" class="photo" src="" alt="Photo" style="width:100px;height:100px;">
   <input type="file" id="planPhotoInput" accept="image/*" style="display:none">
-  <div id="planTexte" contenteditable="true" class="text-area" style="min-height:200px; padding:10px; background-color:#e8f5e9;" data-placeholder="Cliquez ici pour décrire le plan…">
+  <div id="planTexte" contenteditable="true" class="text-area" style="min-height:200px;padding:10px;background-color:#e8f5e9;" data-placeholder="Cliquez ici pour décrire le plan…">
     Cliquez ici pour décrire le plan…
   </div>
-  <canvas id="planSign" class="signature" style="width:120px;height:60px; margin-top:8px;"></canvas>
+  <canvas id="planSign" class="signature" style="width:120px;height:60px;margin-top:8px;"></canvas>
   <div class="actions">
-    <button class="btn">PDF</button>
-    <button class="btn">Word</button>
+    <button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
   </div>
 </div>
 </section>
-
-<!-- Popup Paiement -->
-<div id="popupOverlay">
-  <div id="popup">
-    <h3>Paiement requis</h3>
-    <p class="muted">Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-    <p class="muted">Prix unitaire: <strong>100 FCFA / unité</strong></p>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
-      <button onclick="multPlus()" class="btn secondary">+</button>
-      <div class="muted">Quantité: <span id="mult">1</span></div>
-      <button onclick="multMinus()" class="btn secondary">-</button>
-      <div style="margin-left:auto;" class="muted">Total: <strong><span id="total">100</span> FCFA</strong></div>
-    </div>
-    <label>Message Mobile Money</label>
-    <textarea id="momo" placeholder="Ex : Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
-    <label>ID Transaction</label>
-    <input id="tx" type="text" placeholder="ID transaction">
-    <label>Code admin (optionnel)</label>
-    <input id="admin" type="password" placeholder="Code admin">
-    <div class="actions" style="margin-top:10px;">
-      <button class="btn" onclick="validatePay()">Valider</button>
-      <button class="btn secondary" onclick="closePopup()">Annuler</button>
-    </div>
-  </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// --- Variables globales ---
-let multiplier=1,UNIT=100,BENEF='Wirnkar Loveline',ADMIN='xz233233';
-let usedTransactions=[];
-let currentDoc='',currentAct='';
+// Global variables
+let currentDoc='', currentAct='';
+const UNIT = 100, BENEF='Wirnkar Loveline', ADMIN='xz233233';
+let usedTransactions = [];
 
 // --- Photos ---
 function handlePhoto(imgId,inputId){
@@ -144,21 +107,18 @@ function handlePhoto(imgId,inputId){
     reader.readAsDataURL(f);
   });
 }
-handlePhoto('cvPhoto','cvPhotoInput');
-handlePhoto('lettrePhoto','lettrePhotoInput');
-handlePhoto('planPhoto','planPhotoInput');
+['cv','lettre','plan'].forEach(prefix=>handlePhoto(prefix+'Photo',prefix+'PhotoInput'));
 
 // --- Signatures ---
 function makeSign(id){
   const c=document.getElementById(id);
-  if(!c)return;
+  if(!c) return;
   c.width=c.clientWidth*devicePixelRatio;
   c.height=(id==='cvSign')?100*devicePixelRatio:60*devicePixelRatio;
-  const ctx=c.getContext('2d');
-  ctx.scale(devicePixelRatio,devicePixelRatio);
+  const ctx=c.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
   ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
   let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect(); if(e.touches && e.touches[0]) return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}; return{x:e.clientX-r.left,y:e.clientY-r.top};}
+  function pos(e){const r=c.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
   function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
   function move(e){if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();}
   function end(){drawing=false; ctx.closePath();}
@@ -166,7 +126,7 @@ function makeSign(id){
   c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
   c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
 }
-makeSign('cvSign'); makeSign('lettreSign'); makeSign('planSign');
+['cvSign','lettreSign','planSign'].forEach(makeSign);
 
 // --- Placeholder ---
 function setupPlaceholder(id){
@@ -175,42 +135,19 @@ function setupPlaceholder(id){
   el.addEventListener('focus',()=>{if(el.innerText===placeholder) el.innerText='';});
   el.addEventListener('blur',()=>{if(el.innerText.trim()==='') el.innerText=placeholder;});
 }
-setupPlaceholder('lettreTexte'); setupPlaceholder('planTexte');
-
-// --- Popup & Téléchargement ---
-function multPlus(){multiplier++;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function multMinus(){if(multiplier>1) multiplier--;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function openPayment(doc,act){currentDoc=doc; currentAct=act; document.getElementById('popupOverlay').style.display='flex';}
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
-
-function validatePay(){
-  const admin=document.getElementById('admin').value.trim();
-  const msg=document.getElementById('momo').value.trim();
-  const tx=document.getElementById('tx').value.trim();
-  const now=new Date();
-  if(admin===ADMIN){ exportDoc(); closePopup(); return; }
-  if(!msg || !tx){ alert("Message et ID requis"); return; }
-  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){ alert("Nom bénéficiaire incorrect"); return; }
-  const amt=parseInt(msg.match(/\d+/)?.[0],10);
-  if(amt!==UNIT*multiplier){ alert("Montant incorrect"); return; }
-  if(usedTransactions.some(t=>t.id===tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
-  const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
-  if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("Heure transaction incorrecte (>10 min)"); return; }}
-  usedTransactions.push({id:tx,time:now});
-  exportDoc(); closePopup();
-}
+['lettreTexte','planTexte'].forEach(setupPlaceholder);
 
 // --- Export PDF/Word ---
 async function exportDoc(){
   if(!currentDoc) return;
-  const node=document.getElementById(currentDoc);
+  let node=document.getElementById(currentDoc);
   if(!node) return;
   const canvas=await html2canvas(node,{scale:2,useCORS:true,allowTaint:true});
   const imgData=canvas.toDataURL('image/png');
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF('p','mm','a6');
-  const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
-  let imgW=w,imgH=(canvas.height*imgW)/canvas.width;
+  const w=pdf.internal.pageSize.getWidth(), h=pdf.internal.pageSize.getHeight();
+  let imgW=w, imgH=(canvas.height*imgW)/canvas.width;
   if(imgH>h){ const r=h/imgH; imgH*=r; imgW*=r; }
   pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
   if(currentAct==='pdf'){ pdf.save(currentDoc+'.pdf'); return; }
@@ -218,16 +155,59 @@ async function exportDoc(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=currentDoc+'.doc'; a.click();
 }
 
-// --- Attacher événements boutons PDF/Word après DOM ---
-document.addEventListener('DOMContentLoaded', ()=>{
-  document.querySelectorAll('section .btn').forEach(btn=>{
-    btn.addEventListener('click', function(){
-      const act = btn.textContent.toLowerCase().includes('pdf') ? 'pdf' : 'word';
-      const doc = btn.closest('section').id;
-      openPayment(doc,act);
-    });
-  });
-});
+// --- Popup iframe payment ---
+function openPayment(doc, act){
+  currentDoc = doc; currentAct = act;
+  const old = document.getElementById('iframePopup');
+  if(old) old.remove();
+
+  const iframe = document.createElement('iframe');
+  iframe.id='iframePopup';
+  iframe.style.position='fixed'; iframe.style.top='0'; iframe.style.left='0';
+  iframe.style.width='100%'; iframe.style.height='100%'; iframe.style.border='none'; iframe.style.zIndex='9999';
+  iframe.srcdoc = `
+  <html><head><meta charset="UTF-8"><title>Paiement</title>
+  <style>body{margin:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);font-family:sans-serif;}
+  #popup{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:400px;text-align:center;}
+  input,textarea{width:100%;margin:6px 0;padding:6px;border-radius:4px;border:1px solid #ccc;}
+  button{margin-top:8px;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;}</style>
+  </head><body>
+  <div id="popup">
+  <h3>Paiement requis</h3>
+  <p>Bénéficiaire: <strong>${BENEF}</strong></p>
+  <p>Prix: <strong>${UNIT} FCFA / unité</strong></p>
+  <label>Quantité</label><input id="qty" type="number" value="1" min="1">
+  <label>Message Mobile Money</label><textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
+  <label>ID Transaction</label><input id="tx" type="text" placeholder="ID transaction">
+  <label>Code admin (optionnel)</label><input id="admin" type="password" placeholder="Code admin">
+  <div><button id="validate">Valider</button> <button id="cancel">Annuler</button></div>
+  </div>
+  <script>
+  const UNIT=${UNIT},BENEF="${BENEF}",ADMIN="${ADMIN}";
+  let usedTransactions=[];
+  document.getElementById('cancel').onclick=()=>parent.document.getElementById('iframePopup').remove();
+  document.getElementById('validate').onclick=()=>{
+    const admin=document.getElementById('admin').value.trim();
+    const msg=document.getElementById('msg').value.trim();
+    const tx=document.getElementById('tx').value.trim();
+    const qty=parseInt(document.getElementById('qty').value,10)||1;
+    const now=new Date();
+    if(admin===ADMIN){parent.exportDoc();parent.document.getElementById('iframePopup').remove();return;}
+    if(!msg||!tx){alert("Message et ID requis");return;}
+    if(!msg.toLowerCase().includes(BENEF.toLowerCase())){alert("Nom bénéficiaire incorrect");return;}
+    const amt=parseInt(msg.match(/\\d+/)?.[0],10);
+    if(amt!==UNIT*qty){alert("Montant incorrect");return;}
+    if(usedTransactions.some(t=>t.id===tx)){alert("Cette transaction a déjà été utilisée !");return;}
+    const timeMatch=msg.match(/\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}/);
+    if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){alert("Heure transaction incorrecte (>10 min)");return;}}
+    usedTransactions.push({id:tx,time:now});
+    parent.exportDoc();
+    parent.document.getElementById('iframePopup').remove();
+  };
+  </script>
+  </body></html>`;
+  document.body.appendChild(iframe);
+}
 </script>
 </body>
 </html>
