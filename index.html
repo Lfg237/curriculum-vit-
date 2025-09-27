@@ -16,7 +16,17 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 .actions{display:flex;gap:8px;margin-top:8px; clear:both;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999;}
+#popupOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  z-index:99999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
 #popup{width:100%;max-width:420px;background:#fff;border-radius:10px;padding:12px;border:3px solid #1e88e5;box-sizing:border-box;}
 label{font-size:13px;display:block;margin-top:6px;}
 .muted{color:#666;font-size:13px;}
@@ -218,4 +228,4 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 </body>
-</html> 
+</html>
