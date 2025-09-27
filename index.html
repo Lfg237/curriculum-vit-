@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mes Documents A5</title>
+<title>Mes Documents A5 Optimisés</title>
 <style>
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
@@ -25,7 +25,6 @@ section {
 #planDoc {background: #e3f2fd; border-left: 6px solid #1e88e5;}
 
 .flex-row {display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px;}
-
 .photo-preview {
   width: 90px; height: 90px;
   border: 2px dashed #ff6f00;
@@ -40,7 +39,6 @@ section {
   font-weight: bold;
   cursor:pointer;
 }
-
 input, textarea {
   width: 100%;
   padding: 6px;
@@ -49,12 +47,23 @@ input, textarea {
   border-radius: 6px;
   font-size: 13px;
 }
-
 canvas.signature-canvas {
   border: 1.5px solid #43a047;
   border-radius: 5px;
   width: 100%;
   height: 80px;
+}
+/* Lettre : signature réduite, boutons plus petits, zone texte large */
+#lettreDoc .signature-canvas { height: 50px; }
+#lettreDoc .flex-row button.primary { padding:4px 6px; font-size:12px; }
+#lettreTexteDisplay {
+  width:100%;
+  min-height:200px;
+  border:1px solid #1e88e5;
+  border-radius:5px;
+  padding:6px;
+  overflow:auto;
+  background:#f9f9f9;
 }
 
 /* Popup paiement */
@@ -77,13 +86,22 @@ button.primary {
 </head>
 <body>
 
-<h1>📄 Mes Documents A5</h1>
+<h1>📄 Mes Documents A5 Optimisés</h1>
 
 <!-- ===== CV ===== -->
 <section id="cvDoc">
 <h2>CV</h2>
 <div style="display:flex; gap:10px; align-items:flex-start;">
-  <div class="photo-preview" id="cvPhotoPreview">Cliquer pour photo</div>
+  <div>
+    <div class="photo-preview" id="cvPhotoPreview">Cliquer pour photo</div>
+    <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+      <input id="cvSituation" placeholder="Situation matrimoniale">
+      <input id="cvExperience" placeholder="Autre expérience">
+      <input id="cvEnfants" placeholder="Nombre d'enfants">
+      <input id="cvCaractere" placeholder="Caractère">
+      <input id="cvDiplome" placeholder="Dernier diplôme">
+    </div>
+  </div>
   <div style="flex:1;">
     <input id="cvPrenom" placeholder="Prénom">
     <input id="cvNom" placeholder="Nom">
@@ -112,13 +130,16 @@ button.primary {
     <input id="lettreNom" placeholder="Nom">
     <input id="lettrePrenom" placeholder="Prénom">
     <input id="lettrePoste" placeholder="Poste souhaité">
-    <textarea id="lettreTexte" placeholder="Écrire votre lettre ici..." rows="6"></textarea>
+    <!-- zone texte lecture seule -->
+    <div id="lettreTexteDisplay"></div>
+    <!-- champ texte caché pour saisie -->
+    <textarea id="lettreTexte" placeholder="Écrire votre lettre ici..." rows="4" style="display:none;"></textarea>
   </div>
 </div>
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-  <button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
-  <button class="primary" onclick="openPaymentPopup('lettreDoc','word')">📄 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 PDF</button>
+  <button class="primary" onclick="openPaymentPopup('lettreDoc','word')">📄 Word</button>
 </div>
 <input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
 </section>
@@ -203,6 +224,14 @@ function initPhotoPreview(photoId, inputId){
 initPhotoPreview('cvPhotoPreview','cvPhotoInput');
 initPhotoPreview('lettrePhotoPreview','lettrePhotoInput');
 
+// Lettre texte lecture seule
+const lettreTexteDisplay = document.getElementById('lettreTexteDisplay');
+const lettreTexteInput = document.getElementById('lettreTexte');
+lettreTexteInput.addEventListener('input', ()=>{
+  lettreTexteDisplay.innerText = lettreTexteInput.value;
+});
+
+// Popup paiement
 function incrementMultiplier(){ multiplier++; updatePopup(); }
 function decrementMultiplier(){ if(multiplier>1){multiplier--; updatePopup();} }
 function updatePopup(){document.getElementById('multiplierDisplay').innerText=multiplier; document.getElementById('totalAmount').innerText=multiplier*UNIT_PRICE;}
