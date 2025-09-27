@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tableau Utilisateurs - CV / Lettre / Plan</title>
+  <title>Tableau Utilisateurs - Lettre & Plan</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
@@ -12,7 +12,6 @@
     th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
     th { background: #333; color: #fff; }
     .doc { padding: 10px; margin: 5px; border-radius: 8px; }
-    .cv { background: #fdf6e3; }
     .lettre { background: #e6f7ff; }
     .plan { background: #f0fff0; }
     h3 { margin: 0 0 10px 0; }
@@ -28,7 +27,6 @@
   <thead>
     <tr>
       <th>Nom</th>
-      <th>CV</th>
       <th>Lettre de Motivation</th>
       <th>Plan de Localisation</th>
     </tr>
@@ -36,16 +34,6 @@
   <tbody>
     <tr>
       <td><strong>Jean Dupont</strong></td>
-      <td>
-        <div id="cv1" class="doc cv">
-          <h3>Jean Dupont</h3>
-          <p><strong>Profession :</strong> Développeur</p>
-          <p><strong>Email :</strong> jean@mail.com</p>
-          <p><strong>Tél MTN :</strong> 670000000</p>
-          <p><strong>Tél Orange :</strong> 690000000</p>
-        </div>
-        <button onclick="downloadPDFFromElement(document.getElementById('cv1'),'CV_Jean.pdf')">📄 Télécharger CV</button>
-      </td>
       <td>
         <div id="lettre1" class="doc lettre">
           <h3>Lettre de Motivation</h3>
