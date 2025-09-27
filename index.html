@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Documents A6 Stables</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00695c">
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
@@ -107,7 +105,6 @@ label{font-size:13px;display:block;margin-top:6px;}
 <div id="popup">
 <h3>Paiement requis</h3>
 <p class="muted">Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-<p class="muted">Numéros: MTN 676353859 / Orange 640647072</p>
 <p class="muted">Prix unitaire: <strong>100 FCFA / unité</strong></p>
 <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
 <button onclick="multPlus()" class="btn secondary">+</button>
@@ -179,9 +176,17 @@ setupPlaceholder('lettreTexte'); setupPlaceholder('planTexte');
 // Popup paiement
 let multiplier=1,UNIT=100,BENEF='Wirnkar Loveline',ADMIN='xz233233';
 let usedTransactions=[];
+let currentDoc='',currentAct='';
+
 function multPlus(){multiplier++;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
 function multMinus(){if(multiplier>1) multiplier--;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function openPayment(id,act){window.__doc=id;window.__act=act;document.getElementById('popupOverlay').style.display='flex';}
+
+function openPayment(id,act){
+  currentDoc=id;
+  currentAct=act;
+  document.getElementById('popupOverlay').style.display='flex';
+}
+
 function closePopup(){document.getElementById('popupOverlay').style.display='none';}
 
 function validatePay(){
@@ -189,7 +194,9 @@ function validatePay(){
   const msg=document.getElementById('momo').value.trim();
   const tx=document.getElementById('tx').value.trim();
   const now=new Date();
+
   if(admin===ADMIN){ exportDoc(); closePopup(); return; }
+
   if(!msg || !tx){ alert("Message et ID requis"); return; }
   if(!msg.toLowerCase().includes(BENEF.toLowerCase())){ alert("Nom bénéficiaire incorrect"); return; }
   const amt=parseInt(msg.match(/\d+/)?.[0],10);
@@ -197,15 +204,15 @@ function validatePay(){
   if(usedTransactions.some(t=>t.id===tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
   const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
   if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("L'heure de la transaction est incorrecte (>10 min)"); return; }}
+  
   usedTransactions.push({id:tx,time:now});
-  exportDoc(); closePopup();
+  exportDoc();
+  closePopup();
 }
 
 // Export PDF/Word
 async function exportDoc(){
-  const id=window.__doc,act=window.__act;
-  if(!id) return;
-  let node=document.getElementById(id);
+  const node=document.getElementById(currentDoc);
   if(!node) return;
   const canvas=await html2canvas(node,{scale:2,useCORS:true,allowTaint:true});
   const imgData=canvas.toDataURL('image/png');
@@ -215,16 +222,9 @@ async function exportDoc(){
   let imgW=w,imgH=(canvas.height*imgW)/canvas.width;
   if(imgH>h){ const r=h/imgH; imgH*=r; imgW*=r; }
   pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
-  if(act==='pdf'){ pdf.save(id+'.pdf'); return; }
+  if(currentAct==='pdf'){ pdf.save(currentDoc+'.pdf'); return; }
   const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.doc'; a.click();
-}
-
-// Service Worker PWA
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js")
-    .then(reg => console.log("Service Worker enregistré!", reg))
-    .catch(err => console.log("Erreur SW:", err));
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=currentDoc+'.doc'; a.click();
 }
 </script>
 </body>
