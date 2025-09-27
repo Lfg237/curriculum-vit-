@@ -3,86 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bureau de Documents</title>
+<title>CV / Lettre / Plan</title>
 <style>
-body{font-family:Arial,sans-serif;margin:0;background:#f5f5f5;}
-header{background:#00695c;color:#fff;text-align:center;padding:15px;font-size:22px;font-weight:bold;}
-nav{display:flex;background:#004d40;}
-nav button{flex:1;padding:12px;border:none;background:#004d40;color:white;cursor:pointer;font-weight:bold;}
-nav button.active{background:#00796b;}
-section{display:none;padding:20px;margin:20px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.2);}
-section.active{display:block;}
-h2{margin-top:0;color:#333;}
-input,textarea{width:100%;padding:8px;margin:6px 0;border:2px solid #1e88e5;border-radius:8px;}
-button.primary{background:linear-gradient(45deg,#00c853,#b2ff59);color:#fff;font-weight:bold;border:none;padding:10px 15px;border-radius:8px;margin-top:10px;cursor:pointer;}
-.cv-photo-preview{width:130px;height:130px;border:3px dashed #ff6f00;border-radius:50%;margin:0 auto 10px auto;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-size:13px;font-weight:bold;}
-canvas.signature-canvas{border:2px solid #43a047;border-radius:5px;width:100%;height:100px;margin-top:10px;}
-.flex-row{display:flex;gap:10px;justify-content:space-between;align-items:center;}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:9999;}
-#popup{border:3px solid #1e88e5;background:#fffde7;padding:15px;border-radius:10px;width:100%;max-width:400px;}
-#popup h2{margin-top:0;}
-#timeDisplay{font-weight:bold;color:#d32f2f;margin-left:10px;}
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 10px;
+}
+h1 {
+    text-align: center;
+    color: #00695c;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+section {
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    background: #fff;
+}
+h2 { color: #424242; font-size: 22px; margin-bottom: 10px; }
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border: 2px solid #1e88e5;
+    border-radius: 8px;
+    font-size: 14px;
+}
+button.primary {
+    background: linear-gradient(45deg,#00c853,#b2ff59);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+.cv-photo-preview {
+    width: 150px;
+    height: 150px;
+    border: 3px dashed #ff6f00;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff6f00;
+    font-size: 13px;
+    font-weight: bold;
+}
+canvas.signature-canvas {
+    border: 2px solid #43a047;
+    border-radius: 5px;
+    width: 100%;
+    height: 120px;
+    margin-top: 5px;
+}
+.flex-row { display:flex; justify-content:space-between; align-items:center; gap:5px; }
+#popupOverlay {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+#popup {
+    border:3px solid #1e88e5;
+    background:#fffde7;
+    padding:15px;
+    border-radius:10px;
+    width:100%;
+    max-width:400px;
+}
+#popup textarea, #popup input { margin-bottom:5px; }
+#popupResult { margin:5px 0; font-weight:bold; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<header>📑 Bureau de Documents</header>
-<nav>
-<button class="active" onclick="showSection('cvDoc',this)">CV</button>
-<button onclick="showSection('lettreDoc',this)">Lettre</button>
-<button onclick="showSection('planDoc',this)">Plan</button>
-</nav>
-<div style="text-align:center;padding:5px;">Temps restant: <span id="timeDisplay">0</span> min</div>
+<h1>📄 Mes Documents</h1>
 
 <!-- CV -->
-<section id="cvDoc" class="active">
-<h2>📄 CV</h2>
+<section id="cvDoc">
+<h2>CV</h2>
 <div class="cv-photo-preview" id="cvPhotoPreview">Importer photo</div>
 <input type="file" id="cvPhotoInput" accept="image/*">
-<h3 id="cvName" style="text-align:center;font-weight:bold;font-size:20px;">Jean Dupont</h3>
-<p id="cvProfession" style="text-align:center;">Développeur Web</p>
-<input id="cvPrenom" placeholder="Prénom" value="Jean">
-<input id="cvNom" placeholder="Nom" value="Dupont">
-<input id="cvAge" placeholder="Âge" value="30 ans">
-<input id="cvVille" placeholder="Ville" value="Yaoundé">
-<input id="cvQuartier" placeholder="Quartier" value="Bastos">
-<input id="cvSituation" placeholder="Situation matrimoniale" value="Célibataire">
-<input id="cvPoste" placeholder="Poste" value="Développeur Web">
-<input id="cvDiplome" placeholder="Diplôme" value="Licence en Informatique">
-<input id="cvEtablissement" placeholder="Établissement" value="Université de Douala">
-<input id="cvEmail" placeholder="Email" value="jean.dupont@mail.com">
-<input id="cvTelMtn" placeholder="Tel MTN" value="+237670000000">
-<input id="cvTelOrange" placeholder="Tel Orange" value="+237690000000">
+<h3 style="text-align:center;font-weight:bold;font-size:20px;" id="cvName">Nom Complet</h3>
+<p style="text-align:center;font-size:14px;" id="cvProfession">Profession</p>
+<input id="cvPrenom" placeholder="Prénom">
+<input id="cvNom" placeholder="Nom">
+<input id="cvAge" placeholder="Âge">
+<input id="cvVille" placeholder="Ville">
+<input id="cvQuartier" placeholder="Quartier">
+<input id="cvSituation" placeholder="Situation matrimoniale">
+<input id="cvEnfants" placeholder="Nombre d'enfants">
+<input id="cvPoste" placeholder="Dernier poste">
+<input id="cvLoisirs" placeholder="Loisirs">
+<input id="cvCaractere" placeholder="Caractère">
+<input id="cvDiplome" placeholder="Dernier diplôme">
+<input id="cvEtablissement" placeholder="Établissement">
+<input id="cvAlcool" placeholder="Alcoolique Oui/Non">
+<input id="cvSalaire" placeholder="Salaire">
+<input id="cvEmail" placeholder="Email">
+<input id="cvTelMtn" placeholder="Tel MTN">
+<input id="cvTelOrange" placeholder="Tel Orange">
 <canvas id="cvCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="requestPayment('cvDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="requestPayment('cvDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
+<button class="primary" onclick="openPaymentPopup('cvDoc','wa')">📤 Partager WhatsApp</button>
 </div>
 </section>
 
 <!-- Lettre -->
 <section id="lettreDoc">
 <h2>✉️ Lettre de Motivation</h2>
-<input id="lettreNom" placeholder="Nom" value="Dupont">
-<input id="lettreEntreprise" placeholder="Entreprise" value="TechCorp">
-<input id="lettrePoste" placeholder="Poste souhaité" value="Développeur">
-<textarea id="lettreContenu" rows="6">Je vous écris afin de postuler au poste...</textarea>
+<input id="lettrePrenom" placeholder="Prénom">
+<input id="lettreNom" placeholder="Nom">
+<input id="lettreEntreprise" placeholder="Entreprise">
+<input id="lettrePoste" placeholder="Poste souhaité">
+<textarea id="lettreContenu" placeholder="Contenu de la lettre"></textarea>
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="requestPayment('lettreDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="requestPayment('lettreDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
+<button class="primary" onclick="openPaymentPopup('lettreDoc','wa')">📤 Partager WhatsApp</button>
 </div>
 </section>
 
-<!-- Plan -->
+<!-- Plan de localisation -->
 <section id="planDoc">
 <h2>🗺️ Plan de Localisation</h2>
-<textarea id="planContenu" rows="6">Dessinez ou décrivez ici le plan...</textarea>
+<textarea id="planContenu" placeholder="Saisir le plan de localisation"></textarea>
 <canvas id="planCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="requestPayment('planDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="requestPayment('planDoc','wa')">📤 Partager WhatsApp</button>
+<button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
+<button class="primary" onclick="openPaymentPopup('planDoc','wa')">📤 Partager WhatsApp</button>
 </div>
 </section>
 
@@ -91,17 +152,18 @@ canvas.signature-canvas{border:2px solid #43a047;border-radius:5px;width:100%;he
 <div id="popup">
 <h2>Paiement requis</h2>
 <p>Bénéficiaire: Wirnkar Loveline</p>
-<p>Numéros: MTN +237670000000 | Orange +237690000000</p>
-<p>Prix unitaire: <span id="unitPrice">100</span> FCFA / heure</p>
+<p>Numéros: 690000000 / 650000000</p>
+<p>Montant unitaire: 100 FCFA / heure</p>
 <div class="flex-row">
 <label>Multiplier: <span id="multiplierDisplay">1</span></label>
 <button onclick="incrementMultiplier()">+</button>
+<button onclick="decrementMultiplier()">-</button>
 </div>
-<p>Total à payer: <span id="totalPrice">100</span> FCFA</p>
 <textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
-<input id="transactionId" placeholder="ID transaction">
+<input id="transactionId" placeholder="ID de transaction">
 <input id="adminCode" type="password" placeholder="Code admin">
 <div id="popupResult"></div>
+<p>Temps restant: <span id="remainingTime">0 min</span></p>
 <div class="flex-row">
 <button class="primary" onclick="validatePayment()">✅ Valider</button>
 <button onclick="closePopup()">Annuler</button>
@@ -110,82 +172,98 @@ canvas.signature-canvas{border:2px solid #43a047;border-radius:5px;width:100%;he
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script>
-// Navigation
-function showSection(id,btn){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-}
-
-// Signature
-function initSignature(canvasId){
-  const c=document.getElementById(canvasId); if(!c)return;
-  const ctx=c.getContext('2d'); ctx.lineWidth=2; ctx.lineCap='round';
-  let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
-  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.();}
-  function move(e){if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.();}
-  function end(){drawing=false; ctx.beginPath();}
-  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move);
-  c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
-  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
-}
-['cvCanvas','lettreCanvas','planCanvas'].forEach(initSignature);
-
-// Photo CV
-document.getElementById('cvPhotoInput').addEventListener('change',e=>{
-  const file=e.target.files[0]; if(!file)return;
-  const reader=new FileReader(); reader.onload=ev=>{
-    document.getElementById('cvPhotoPreview').style.backgroundImage=`url(${ev.target.result})`;
-    document.getElementById('cvPhotoPreview').textContent='';
-  }; reader.readAsDataURL(file);
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script>
+// ==================== Photo CV ====================
+const cvPhotoInput = document.getElementById('cvPhotoInput');
+const cvPhotoPreview = document.getElementById('cvPhotoPreview');
+cvPhotoInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(evt){
+            cvPhotoPreview.style.backgroundImage = `url(${evt.target.result})`;
+            cvPhotoPreview.textContent = '';
+        }
+        reader.readAsDataURL(file);
+    }
 });
 
-// Paiement
-const ADMIN_CODE='xz233233';
-let multiplier=1, currentDoc='', currentAction='', remainingTime=0, timer=null;
-function incrementMultiplier(){multiplier++; updatePopup();}
-function updatePopup(){
-  document.getElementById('multiplierDisplay').innerText=multiplier;
-  document.getElementById('totalPrice').innerText=multiplier*100;
+// ==================== Signature ====================
+function enableSignature(canvasId){
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    canvas.addEventListener('mousedown', e => { drawing=true; ctx.moveTo(e.offsetX,e.offsetY); });
+    canvas.addEventListener('mousemove', e => { if(drawing){ ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); } });
+    canvas.addEventListener('mouseup', () => drawing=false);
+    canvas.addEventListener('mouseout', () => drawing=false);
 }
-function requestPayment(doc,action){
-  if(remainingTime>0){proceed(doc,action); return;}
-  currentDoc=doc; currentAction=action; multiplier=1; updatePopup();
-  document.getElementById('momoMsg').value=''; document.getElementById('transactionId').value=''; document.getElementById('adminCode').value='';
-  document.getElementById('popupResult').innerHTML=''; document.getElementById('popupOverlay').style.display='flex';
-}
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
-function validatePayment(){
-  const admin=document.getElementById('adminCode').value.trim();
-  if(admin===ADMIN_CODE){setTime(10); closePopup(); proceed(currentDoc,currentAction); return;}
-  const msg=document.getElementById('momoMsg').value.trim();
-  const tx=document.getElementById('transactionId').value.trim();
-  if(!msg||!tx){document.getElementById('popupResult').innerText='Entrez le message et l’ID.'; return;}
-  setTime(10); closePopup(); proceed(currentDoc,currentAction);
-}
-function setTime(min){remainingTime=min; document.getElementById('timeDisplay').innerText=remainingTime; if(timer) clearInterval(timer);
-timer=setInterval(()=>{remainingTime--; document.getElementById('timeDisplay').innerText=remainingTime; if(remainingTime<=0){clearInterval(timer);timer=null;}},60000);}
+enableSignature('cvCanvas');
+enableSignature('lettreCanvas');
+enableSignature('planCanvas');
 
-// PDF & WhatsApp
-function proceed(doc,action){
-  const el=document.getElementById(doc); if(!el) return;
-  if(action==='pdf'){html2canvas(el,{scale:2}).then(canvas=>{
-    const img=canvas.toDataURL('image/png');
-    const { jsPDF }=window.jspdf;
-    const pdf=new jsPDF('p','mm','a4');
-    const w=pdf.internal.pageSize.getWidth();
-    const h=(canvas.height* w)/canvas.width;
-    pdf.addImage(img,'PNG',0,0,w,h); pdf.save(doc+'.pdf');
-  });}else if(action==='wa'){html2canvas(el,{scale:2}).then(c=>{
-    const text=el.innerText.slice(0,1000);
-    const img=c.toDataURL(); window.open(`https://wa.me/?text=${encodeURIComponent(text+'\n'+img)}`,'_blank');
-  });}
+// ==================== Popup Paiement ====================
+let popupTarget = '';
+let popupType = '';
+let multiplier = 1;
+let remainingMinutes = 10; // exemple de temps dispo
+
+function openPaymentPopup(targetId,type){
+    popupTarget = targetId;
+    popupType = type;
+    multiplier = 1;
+    document.getElementById('multiplierDisplay').textContent = multiplier;
+    document.getElementById('remainingTime').textContent = remainingMinutes + ' min';
+    document.getElementById('popupOverlay').style.display='flex';
+    document.getElementById('popupResult').textContent='';
 }
+function closePopup(){
+    document.getElementById('popupOverlay').style.display='none';
+}
+function incrementMultiplier(){ multiplier++; document.getElementById('multiplierDisplay').textContent=multiplier; }
+function decrementMultiplier(){ if(multiplier>1) multiplier--; document.getElementById('multiplierDisplay').textContent=multiplier; }
+
+// ==================== Validation Paiement ====================
+function validatePayment(){
+    const msg = document.getElementById('momoMsg').value.trim();
+    const id = document.getElementById('transactionId').value.trim();
+    const admin = document.getElementById('adminCode').value.trim();
+    if(msg && id && admin){
+        document.getElementById('popupResult').textContent = `Paiement validé: ${multiplier*100} FCFA`;
+        setTimeout(() => { closePopup(); generatePDF(popupTarget); }, 500);
+        remainingMinutes -= multiplier; // réduit le temps dispo
+    } else {
+        document.getElementById('popupResult').textContent = 'Remplir tous les champs !';
+    }
+}
+
+// ==================== Génération PDF ====================
+async function generatePDF(targetId){
+    const { jsPDF } = window.jspdf;
+    const docSection = document.getElementById(targetId);
+    const canvas = await html2canvas(docSection, {scale:2});
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p','mm','a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.save(`${targetId}.pdf`);
+}
+
+// ==================== Partage WhatsApp ====================
+function shareWhatsApp(targetId){
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent("Voici mon document: "+targetId);
+    window.open(`https://wa.me/?text=${text}%20${url}`,'_blank');
+}
+
+// Relier boutons WA avec popup
+document.querySelectorAll('button[onclick*="wa"]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+        const targetId = btn.getAttribute('onclick').match(/'(\w+)'/)[1];
+        shareWhatsApp(targetId);
+    });
+});
 </script>
 </body>
 </html>
