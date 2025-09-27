@@ -15,8 +15,8 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
 .text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
-#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999;}
-#popup{width:90%;max-width:400px;background:#fff;border-radius:10px;padding:20px;border:3px solid #1e88e5;box-sizing:border-box;text-align:center;}
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;overflow:auto;}
+#popup{width:90%;max-width:350px;background:#fff;border-radius:10px;padding:15px;border:2px solid #1e88e5;box-sizing:border-box;text-align:center;}
 #popup input,#popup textarea{width:100%;margin:6px 0;padding:6px;border-radius:4px;border:1px solid #ccc;}
 #popup button{margin-top:8px;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;}
 </style>
@@ -88,37 +88,45 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
     <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
   </div>
 </div>
-</section>
-
-<!-- Popup Paiement -->
+</section><!-- Popup Paiement -->
 <div id="popupOverlay">
-<div id="popup">
-<h3>Paiement requis</h3>
-<p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-<p>Prix unitaire: <strong>100 FCFA / unité</strong></p>
-<label>Quantité</label>
-<input id="qty" type="number" value="1" min="1">
-<label>Message Mobile Money</label>
-<textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
-<label>ID Transaction</label>
-<input id="tx" type="text" placeholder="ID transaction">
-<label>Code admin (optionnel)</label>
-<input id="admin" type="password" placeholder="Code admin">
-<div class="actions">
-<button class="btn" id="validateBtn">Valider</button>
-<button class="btn secondary" onclick="closePopup()">Annuler</button>
-</div>
-</div>
+  <div id="popup">
+    <h3>Paiement requis</h3>
+    <p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
+    <p>Prix unitaire: <strong>100 FCFA / unité</strong></p>
+
+    <label>Quantité</label>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+      <button type="button" id="minus" class="btn secondary">-</button>
+      <div id="mult">1</div>
+      <button type="button" id="plus" class="btn secondary">+</button>
+      <div style="margin-left:auto;">Total: <strong><span id="total">100</span> FCFA</strong></div>
+    </div>
+
+    <label>Message Mobile Money</label>
+    <textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
+
+    <label>ID Transaction</label>
+    <input id="tx" type="text" placeholder="ID transaction">
+
+    <label>Code admin (optionnel)</label>
+    <input id="admin" type="password" placeholder="Code admin">
+
+    <div class="actions" style="margin-top:10px;">
+      <button class="btn" id="validateBtn">Valider</button>
+      <button class="btn secondary" onclick="closePopup()">Annuler</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// --- Variables globales ---
+// --- Variables ---
 let currentDoc='', currentAct='';
 const UNIT=100, BENEF='Wirnkar Loveline', ADMIN='xz233233';
-let usedTransactions=[];
+let usedTransactions=[], multiplier=1;
 
 // --- Photos ---
 function handlePhoto(imgId,inputId){
@@ -136,14 +144,13 @@ function handlePhoto(imgId,inputId){
 
 // --- Signatures ---
 function makeSign(id){
-  const c=document.getElementById(id);
-  if(!c) return;
+  const c=document.getElementById(id); if(!c) return;
   c.width=c.clientWidth*devicePixelRatio;
   c.height=(id==='cvSign')?100*devicePixelRatio:60*devicePixelRatio;
   const ctx=c.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
   ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
   let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
+  function pos(e){const r=c.getBoundingClientRect();return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
   function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
   function move(e){if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();}
   function end(){drawing=false; ctx.closePath();}
@@ -165,7 +172,7 @@ function setupPlaceholder(id){
 // --- Export PDF/Word ---
 async function exportDoc(){
   if(!currentDoc) return;
-  let node=document.getElementById(currentDoc);
+  const node=document.getElementById(currentDoc);
   if(!node) return;
   const canvas=await html2canvas(node,{scale:2,useCORS:true,allowTaint:true});
   const imgData=canvas.toDataURL('image/png');
@@ -180,24 +187,26 @@ async function exportDoc(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=currentDoc+'.doc'; a.click();
 }
 
-// --- Popup Paiement ---
+// --- Popup ---
 function openPayment(doc,act){
   currentDoc=doc; currentAct=act;
+  multiplier=1; updateTotal();
+  document.getElementById('msg').value=''; document.getElementById('tx').value=''; document.getElementById('admin').value='';
   document.getElementById('popupOverlay').style.display='flex';
-  document.getElementById('qty').value=1;
-  document.getElementById('msg').value='';
-  document.getElementById('tx').value='';
-  document.getElementById('admin').value='';
 }
-
 function closePopup(){document.getElementById('popupOverlay').style.display='none';}
+
+// --- Multiplicateur ---
+function updateTotal(){ document.getElementById('mult').innerText=multiplier; document.getElementById('total').innerText=UNIT*multiplier; }
+document.getElementById('plus').onclick=function(){ multiplier++; updateTotal(); }
+document.getElementById('minus').onclick=function(){ if(multiplier>1) multiplier--; updateTotal(); }
 
 // --- Validation Paiement ---
 document.getElementById('validateBtn').onclick=function(){
-  const admin=document.getElementById('admin').value.trim();
+  const qty=multiplier;
   const msg=document.getElementById('msg').value.trim();
   const tx=document.getElementById('tx').value.trim();
-  const qty=parseInt(document.getElementById('qty').value,10)||1;
+  const admin=document.getElementById('admin').value.trim();
   const now=new Date();
 
   if(admin===ADMIN){ exportDoc(); closePopup(); return; }
@@ -208,7 +217,7 @@ document.getElementById('validateBtn').onclick=function(){
   if(amt!==UNIT*qty){ alert("Montant incorrect"); return; }
   if(usedTransactions.some(t=>t.id===tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
   const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
-  if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("Heure transaction incorrecte (>10 min)"); return; }}
+  if(timeMatch){ const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("Heure transaction incorrecte (>10 min)"); return; } }
   usedTransactions.push({id:tx,time:now});
   exportDoc(); closePopup();
 }
