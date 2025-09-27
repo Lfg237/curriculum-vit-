@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Documents A5 Stables</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00695c">
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
@@ -183,23 +181,39 @@ function validatePay(){
   const amt=parseInt(msg.match(/\d+/)?.[0],10); if(amt!==UNIT*multiplier){document.getElementById('popupMsg').innerText="Montant incorrect";return;}
   exportDoc();closePopup();
 }
-async function exportDoc(){
-  const id=window.__doc,act=window.__act; if(!id) return; const node=document.getElementById(id); if(!node) return;
-  const canvas=await html2canvas(node,{scale:2,useCORS:true,logging:false});
-  const imgData=canvas.toDataURL('image/png'); const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF('p','mm','a5'); const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
-  let imgW=w-12,imgH=(canvas.height*imgW)/canvas.width; if(imgH>h-12){const r=(h-12)/imgH;imgH*=r;imgW*=r;}
-  pdf.addImage(imgData,'PNG',6,6,imgW,imgH);
-  if(act==='pdf'){pdf.save(id+'.pdf');return;}
-  const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=id+'.doc';a.click();
-}
 
-// Enregistrement du service worker pour PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
-    .then(reg => console.log('Service Worker enregistré', reg))
-    .catch(err => console.error('Erreur SW:', err));
+// Export PDF/Word
+async function exportDoc(){
+  const id=window.__doc,act=window.__act; if(!id) return; 
+  const node=document.getElementById(id); if(!node) return;
+
+  // Choix format : CV en A5, Lettre/Plan en A6
+  let format = (id==='lettreDoc' || id==='planDoc') ? 'a6' : 'a5';
+
+  const canvas=await html2canvas(node,{scale:2,useCORS:true,logging:false});
+  const imgData=canvas.toDataURL('image/png'); 
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF('p','mm',format);
+
+  const w=pdf.internal.pageSize.getWidth(),
+        h=pdf.internal.pageSize.getHeight();
+
+  let imgW=w-12,
+      imgH=(canvas.height*imgW)/canvas.width;
+
+  if(imgH>h-12){
+    const r=(h-12)/imgH;
+    imgH*=r; imgW*=r;
+  }
+  pdf.addImage(imgData,'PNG',6,6,imgW,imgH);
+
+  if(act==='pdf'){pdf.save(id+'.pdf');return;}
+
+  const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=id+'.doc';
+  a.click();
 }
 </script>
 </body>
