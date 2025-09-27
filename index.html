@@ -15,6 +15,10 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
 .text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999;}
+#popup{width:90%;max-width:400px;background:#fff;border-radius:10px;padding:20px;border:3px solid #1e88e5;box-sizing:border-box;text-align:center;}
+#popup input,#popup textarea{width:100%;margin:6px 0;padding:6px;border-radius:4px;border:1px solid #ccc;}
+#popup button{margin-top:8px;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -86,14 +90,35 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 </div>
 </section>
 
+<!-- Popup Paiement -->
+<div id="popupOverlay">
+<div id="popup">
+<h3>Paiement requis</h3>
+<p>Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
+<p>Prix unitaire: <strong>100 FCFA / unité</strong></p>
+<label>Quantité</label>
+<input id="qty" type="number" value="1" min="1">
+<label>Message Mobile Money</label>
+<textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
+<label>ID Transaction</label>
+<input id="tx" type="text" placeholder="ID transaction">
+<label>Code admin (optionnel)</label>
+<input id="admin" type="password" placeholder="Code admin">
+<div class="actions">
+<button class="btn" id="validateBtn">Valider</button>
+<button class="btn secondary" onclick="closePopup()">Annuler</button>
+</div>
+</div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// Global variables
+// --- Variables globales ---
 let currentDoc='', currentAct='';
-const UNIT = 100, BENEF='Wirnkar Loveline', ADMIN='xz233233';
-let usedTransactions = [];
+const UNIT=100, BENEF='Wirnkar Loveline', ADMIN='xz233233';
+let usedTransactions=[];
 
 // --- Photos ---
 function handlePhoto(imgId,inputId){
@@ -107,7 +132,7 @@ function handlePhoto(imgId,inputId){
     reader.readAsDataURL(f);
   });
 }
-['cv','lettre','plan'].forEach(prefix=>handlePhoto(prefix+'Photo',prefix+'PhotoInput'));
+['cv','lettre','plan'].forEach(p=>handlePhoto(p+'Photo',p+'PhotoInput'));
 
 // --- Signatures ---
 function makeSign(id){
@@ -155,58 +180,37 @@ async function exportDoc(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=currentDoc+'.doc'; a.click();
 }
 
-// --- Popup iframe payment ---
-function openPayment(doc, act){
-  currentDoc = doc; currentAct = act;
-  const old = document.getElementById('iframePopup');
-  if(old) old.remove();
+// --- Popup Paiement ---
+function openPayment(doc,act){
+  currentDoc=doc; currentAct=act;
+  document.getElementById('popupOverlay').style.display='flex';
+  document.getElementById('qty').value=1;
+  document.getElementById('msg').value='';
+  document.getElementById('tx').value='';
+  document.getElementById('admin').value='';
+}
 
-  const iframe = document.createElement('iframe');
-  iframe.id='iframePopup';
-  iframe.style.position='fixed'; iframe.style.top='0'; iframe.style.left='0';
-  iframe.style.width='100%'; iframe.style.height='100%'; iframe.style.border='none'; iframe.style.zIndex='9999';
-  iframe.srcdoc = `
-  <html><head><meta charset="UTF-8"><title>Paiement</title>
-  <style>body{margin:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);font-family:sans-serif;}
-  #popup{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:400px;text-align:center;}
-  input,textarea{width:100%;margin:6px 0;padding:6px;border-radius:4px;border:1px solid #ccc;}
-  button{margin-top:8px;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;}</style>
-  </head><body>
-  <div id="popup">
-  <h3>Paiement requis</h3>
-  <p>Bénéficiaire: <strong>${BENEF}</strong></p>
-  <p>Prix: <strong>${UNIT} FCFA / unité</strong></p>
-  <label>Quantité</label><input id="qty" type="number" value="1" min="1">
-  <label>Message Mobile Money</label><textarea id="msg" placeholder="Ex: Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
-  <label>ID Transaction</label><input id="tx" type="text" placeholder="ID transaction">
-  <label>Code admin (optionnel)</label><input id="admin" type="password" placeholder="Code admin">
-  <div><button id="validate">Valider</button> <button id="cancel">Annuler</button></div>
-  </div>
-  <script>
-  const UNIT=${UNIT},BENEF="${BENEF}",ADMIN="${ADMIN}";
-  let usedTransactions=[];
-  document.getElementById('cancel').onclick=()=>parent.document.getElementById('iframePopup').remove();
-  document.getElementById('validate').onclick=()=>{
-    const admin=document.getElementById('admin').value.trim();
-    const msg=document.getElementById('msg').value.trim();
-    const tx=document.getElementById('tx').value.trim();
-    const qty=parseInt(document.getElementById('qty').value,10)||1;
-    const now=new Date();
-    if(admin===ADMIN){parent.exportDoc();parent.document.getElementById('iframePopup').remove();return;}
-    if(!msg||!tx){alert("Message et ID requis");return;}
-    if(!msg.toLowerCase().includes(BENEF.toLowerCase())){alert("Nom bénéficiaire incorrect");return;}
-    const amt=parseInt(msg.match(/\\d+/)?.[0],10);
-    if(amt!==UNIT*qty){alert("Montant incorrect");return;}
-    if(usedTransactions.some(t=>t.id===tx)){alert("Cette transaction a déjà été utilisée !");return;}
-    const timeMatch=msg.match(/\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}/);
-    if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){alert("Heure transaction incorrecte (>10 min)");return;}}
-    usedTransactions.push({id:tx,time:now});
-    parent.exportDoc();
-    parent.document.getElementById('iframePopup').remove();
-  };
-  </script>
-  </body></html>`;
-  document.body.appendChild(iframe);
+function closePopup(){document.getElementById('popupOverlay').style.display='none';}
+
+// --- Validation Paiement ---
+document.getElementById('validateBtn').onclick=function(){
+  const admin=document.getElementById('admin').value.trim();
+  const msg=document.getElementById('msg').value.trim();
+  const tx=document.getElementById('tx').value.trim();
+  const qty=parseInt(document.getElementById('qty').value,10)||1;
+  const now=new Date();
+
+  if(admin===ADMIN){ exportDoc(); closePopup(); return; }
+
+  if(!msg || !tx){ alert("Message et ID requis"); return; }
+  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){ alert("Nom bénéficiaire incorrect"); return; }
+  const amt=parseInt(msg.match(/\d+/)?.[0],10);
+  if(amt!==UNIT*qty){ alert("Montant incorrect"); return; }
+  if(usedTransactions.some(t=>t.id===tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
+  const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("Heure transaction incorrecte (>10 min)"); return; }}
+  usedTransactions.push({id:tx,time:now});
+  exportDoc(); closePopup();
 }
 </script>
 </body>
