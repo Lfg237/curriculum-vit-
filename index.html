@@ -7,23 +7,23 @@
 <style>
 body {font-family: 'Segoe UI', Arial, sans-serif; background: #e0f7fa; margin: 0; padding: 10px;}
 h1 {text-align: center; color: #00695c; font-size: 28px; margin-bottom: 20px;}
-section {padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
+section {padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
 #cvDoc {background: #fff3e0; border-left: 8px solid #ff6f00;}
 #lettreDoc {background: #e8f5e9; border-left: 8px solid #43a047;}
 #planDoc {background: #e3f2fd; border-left: 8px solid #1e88e5;}
 h2 {color: #424242; font-size: 22px; margin-bottom: 10px;}
-input, textarea {width: 100%; padding: 10px; margin: 6px 0; border: 2px solid #1e88e5; border-radius: 8px; font-size: 14px;}
+input, textarea {width: 100%; padding: 8px; margin: 5px 0; border: 2px solid #1e88e5; border-radius: 8px; font-size: 14px; box-sizing: border-box;}
 button.primary {background: linear-gradient(45deg,#00c853,#b2ff59); color: #fff; font-weight: bold; border: none; padding: 10px; border-radius: 8px; margin-top: 5px; cursor:pointer;}
-.cv-photo-preview {width: 150px; height: 150px; border: 3px dashed #ff6f00; border-radius: 50%; margin: 0 auto 10px auto; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; color: #ff6f00; font-size: 13px; font-weight: bold;}
-canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 100%; height: 120px;}
+.cv-container {display:flex; align-items:flex-start; gap:10px;}
+.cv-photo-preview {width:100px; height:100px; border: 2px dashed #ff6f00; border-radius:50%; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:#ff6f00; font-size:12px; font-weight:bold;}
+.cv-text {flex:1;}
+canvas.signature-canvas {border:2px solid #43a047; border-radius:5px; width:100%; height:80px;}
 #popupOverlay {display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;}
 #popup {border:3px solid #1e88e5; background:#fffde7; padding:15px; border-radius:10px; width:100%; max-width:400px;}
 .error {color:#b00020;}
 .success {color:#006400;}
 .flex-row {display:flex; justify-content:space-between; align-items:center; margin-top:5px;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <h1>📄 Mes Documents</h1>
@@ -31,31 +31,32 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <!-- CV -->
 <section id="cvDoc">
 <h2>CV</h2>
-<div class="cv-photo-preview" id="cvPhotoPreview">Importer photo</div>
-<input type="file" id="cvPhotoInput" accept="image/*">
-<h3 style="text-align:center;font-weight:bold;font-size:20px;" id="cvName">Nom Complet</h3>
-<p style="text-align:center;font-size:14px;" id="cvProfession">Profession</p>
-<input id="cvPrenom" placeholder="Prénom">
-<input id="cvNom" placeholder="Nom">
-<input id="cvAge" placeholder="Âge">
-<input id="cvVille" placeholder="Ville">
-<input id="cvQuartier" placeholder="Quartier">
-<input id="cvSituation" placeholder="Situation matrimoniale">
-<input id="cvEnfants" placeholder="Nombre d'enfants">
-<input id="cvPoste" placeholder="Dernier poste">
-<input id="cvLoisirs" placeholder="Loisirs">
-<input id="cvCaractere" placeholder="Caractère">
-<input id="cvDiplome" placeholder="Dernier diplôme">
-<input id="cvEtablissement" placeholder="Établissement">
-<input id="cvAlcool" placeholder="Alcoolique Oui/Non">
-<input id="cvSalaire" placeholder="Salaire">
-<input id="cvEmail" placeholder="Email">
-<input id="cvTelMtn" placeholder="Tel MTN">
-<input id="cvTelOrange" placeholder="Tel Orange">
+<div class="cv-container">
+  <div class="cv-photo-preview" id="cvPhotoPreview">Importer photo</div>
+  <div class="cv-text">
+    <input id="cvPrenom" placeholder="Prénom">
+    <input id="cvNom" placeholder="Nom">
+    <input id="cvAge" placeholder="Âge">
+    <input id="cvVille" placeholder="Ville">
+    <input id="cvQuartier" placeholder="Quartier">
+    <input id="cvSituation" placeholder="Situation matrimoniale">
+    <input id="cvEnfants" placeholder="Nombre d'enfants">
+    <input id="cvPoste" placeholder="Dernier poste">
+    <input id="cvLoisirs" placeholder="Loisirs">
+    <input id="cvCaractere" placeholder="Caractère">
+    <input id="cvDiplome" placeholder="Dernier diplôme">
+    <input id="cvEtablissement" placeholder="Établissement">
+    <input id="cvAlcool" placeholder="Alcoolique Oui/Non">
+    <input id="cvSalaire" placeholder="Salaire">
+    <input id="cvEmail" placeholder="Email">
+    <input id="cvTelMtn" placeholder="Tel MTN">
+    <input id="cvTelOrange" placeholder="Tel Orange">
+  </div>
+</div>
 <canvas id="cvCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('cvDoc','word')">📄 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
+  <button class="primary" onclick="openPaymentPopup('cvDoc','word')">📝 Télécharger Word</button>
 </div>
 </section>
 
@@ -69,8 +70,8 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <textarea id="lettreContenu" placeholder="Contenu de la lettre"></textarea>
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('lettreDoc','word')">📄 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
+  <button class="primary" onclick="openPaymentPopup('lettreDoc','word')">📝 Télécharger Word</button>
 </div>
 </section>
 
@@ -80,137 +81,32 @@ canvas.signature-canvas {border: 2px solid #43a047; border-radius: 5px; width: 1
 <textarea id="planContenu" placeholder="Saisir le plan de localisation"></textarea>
 <canvas id="planCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
-<button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
-<button class="primary" onclick="openPaymentPopup('planDoc','word')">📄 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
+  <button class="primary" onclick="openPaymentPopup('planDoc','word')">📝 Télécharger Word</button>
 </div>
 </section>
 
 <!-- Popup paiement -->
 <div id="popupOverlay">
-<div id="popup">
-<h2>Paiement requis</h2>
-<p>Bénéficiaire: Wirnkar Loveline</p>
-<p>Numéros: MTN 676353859 / Orange 640647072</p>
-<p>Montant unitaire: 100 FCFA / heure</p>
-<div class="flex-row">
-<label>Multiplier: <span id="multiplierDisplay">1</span></label>
-<button onclick="incrementMultiplier()">+</button>
-<button onclick="decrementMultiplier()">-</button>
+  <div id="popup">
+    <h2>Paiement requis</h2>
+    <p>Bénéficiaire: Wirnkar Loveline</p>
+    <p>Numéros: MTN 676353859 / Orange 640647072</p>
+    <p>Montant unitaire: 100 FCFA / heure</p>
+    <div class="flex-row">
+      <label>Multiplier: <span id="multiplierDisplay">1</span></label>
+      <button onclick="incrementMultiplier()">+</button>
+      <button onclick="decrementMultiplier()">-</button>
+    </div>
+    <p>Total: <span id="totalAmount">100</span> FCFA</p>
+    <textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
+    <input id="transactionId" placeholder="ID de transaction">
+    <input id="adminCode" type="password" placeholder="Code admin">
+    <div id="popupResult"></div>
+    <p>Temps restant: <span id="remainingTime">0 min</span></p>
+    <div class="flex-row">
+      <button class="primary" onclick="validatePayment()">✅ Valider</button>
+      <button onclick="closePopup()">Annuler</button>
+    </div>
+  </div>
 </div>
-<p>Total: <span id="totalAmount">100</span> FCFA</p>
-<textarea id="momoMsg" placeholder="Message Mobile Money"></textarea>
-<input id="transactionId" placeholder="ID de transaction">
-<input id="adminCode" type="password" placeholder="Code admin">
-<div id="popupResult"></div>
-<p>Temps restant: <span id="remainingTime">0 min</span></p>
-<div class="flex-row">
-<button class="primary" onclick="validatePayment()">✅ Valider</button>
-<button onclick="closePopup()">Annuler</button>
-</div>
-</div>
-</div>
-
-<script>
-// ===== CONFIG =====
-const ADMIN_CODE = 'xz233233';
-const UNIT_PRICE = 100;
-const UNIT_HOURS = 1;
-const PAYMENT_BENEF = 'Wirnkar Loveline';
-
-// ===== Signature Canvas =====
-function initSignatureCanvas(canvasId){
-  const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 2; ctx.lineCap = 'round';
-  let drawing = false;
-  function getPos(e){
-    const rect = canvas.getBoundingClientRect();
-    if(e.touches && e.touches.length){
-      return { x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top };
-    }
-    return { x:e.clientX-rect.left, y:e.clientY-rect.top };
-  }
-  function start(e){ drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.(); }
-  function move(e){ if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.(); }
-  function end(){ drawing=false; ctx.beginPath(); }
-  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
-  canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseleave', end);
-  canvas.addEventListener('touchstart', start, {passive:false});
-  canvas.addEventListener('touchmove', move, {passive:false});
-  canvas.addEventListener('touchend', end);
-}
-['cvCanvas','lettreCanvas','planCanvas'].forEach(initSignatureCanvas);
-
-// ===== Photo CV =====
-const cvPhotoInput=document.getElementById('cvPhotoInput');
-const cvPhotoPreview=document.getElementById('cvPhotoPreview');
-cvPhotoInput.addEventListener('change', (e)=>{
-  const file=e.target.files?.[0]; 
-  if(!file) return;
-  const reader=new FileReader(); 
-  reader.onload=ev=>{
-    cvPhotoPreview.style.backgroundImage=`url(${ev.target.result})`;
-    cvPhotoPreview.textContent='';
-  }; 
-  reader.readAsDataURL(file); 
-});
-
-// ===== Popup paiement =====
-let multiplier=1, currentDocId='', currentAction='';
-function incrementMultiplier(){ multiplier++; updatePopup(); }
-function decrementMultiplier(){ if(multiplier>1){multiplier--; updatePopup();} }
-function updatePopup(){
-  document.getElementById('multiplierDisplay').innerText = multiplier;
-  document.getElementById('totalAmount').innerText = multiplier*UNIT_PRICE;
-}
-function resetMultiplier(){ multiplier=1; updatePopup(); }
-function openPaymentPopup(docId,action){ currentDocId=docId; currentAction=action; resetMultiplier(); document.getElementById('momoMsg').value=''; document.getElementById('transactionId').value=''; document.getElementById('adminCode').value=''; document.getElementById('popupResult').innerHTML=''; document.getElementById('popupOverlay').style.display='flex'; }
-function closePopup(){ document.getElementById('popupOverlay').style.display='none'; resetMultiplier(); }
-
-// ===== Validation paiement =====
-function validatePayment(){
-  const admin=(document.getElementById('adminCode')?.value||'').trim();
-  if(admin===ADMIN_CODE){ document.getElementById('popupResult').innerHTML='<span style="color:green">Code admin accepté ✅</span>'; setTimeout(proceedAction,500); return; }
-  const msg=(document.getElementById('momoMsg')?.value||'').trim();
-  const txId=(document.getElementById('transactionId')?.value||'').trim();
-  if(!msg||!txId){ document.getElementById('popupResult').innerHTML='<span style="color:red">Merci d’entrer le message Mobile Money et l’ID de transaction.</span>'; return; }
-  if(!msg.toLowerCase().includes(PAYMENT_BENEF.toLowerCase())){ document.getElementById('popupResult').innerHTML='<span style="color:red">Nom bénéficiaire non trouvé.</span>'; return; }
-  const expectedAmount = UNIT_PRICE*multiplier;
-  const amountMatch = msg.match(/(\d{2,})/);
-  if(!amountMatch || parseInt(amountMatch[1],10)!==expectedAmount){ document.getElementById('popupResult').innerHTML=`<span style="color:red">Montant incorrect (attendu ${expectedAmount} FCFA).</span>`; return; }
-  const now=Date.now(); const currentExpiry=parseInt(localStorage.getItem('abonnementExpiry')||'0',10); const base=Math.max(currentExpiry,now); const addMs=multiplier*UNIT_HOURS*60*60*1000; const newExpiry=base+addMs; localStorage.setItem('abonnementExpiry',String(newExpiry));
-  document.getElementById('popupResult').innerHTML='<span style="color:green">Paiement validé ✅</span>';
-  setTimeout(proceedAction,500);
-}
-
-// ===== Capture et téléchargement =====
-function proceedAction(){
-  closePopup(); 
-  if(!currentDocId||!currentAction) return;
-  const section=document.getElementById(currentDocId);
-  html2canvas(section,{scale:1.5}).then(canvas=>{
-    const imgData=canvas.toDataURL('image/png');
-    const imgWidthMM=160;
-    const imgHeightMM=(canvas.height*imgWidthMM)/canvas.width;
-    if(currentAction==='pdf'){
-      const { jsPDF }=window.jspdf;
-      const pdf=new jsPDF('p','mm','a4');
-      const margin=10;
-      pdf.addImage(imgData,'PNG',margin,margin,imgWidthMM,imgHeightMM);
-      pdf.save('document.pdf');
-    } else if(currentAction==='word'){
-      const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-      <head><meta charset="utf-8"><title>Document</title></head>
-      <body><img src="${imgData}" style="width:100%;max-width:800px;"/></body></html>`;
-      const blob=new Blob([html],{type:'application/msword'});
-      const link=document.createElement('a');
-      link.href=URL.createObjectURL(blob);
-      link.download='document.doc';
-      link.click();
-    }
-  });
-}
-</script>
-</body>
-</html>
