@@ -215,7 +215,7 @@ function validatePay(){
   closePopup();
 }
 
-// Export PDF/Word
+// Export PDF/Word avec signatures visibles
 async function exportDoc(){
   const id=window.__doc,act=window.__act; if(!id) return; 
   const node=document.getElementById(id); if(!node) return;
@@ -227,6 +227,16 @@ async function exportDoc(){
         pageH = pdf.internal.pageSize.getHeight();
 
   const clone = node.cloneNode(true);
+
+  // Remplace chaque canvas par image pour inclure signature
+  clone.querySelectorAll('canvas').forEach(c => {
+    const img = document.createElement('img');
+    img.src = c.toDataURL();
+    img.style.width = c.style.width || c.width/2 + 'px';
+    img.style.height = c.style.height || c.height/2 + 'px';
+    c.parentNode.replaceChild(img, c);
+  });
+
   clone.style.width = pageW + "mm";
   clone.style.fontSize = "10px";
   clone.style.lineHeight = "1.2";
