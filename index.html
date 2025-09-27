@@ -3,51 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV / Lettre / Plan</title>
+<title>Mes Documents A5</title>
 <style>
-body {font-family: 'Segoe UI', Arial, sans-serif; background: #e0f7fa; margin: 0; padding: 10px;}
-h1 {text-align: center; color: #00695c; font-size: 28px; margin-bottom: 20px;}
-section {padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
-#cvDoc {background: #fff3e0; border-left: 8px solid #ff6f00;}
-#lettreDoc {background: #e8f5e9; border-left: 8px solid #43a047;}
-#planDoc {background: #e3f2fd; border-left: 8px solid #1e88e5;}
-h2 {color: #424242; font-size: 22px; margin-bottom: 10px;}
-input, textarea {width: 100%; padding: 8px; margin: 5px 0; border: 2px solid #1e88e5; border-radius: 8px; font-size: 14px; box-sizing: border-box;}
-button.primary {background: linear-gradient(45deg,#00c853,#b2ff59); color: #fff; font-weight: bold; border: none; padding: 10px; border-radius: 8px; margin-top: 5px; cursor:pointer;}
-.cv-container {display:flex; align-items:flex-start; gap:10px;}
-.cv-photo-preview {width:100px; height:100px; border: 2px dashed #ff6f00; border-radius:50%; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:#ff6f00; font-size:12px; font-weight:bold;}
-.cv-text {flex:1;}
-canvas.signature-canvas {border:2px solid #43a047; border-radius:5px; width:100%; height:80px;}
-#popupOverlay {display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;}
-#popup {border:3px solid #1e88e5; background:#fffde7; padding:15px; border-radius:10px; width:100%; max-width:400px;}
-.error {color:#b00020;}
-.success {color:#006400;}
-.flex-row {display:flex; justify-content:space-between; align-items:center; margin-top:5px;}
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #e0f7fa;
+  margin: 0;
+  padding: 10px;
+}
+h1 {text-align:center; color:#00695c; font-size:26px; margin-bottom:15px;}
+section {
+  padding: 15px;
+  border-radius: 12px;
+  margin: 10px auto;
+  max-width: 140mm; /* légèrement inférieur à A5 largeur 148mm */
+  background:#fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#cvDoc {background: #fff3e0; border-left: 6px solid #ff6f00;}
+#lettreDoc {background: #e8f5e9; border-left: 6px solid #43a047;}
+#planDoc {background: #e3f2fd; border-left: 6px solid #1e88e5;}
+
+.flex-row {display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px;}
+
+.photo-preview {
+  width: 90px; height: 90px;
+  border: 2px dashed #ff6f00;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #ff6f00;
+  font-weight: bold;
+  cursor:pointer;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 6px;
+  margin: 4px 0;
+  border: 1.5px solid #1e88e5;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+canvas.signature-canvas {
+  border: 1.5px solid #43a047;
+  border-radius: 5px;
+  width: 100%;
+  height: 80px;
+}
+
+/* Popup paiement */
+#popupOverlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.6);
+  justify-content:center; align-items:center; z-index:9999;
+}
+#popup {
+  border:3px solid #1e88e5; background:#fffde7; padding:15px;
+  border-radius:10px; width:100%; max-width:400px;
+}
+button.primary {
+  background: linear-gradient(45deg,#00c853,#b2ff59);
+  color: #fff; font-weight:bold; border:none; padding:8px; border-radius:6px; cursor:pointer;
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<h1>📄 Mes Documents</h1>
 
-<!-- CV -->
+<h1>📄 Mes Documents A5</h1>
+
+<!-- ===== CV ===== -->
 <section id="cvDoc">
 <h2>CV</h2>
-<div class="cv-container">
-  <div class="cv-photo-preview" id="cvPhotoPreview">Importer photo</div>
-  <div class="cv-text">
+<div style="display:flex; gap:10px; align-items:flex-start;">
+  <div class="photo-preview" id="cvPhotoPreview">Cliquer pour photo</div>
+  <div style="flex:1;">
     <input id="cvPrenom" placeholder="Prénom">
     <input id="cvNom" placeholder="Nom">
-    <input id="cvAge" placeholder="Âge">
+    <input id="cvProfession" placeholder="Profession">
     <input id="cvVille" placeholder="Ville">
     <input id="cvQuartier" placeholder="Quartier">
-    <input id="cvSituation" placeholder="Situation matrimoniale">
-    <input id="cvEnfants" placeholder="Nombre d'enfants">
-    <input id="cvPoste" placeholder="Dernier poste">
-    <input id="cvLoisirs" placeholder="Loisirs">
-    <input id="cvCaractere" placeholder="Caractère">
-    <input id="cvDiplome" placeholder="Dernier diplôme">
-    <input id="cvEtablissement" placeholder="Établissement">
-    <input id="cvAlcool" placeholder="Alcoolique Oui/Non">
-    <input id="cvSalaire" placeholder="Salaire">
     <input id="cvEmail" placeholder="Email">
     <input id="cvTelMtn" placeholder="Tel MTN">
     <input id="cvTelOrange" placeholder="Tel Orange">
@@ -56,37 +98,42 @@ canvas.signature-canvas {border:2px solid #43a047; border-radius:5px; width:100%
 <canvas id="cvCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
   <button class="primary" onclick="openPaymentPopup('cvDoc','pdf')">📄 Télécharger PDF</button>
-  <button class="primary" onclick="openPaymentPopup('cvDoc','word')">📝 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('cvDoc','word')">📄 Télécharger Word</button>
 </div>
+<input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
 </section>
 
-<!-- Lettre -->
+<!-- ===== Lettre ===== -->
 <section id="lettreDoc">
-<h2>✉️ Lettre de Motivation</h2>
-<input id="lettrePrenom" placeholder="Prénom">
-<input id="lettreNom" placeholder="Nom">
-<input id="lettreEntreprise" placeholder="Entreprise">
-<input id="lettrePoste" placeholder="Poste souhaité">
-<textarea id="lettreContenu" placeholder="Contenu de la lettre"></textarea>
+<h2>Lettre de motivation</h2>
+<div style="display:flex; gap:10px; align-items:flex-start;">
+  <div class="photo-preview" id="lettrePhotoPreview">Cliquer pour photo</div>
+  <div style="flex:1;">
+    <input id="lettreNom" placeholder="Nom">
+    <input id="lettrePrenom" placeholder="Prénom">
+    <input id="lettrePoste" placeholder="Poste souhaité">
+    <textarea id="lettreTexte" placeholder="Écrire votre lettre ici..." rows="6"></textarea>
+  </div>
+</div>
 <canvas id="lettreCanvas" class="signature-canvas"></canvas>
 <div class="flex-row">
   <button class="primary" onclick="openPaymentPopup('lettreDoc','pdf')">📄 Télécharger PDF</button>
-  <button class="primary" onclick="openPaymentPopup('lettreDoc','word')">📝 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('lettreDoc','word')">📄 Télécharger Word</button>
 </div>
+<input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
 </section>
 
-<!-- Plan -->
+<!-- ===== Plan ===== -->
 <section id="planDoc">
-<h2>🗺️ Plan de Localisation</h2>
-<textarea id="planContenu" placeholder="Saisir le plan de localisation"></textarea>
-<canvas id="planCanvas" class="signature-canvas"></canvas>
+<h2>Plan manuscrit</h2>
+<textarea id="planTexte" placeholder="Dessinez ou décrivez votre plan..." rows="8"></textarea>
 <div class="flex-row">
   <button class="primary" onclick="openPaymentPopup('planDoc','pdf')">📄 Télécharger PDF</button>
-  <button class="primary" onclick="openPaymentPopup('planDoc','word')">📝 Télécharger Word</button>
+  <button class="primary" onclick="openPaymentPopup('planDoc','word')">📄 Télécharger Word</button>
 </div>
 </section>
 
-<!-- Popup paiement -->
+<!-- ===== Popup paiement ===== -->
 <div id="popupOverlay">
   <div id="popup">
     <h2>Paiement requis</h2>
@@ -110,3 +157,97 @@ canvas.signature-canvas {border:2px solid #43a047; border-radius:5px; width:100%
     </div>
   </div>
 </div>
+
+<script>
+const ADMIN_CODE='xz233233';
+const UNIT_PRICE=100;
+const PAYMENT_BENEF='Wirnkar Loveline';
+let multiplier=1, currentDocId='', currentAction='';
+
+function initSignatureCanvas(canvasId){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d'); ctx.lineWidth=2; ctx.lineCap='round';
+  let drawing=false;
+  function getPos(e){
+    const rect=canvas.getBoundingClientRect();
+    if(e.touches && e.touches.length) return {x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top};
+    return {x:e.clientX-rect.left, y:e.clientY-rect.top};
+  }
+  function start(e){drawing=true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.();}
+  function move(e){if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault?.();}
+  function end(){drawing=false; ctx.beginPath();}
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('mouseup',end); canvas.addEventListener('mouseleave',end);
+  canvas.addEventListener('touchstart',start,{passive:false});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',end);
+}
+initSignatureCanvas('cvCanvas');
+initSignatureCanvas('lettreCanvas');
+
+function initPhotoPreview(photoId, inputId){
+  const photoPreview=document.getElementById(photoId);
+  const photoInput=document.getElementById(inputId);
+  photoPreview.addEventListener('click',()=>photoInput.click());
+  photoInput.addEventListener('change', (e)=>{
+    const file=e.target.files?.[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      photoPreview.style.backgroundImage=`url(${ev.target.result})`;
+      photoPreview.textContent='';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+initPhotoPreview('cvPhotoPreview','cvPhotoInput');
+initPhotoPreview('lettrePhotoPreview','lettrePhotoInput');
+
+function incrementMultiplier(){ multiplier++; updatePopup(); }
+function decrementMultiplier(){ if(multiplier>1){multiplier--; updatePopup();} }
+function updatePopup(){document.getElementById('multiplierDisplay').innerText=multiplier; document.getElementById('totalAmount').innerText=multiplier*UNIT_PRICE;}
+function resetMultiplier(){multiplier=1; updatePopup();}
+function openPaymentPopup(docId,action){currentDocId=docId; currentAction=action; resetMultiplier(); document.getElementById('momoMsg').value=''; document.getElementById('transactionId').value=''; document.getElementById('adminCode').value=''; document.getElementById('popupResult').innerHTML=''; document.getElementById('popupOverlay').style.display='flex';}
+function closePopup(){document.getElementById('popupOverlay').style.display='none'; resetMultiplier();}
+
+function validatePayment(){
+  const admin=document.getElementById('adminCode').value.trim();
+  if(admin===ADMIN_CODE){ document.getElementById('popupResult').innerHTML='<span style="color:green">Code admin accepté ✅</span>'; setTimeout(()=>{proceedAction(); closePopup();},500); return;}
+  const msg=document.getElementById('momoMsg').value.trim();
+  const txId=document.getElementById('transactionId').value.trim();
+  if(!msg||!txId){ document.getElementById('popupResult').innerHTML='<span style="color:red">Merci d’entrer le message Mobile Money et l’ID.</span>'; return;}
+  if(!msg.toLowerCase().includes(PAYMENT_BENEF.toLowerCase())){ document.getElementById('popupResult').innerHTML='<span style="color:red">Nom bénéficiaire non trouvé.</span>'; return;}
+  const amountMatch=msg.match(/(\d+)/); 
+  const expectedAmount=UNIT_PRICE*multiplier;
+  if(!amountMatch || parseInt(amountMatch[1],10)!==expectedAmount){ document.getElementById('popupResult').innerHTML=`<span style="color:red">Montant incorrect (attendu ${expectedAmount} FCFA)</span>`; return;}
+  proceedAction(); closePopup();
+}
+
+function proceedAction(){
+  const doc=document.getElementById(currentDocId);
+  if(currentAction==='pdf'){
+    html2canvas(doc, {scale:2}).then(canvas=>{
+      const imgData=canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf=new jsPDF('p','mm','a5');
+      const pageWidth=pdf.internal.pageSize.getWidth();
+      const pageHeight=pdf.internal.pageSize.getHeight();
+      const imgWidth=pageWidth-10;
+      const imgHeight=canvas.height * imgWidth / canvas.width;
+      const yOffset = (pageHeight - imgHeight)/2;
+      pdf.addImage(imgData,'PNG',5, yOffset>0?yOffset:5, imgWidth,imgHeight);
+      pdf.save('document.pdf');
+    });
+  }
+  if(currentAction==='word'){
+    let htmlContent=doc.innerHTML;
+    let blob=new Blob(['<html><body>'+htmlContent+'</body></html>'],{type:'application/msword'});
+    let link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);
+    link.download='document.doc';
+    link.click();
+  }
+}
+</script>
+</body>
+</html>
