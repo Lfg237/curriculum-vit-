@@ -18,7 +18,7 @@ h2{margin:0 0 12px;font-size:18px;color:#333;}
 #popup{width:100%;max-width:420px;background:#fff;border-radius:10px;padding:12px;border:3px solid #1e88e5;box-sizing:border-box;}
 label{font-size:13px;display:block;margin-top:6px;}
 .muted{color:#666;font-size:13px;}
-.text-area{resize:none;width:100%;padding:10px;font-size:14px;border:1.5px solid #1e88e5;border-radius:6px;box-sizing:border-box;overflow:auto;}
+.text-area{resize:none;width:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
 .text-img{float:left;width:100px;height:100px;margin-right:8px;margin-bottom:8px;object-fit:cover;border:1px solid #aaa;border-radius:4px;}
 </style>
 </head>
@@ -187,29 +187,41 @@ async function exportDoc(){
   const id=window.__doc,act=window.__act; if(!id) return; 
   const node=document.getElementById(id); if(!node) return;
 
-  // Choix format : CV en A5, Lettre/Plan en A6
   let format = (id==='lettreDoc' || id==='planDoc') ? 'a6' : 'a5';
 
-  const canvas=await html2canvas(node,{scale:2,useCORS:true,logging:false});
-  const imgData=canvas.toDataURL('image/png'); 
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF('p','mm',format);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p','mm',format);
 
-  const w=pdf.internal.pageSize.getWidth(),
-        h=pdf.internal.pageSize.getHeight();
+  const pageW = pdf.internal.pageSize.getWidth(),
+        pageH = pdf.internal.pageSize.getHeight();
 
-  let imgW=w-12,
-      imgH=(canvas.height*imgW)/canvas.width;
+  const clone = node.cloneNode(true);
+  clone.style.width = pageW + "mm";
+  clone.style.fontSize = "10px";
+  clone.style.lineHeight = "1.2";
+  clone.style.padding = "4px";
+  clone.style.position = "fixed";
+  clone.style.left = "-9999px";
+  document.body.appendChild(clone);
 
-  if(imgH>h-12){
-    const r=(h-12)/imgH;
-    imgH*=r; imgW*=r;
+  const canvas = await html2canvas(clone,{scale:2,useCORS:true});
+  document.body.removeChild(clone);
+
+  const imgData = canvas.toDataURL("image/png");
+  const imgW = pageW, 
+        imgH = (canvas.height * imgW) / canvas.width;
+
+  pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
+
+  if(act==='pdf'){ 
+    pdf.save(id + '.pdf'); 
+    return; 
   }
-  pdf.addImage(imgData,'PNG',6,6,imgW,imgH);
 
-  if(act==='pdf'){pdf.save(id+'.pdf');return;}
-
-  const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
+  const blob=new Blob(
+    ['<html><body>'+node.innerHTML+'</body></html>'],
+    {type:'application/msword'}
+  );
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download=id+'.doc';
