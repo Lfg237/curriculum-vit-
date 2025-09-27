@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Documents A5 Stables</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00695c">
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
@@ -125,13 +127,20 @@ label{font-size:13px;display:block;margin-top:6px;}
 <script>
 // Photos CV/Lettre/Plan
 function handlePhoto(imgId,inputId){
-  const img=document.getElementById(imgId);
+  const el=document.getElementById(imgId);
   const input=document.getElementById(inputId);
-  img.addEventListener('click',()=>input.click());
+  el.addEventListener('click',()=>input.click());
   input.addEventListener('change',e=>{
     const f=e.target.files[0]; if(!f) return;
     const reader=new FileReader();
-    reader.onload=ev=>{img.src=ev.target.result; if(img.classList.contains('photo')){img.textContent='';}};
+    reader.onload=ev=>{
+      if(el.tagName.toLowerCase()==='img'){
+        el.src=ev.target.result;
+      } else {
+        el.style.backgroundImage=`url('${ev.target.result}')`;
+        el.textContent='';
+      }
+    };
     reader.readAsDataURL(f);
   });
 }
@@ -185,6 +194,13 @@ async function exportDoc(){
   const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=id+'.doc';a.click();
 }
+
+// Enregistrement du service worker pour PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('Service Worker enregistré', reg))
+    .catch(err => console.error('Erreur SW:', err));
+}
 </script>
 </body>
-</html> 
+</html>
