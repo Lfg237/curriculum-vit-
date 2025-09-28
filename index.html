@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Documents A6 Stables - PWA</title>
+<title>Documents A6 Stables</title>
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
 section{background:#fff;border-radius:10px;padding:12px;margin:10px auto;max-width:780px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
 h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
-.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;object-fit:cover; float:left; margin-right:12px; margin-bottom:6px;}
+.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;float:left;margin-right:12px;margin-bottom:6px;}
 .signature{border-radius:6px;border:1px solid #43a047;margin-top:4px; display:block;}
 .actions{display:flex;gap:8px;margin-top:8px; clear:both;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
@@ -126,7 +126,6 @@ label{font-size:13px;display:block;margin-top:6px;}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
 // Gestion photos
 function handlePhoto(imgId,inputId){
@@ -178,19 +177,36 @@ function multMinus(){if(multiplier>1) multiplier--;document.getElementById('mult
 function openPayment(doc,act){currentDoc=doc;currentAct=act;multiplier=1;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT;document.getElementById('popupOverlay').style.display='flex';}
 function closePopup(){document.getElementById('popupOverlay').style.display='none';}
 
-async function validatePay(){
+// Simulation vérification paiement côté client (pour HTML pur)
+let usedTx = [];
+function validatePay(){
   const msg=document.getElementById('momo').value.trim();
   const tx=document.getElementById('tx').value.trim();
   if(!msg||!tx){alert("Message et ID requis");return;}
   
-  const resp=await fetch("/api/verify",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({tx,msg,amtExpected:UNIT*multiplier})
-  }).then(r=>r.json());
+  // Vérif doublon
+  if(usedTx.includes(tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
 
-  if(resp.ok){ closePopup(); exportDoc(currentDoc,currentAct); }
-  else{ alert("Paiement rejeté : " + resp.reason); }
+  // Vérif bénéficiaire
+  if(!msg.includes("Wirnkar") || (!msg.includes("676353859") && !msg.includes("640647072"))){
+    alert("Nom ou numéro bénéficiaire incorrect"); return;
+  }
+
+  // Vérif montant
+  const montant = parseInt(msg.match(/\d+/)?.[0]||"0",10);
+  if(montant !== UNIT*multiplier){ alert("Montant incorrect"); return; }
+
+  // Vérif date/heure
+  const match = msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  if(!match){ alert("Date/heure manquante"); return; }
+  const msgTime = new Date(match[0]);
+  const diffMinutes = Math.abs(Date.now() - msgTime.getTime())/60000;
+  if(diffMinutes>20){ alert("Date/heure dépassée (>20min)"); return; }
+
+  // Tout ok
+  usedTx.push(tx);
+  closePopup();
+  exportDoc(currentDoc,currentAct);
 }
 
 // Export PDF/Word
