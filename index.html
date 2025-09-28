@@ -3,85 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>📚mini secrétariat bureautique Lesfacilitateurs</title>
+<title>Documents A6 Stables</title>
+
+<!-- Manifest PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00695c">
+
 <style>
-body{font-family:"Segoe UI",Arial,sans-serif;margin:0;padding:12px;background:#e0f7fa;}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
 section{background:#fff;border-radius:10px;padding:12px;margin:10px auto;max-width:780px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
 h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
-.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;float:left;margin-right:12px;margin-bottom:6px;}
+.photo{border-radius:8px;border:2px dashed #ff6f00;background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:#ff6f00;font-weight:700;cursor:pointer;object-fit:cover; float:left; margin-right:12px; margin-bottom:6px;}
 .signature{border-radius:6px;border:1px solid #43a047;margin-top:4px; display:block;}
 .actions{display:flex;gap:8px;margin-top:8px; clear:both;}
 .btn{background:#00c853;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;}
 .btn.secondary{background:#2196f3;}
-.text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
+#popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:9999;}
+#popup{width:100%;max-width:420px;background:#fff;border-radius:10px;padding:12px;border:3px solid #1e88e5;box-sizing:border-box;}
+label{font-size:13px;display:block;margin-top:6px;}
 .muted{color:#666;font-size:13px;}
-
-/* Overlay Prévisualisation */
-#previewOverlay{
-  position:fixed;
-  top:50px; left:0;
-  width:100%; height:calc(100% - 60px);
-  background:rgba(0,0,0,0.6);
-  display:flex; align-items:center; justify-content:center;
-  pointer-events:none; /* permet de continuer à travailler */
-  z-index:5000;
-}
-#previewCanvas{max-width:90%; max-height:90%; filter:blur(2px) brightness(0.5); border-radius:10px;}
-
-/* Popup Paiement */
-#popupOverlay{
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.6);
-  align-items:center; justify-content:center; z-index:10000;
-}
-#popup{width:100%; max-width:420px; background:#fff; border-radius:10px; padding:12px; border:3px solid #1e88e5; box-sizing:border-box;}
+.text-area{resize:none;width:100%;height:100%;padding:10px;font-size:14px;border:none;border-radius:6px;box-sizing:border-box;overflow:auto;}
 </style>
 </head>
 <body>
-
-<h1>📚mini secrétariat bureautique Lesfacilitateurs</h1>
-
-<!-- Prévisualisation basse résolution -->
-<div id="previewOverlay"><canvas id="previewCanvas"></canvas></div>
+<h1>📄 Mes Documents A6</h1>
 
 <!-- CV -->
 <section id="cvDoc">
 <h2>Curriculum Vitae</h2>
-<img id="cvPhoto" class="photo" src="" style="width:120px;height:120px;">
-<input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
-<div contenteditable="true" id="cvNomPrenom" style="font-weight:700;font-size:22px;">Nom Prénom</div>
-<div contenteditable="true" id="cvFonctionAge" style="font-size:14px;margin-top:4px;">Fonction - Âge</div>
-<canvas id="cvSign" class="signature" style="height:100px;"></canvas>
-<div class="actions">
-<button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
-<button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
+<div style="position:relative; width:100%;">
+  <img id="cvPhoto" class="photo" src="" alt="Photo" style="width:120px; height:120px;">
+  <input type="file" id="cvPhotoInput" accept="image/*" style="display:none">
+  
+  <div contenteditable="true" id="cvNomPrenom" style="font-weight:700;font-size:22px;">Nom Prénom</div>
+  <div contenteditable="true" id="cvFonctionAge" style="font-size:14px;margin-top:4px;">Fonction - Âge</div>
+  
+  <div id="cvInfos" style="margin-top:12px;">
+    <div contenteditable="true">Situation matrimoniale: </div>
+    <div contenteditable="true">Nombre d'enfants: </div>
+    <div contenteditable="true">Région: </div>
+    <div contenteditable="true">Nationalité: </div>
+    <div contenteditable="true">Ville de résidence: </div>
+    <div contenteditable="true">Quartier: </div>
+    <div contenteditable="true">Alcoolique (oui/non): </div>
+    <div contenteditable="true">Religion: </div>
+    <div contenteditable="true">Autres expériences: </div>
+    <div contenteditable="true">Dernier diplôme: </div>
+    <div contenteditable="true">Dernier établissement: </div>
+    <div contenteditable="true">Dernier poste occupé: </div>
+    <div contenteditable="true">Dernier salaire: </div>
+  </div>
+
+  <label class="muted">Signature</label>
+  <canvas id="cvSign" class="signature" style="height:100px; clear:both;"></canvas>
+
+  <div class="actions">
+    <button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
+  </div>
 </div>
 </section>
 
-<!-- Lettre -->
+<!-- Lettre de Motivation -->
 <section id="lettreDoc">
 <h2>Lettre de Motivation</h2>
-<img id="lettrePhoto" class="photo" src="" style="width:100px;height:100px;">
-<input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
-<div id="lettreTexte" contenteditable="true" class="text-area" style="min-height:200px; background:#e3f2fd;" data-placeholder="Cliquez ici pour taper votre lettre…">Cliquez ici pour taper votre lettre…</div>
-<canvas id="lettreSign" class="signature" style="width:120px;height:60px;"></canvas>
-<div class="actions">
-<button class="btn" onclick="openPayment('lettreDoc','pdf')">PDF</button>
-<button class="btn" onclick="openPayment('lettreDoc','word')">Word</button>
+<div style="position:relative; width:100%; min-height:300px;">
+  <img id="lettrePhoto" class="photo" src="" alt="Photo" style="width:100px; height:100px;">
+  <input type="file" id="lettrePhotoInput" accept="image/*" style="display:none">
+  
+  <div id="lettreTexte" contenteditable="true" class="text-area" style="min-height:200px; padding:10px; background-color:#e3f2fd;" data-placeholder="Cliquez ici pour taper votre lettre…">
+    Cliquez ici pour taper votre lettre…
+  </div>
+
+  <canvas id="lettreSign" class="signature" style="width:120px;height:60px; margin-top:8px;"></canvas>
+
+  <div class="actions">
+    <button class="btn" onclick="openPayment('lettreDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('lettreDoc','word')">Word</button>
+  </div>
 </div>
 </section>
 
-<!-- Plan -->
+<!-- Plan de Localisation -->
 <section id="planDoc">
 <h2>Plan de Localisation</h2>
-<img id="planPhoto" class="photo" src="" style="width:100px;height:100px;">
-<input type="file" id="planPhotoInput" accept="image/*" style="display:none">
-<div id="planTexte" contenteditable="true" class="text-area" style="min-height:200px; background:#e8f5e9;" data-placeholder="Cliquez ici pour décrire le plan…">Cliquez ici pour décrire le plan…</div>
-<canvas id="planSign" class="signature" style="width:120px;height:60px;"></canvas>
-<div class="actions">
-<button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
-<button class="btn" onclick="openPayment('planDoc','word')">Word</button>
+<div style="position:relative; width:100%; min-height:300px;">
+  <img id="planPhoto" class="photo" src="" alt="Photo" style="width:100px; height:100px;">
+  <input type="file" id="planPhotoInput" accept="image/*" style="display:none">
+
+  <div id="planTexte" contenteditable="true" class="text-area" style="min-height:200px; padding:10px; background-color:#e8f5e9;" data-placeholder="Cliquez ici pour décrire le plan…">
+    Cliquez ici pour décrire le plan…
+  </div>
+
+  <canvas id="planSign" class="signature" style="width:120px;height:60px; margin-top:8px;"></canvas>
+
+  <div class="actions">
+    <button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
+  </div>
 </div>
 </section>
 
@@ -113,37 +133,18 @@ h2{margin:0 0 12px;font-size:18px;color:#333;text-align:center;}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-// --- Prévisualisation ---
-function updatePreview(id){
-  const doc=document.getElementById(id);
-  const canvas=document.getElementById('previewCanvas');
-  if(!doc || !canvas) return;
-  html2canvas(doc,{scale:0.5}).then(cnv=>{
-    const ctx=canvas.getContext('2d');
-    canvas.width=cnv.width; canvas.height=cnv.height;
-    ctx.filter='blur(2px) brightness(0.5)';
-    ctx.drawImage(cnv,0,0);
-  });
-}
-['cvDoc','lettreDoc','planDoc'].forEach(id=>{
-  const el=document.getElementById(id);
-  el.addEventListener('input',()=>updatePreview(id));
-  el.addEventListener('change',()=>updatePreview(id));
-});
 
+<script>
 // --- Photos ---
 function handlePhoto(imgId,inputId){
-  const img=document.getElementById(imgId);
+  const el=document.getElementById(imgId);
   const input=document.getElementById(inputId);
-  img.addEventListener('click',()=>input.click());
+  el.addEventListener('click',()=>input.click());
   input.addEventListener('change',e=>{
-    const f=e.target.files[0];
-    if(!f) return;
+    const f=e.target.files[0]; if(!f) return;
     const reader=new FileReader();
-    reader.onload=ev=>{img.src=ev.target.result;};
+    reader.onload=ev=>{el.src=ev.target.result;};
     reader.readAsDataURL(f);
-    updatePreview(img.closest('section').id);
   });
 }
 handlePhoto('cvPhoto','cvPhotoInput');
@@ -153,47 +154,62 @@ handlePhoto('planPhoto','planPhotoInput');
 // --- Signatures ---
 function makeSign(id){
   const c=document.getElementById(id);
+  if(!c)return;
   c.width=c.clientWidth*devicePixelRatio;
-  c.height=c.clientHeight*devicePixelRatio;
+  c.height=(id==='cvSign')?100*devicePixelRatio:60*devicePixelRatio;
   const ctx=c.getContext('2d');
   ctx.scale(devicePixelRatio,devicePixelRatio);
   ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
   let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect(); return {x:(e.touches?e.touches[0].clientX:e.clientX)-r.left,y:(e.touches?e.touches[0].clientY:e.clientY)-r.top};}
-  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault();}
+  function pos(e){const r=c.getBoundingClientRect(); if(e.touches && e.touches[0]) return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}; return{x:e.clientX-r.left,y:e.clientY-r.top};}
+  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
   function move(e){if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();}
-  function end(){drawing=false; ctx.closePath(); updatePreview(c.closest('section').id);}
-  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
+  function end(){drawing=false; ctx.closePath();}
+  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move);
+  c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
   c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
 }
 makeSign('cvSign'); makeSign('lettreSign'); makeSign('planSign');
 
-// --- Popup Paiement ---
+// --- Placeholder texte ---
+function setupPlaceholder(id){
+  const el=document.getElementById(id);
+  const placeholder=el.getAttribute('data-placeholder');
+  el.addEventListener('focus',()=>{if(el.innerText===placeholder) el.innerText='';});
+  el.addEventListener('blur',()=>{if(el.innerText.trim()==='') el.innerText=placeholder;});
+}
+setupPlaceholder('lettreTexte'); setupPlaceholder('planTexte');
+
+// --- Popup paiement ---
 let multiplier=1,UNIT=100,BENEF='Wirnkar Loveline',ADMIN='xz233233';
 let usedTransactions=[];
 function multPlus(){multiplier++;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
 function multMinus(){if(multiplier>1) multiplier--;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function openPayment(docId,act){window.__doc=docId; window.__act=act; document.getElementById('popupOverlay').style.display='flex';}
+function openPayment(id,act){window.__doc=id;window.__act=act;document.getElementById('popupOverlay').style.display='flex';}
 function closePopup(){document.getElementById('popupOverlay').style.display='none';}
 function validatePay(){
   const admin=document.getElementById('admin').value.trim();
   const msg=document.getElementById('momo').value.trim();
   const tx=document.getElementById('tx').value.trim();
+  const now=new Date();
   if(admin===ADMIN){ exportDoc(); closePopup(); return; }
   if(!msg || !tx){ alert("Message et ID requis"); return; }
   if(!msg.toLowerCase().includes(BENEF.toLowerCase())){ alert("Nom bénéficiaire incorrect"); return; }
   const amt=parseInt(msg.match(/\d+/)?.[0],10);
   if(amt!==UNIT*multiplier){ alert("Montant incorrect"); return; }
   if(usedTransactions.some(t=>t.id===tx)){ alert("Cette transaction a déjà été utilisée !"); return; }
-  usedTransactions.push({id:tx});
+  const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){ alert("L'heure de la transaction est incorrecte (>10 min)"); return; }}
+  usedTransactions.push({id:tx,time:now});
   exportDoc(); closePopup();
 }
 
-// --- Export PDF/Word ---
+// --- Export PDF/Word A6 ---
 async function exportDoc(){
   const id=window.__doc,act=window.__act;
   if(!id) return;
-  const node=document.getElementById(id);
+  let node=document.getElementById(id);
+  if(!node) return;
   const canvas=await html2canvas(node,{scale:2,useCORS:true,allowTaint:true});
   const imgData=canvas.toDataURL('image/png');
   const {jsPDF}=window.jspdf;
@@ -205,6 +221,13 @@ async function exportDoc(){
   if(act==='pdf'){ pdf.save(id+'.pdf'); return; }
   const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.doc'; a.click();
+}
+
+// --- Service Worker registration ---
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js")
+    .then(reg => console.log("Service Worker enregistré!", reg))
+    .catch(err => console.log("Erreur SW:", err));
 }
 </script>
 </body>
