@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Documents A6 Stables</title>
 
-<!-- Manifest PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00695c">
-
 <style>
 body{font-family:"Segoe UI",Arial,sans-serif;background:#e0f7fa;margin:0;padding:12px;}
 h1{text-align:center;color:#00695c;margin:6px 0 16px;font-size:24px;}
@@ -63,6 +59,43 @@ label{font-size:13px;display:block;margin-top:6px;}
     <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
   </div>
 </div>
+</section>
+  <!-- Carte de Visite / Badge -->
+<section id="carteDoc">
+  <h2>Carte de Visite / Badge</h2>
+  <div style="position:relative; width:100%;">
+
+    <img id="cartePhoto" class="photo" src="" alt="Photo" style="width:90px; height:90px;">
+    <input type="file" id="cartePhotoInput" accept="image/*" style="display:none">
+
+    <div contenteditable="true" id="carteNom" 
+         style="font-weight:700;font-size:20px;color:#d32f2f;margin-bottom:6px;">
+      Nom Prénom
+    </div>
+    <div contenteditable="true" id="carteProfession" style="font-size:14px;color:#00695c;">
+      Profession
+    </div>
+    <div contenteditable="true" id="carteResponsabilites" style="font-size:13px;margin-top:4px;">
+      Responsabilités principales
+    </div>
+
+    <div id="carteInfos" style="margin-top:8px; font-size:12px; line-height:1.4;">
+      <div contenteditable="true">Tel Orange: </div>
+      <div contenteditable="true">Tel MTN (Momo): </div>
+      <div contenteditable="true">Tel Camtel: </div>
+      <div contenteditable="true">Email: </div>
+      <div contenteditable="true">Services: 1, 2, 3, 4</div>
+      <div contenteditable="true">Ville: </div>
+    </div>
+
+    <label class="muted">Signature</label>
+    <canvas id="carteSign" class="signature" style="height:60px;"></canvas>
+
+    <div class="actions">
+      <button class="btn" onclick="openPayment('carteDoc','pdf')">PDF</button>
+      <button class="btn" onclick="openPayment('carteDoc','word')">Word</button>
+    </div>
+  </div>
 </section>
 
 <!-- Lettre de Motivation -->
@@ -150,6 +183,11 @@ function handlePhoto(imgId,inputId){
 handlePhoto('cvPhoto','cvPhotoInput');
 handlePhoto('lettrePhoto','lettrePhotoInput');
 handlePhoto('planPhoto','planPhotoInput');
+  // --- Photo pour carte ---
+handlePhoto('cartePhoto','cartePhotoInput');
+
+// --- Signature pour carte ---
+makeSign('carteSign');
 
 // --- Signatures ---
 function makeSign(id){
@@ -223,12 +261,6 @@ async function exportDoc(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.doc'; a.click();
 }
 
-// --- Service Worker registration ---
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js")
-    .then(reg => console.log("Service Worker enregistré!", reg))
-    .catch(err => console.log("Erreur SW:", err));
-}
 </script>
 </body>
 </html>
