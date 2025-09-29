@@ -27,7 +27,7 @@ section.active{display:block;}
 <header id="docHeader">
   <span style="color:#ebb8ff; font-weight:bold; font-size:1.2em; margin-right:20px;">
   Mini Secrétariat Lesfacilitateurs
-</span>
+  </span>
   <button class="active" data-target="cvDoc">CV</button>
   <button data-target="carteDoc">Carte de Visite</button>
   <button data-target="cniDoc">CNI</button>
@@ -35,14 +35,15 @@ section.active{display:block;}
   <button data-target="lettreDoc">Lettre Motivation</button>
   <button data-target="planDoc">Plan</button>
   <button data-target="ficheEntreprise">Fiche Entreprise</button>
+  <button data-target="siteStatDoc">Site Statistique</button>
 </header>
+
 <!-- ======================= CV ======================= -->
 <section id="cvDoc" class="active">
 <h2>Curriculum Vitae</h2>
 <div style="position:relative; width:100%; min-height:300px; background:linear-gradient(135deg,#ffe082,#ffcc80); padding:10px; border-radius:10px;">
   <img id="cvPhoto" class="photo" src="" style="width:100px;height:100px; float:right; margin-left:10px;">
   <input type="file" id="cvPhotoInput" style="display:none;">
-  
   <div style="margin-bottom:10px;">
     Nom: <span id="cvNom" contenteditable="true" style="font-weight:bold; font-size:24px; color:#d32f2f;">Cliquez pour taper le nom</span>
   </div>
@@ -69,9 +70,7 @@ section.active{display:block;}
     Marié: <span id="cvMarie" contenteditable="true" style="font-size:14px; color:#555;">Oui / Non</span> |
     Enfants: <span id="cvEnfants" contenteditable="true" style="font-size:14px; color:#555;">--</span>
   </div>
-
   <canvas id="cvSign" class="signature" style="width:120px;height:60px; margin-top:10px; border:1px solid #222;"></canvas>
-  
   <div class="actions">
     <button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
     <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
@@ -85,7 +84,6 @@ section.active{display:block;}
 <div style="position:relative; width:100%; min-height:200px; background:linear-gradient(135deg,#b2dfdb,#80cbc4); padding:10px; border-radius:10px;">
   <img id="cartePhoto" class="photo" src="" style="width:80px;height:80px; float:right; margin-left:10px;">
   <input type="file" id="cartePhotoInput" style="display:none;">
-
   <div>
     Nom: <span id="carteNom" contenteditable="true" style="font-weight:bold; font-size:22px; color:#c2185b;">Cliquez pour taper le nom</span>
   </div>
@@ -101,9 +99,7 @@ section.active{display:block;}
     Nom de l'entreprise: <span id="carteEntreprise" contenteditable="true" style="font-size:14px; color:#555;">Entreprise</span> |
     Contact / Parrain: <span id="carteContact" contenteditable="true" style="font-size:14px; color:#555;">Nom contact</span>
   </div>
-
   <canvas id="carteSign" class="signature" style="width:120px;height:60px; margin-top:10px; border:1px solid #222;"></canvas>
-
   <div class="actions">
     <button class="btn" onclick="openPayment('carteDoc','pdf')">PDF</button>
     <button class="btn" onclick="openPayment('carteDoc','word')">Word</button>
@@ -115,7 +111,7 @@ section.active{display:block;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// ======================= NAVIGATION HEADER =======================
+// ======================= NAVIGATION =======================
 const buttons = document.querySelectorAll('header button');
 const sections = document.querySelectorAll('section');
 buttons.forEach(btn=>{
@@ -125,7 +121,6 @@ buttons.forEach(btn=>{
     sections.forEach(sec=>sec.classList.remove('active'));
     const target = document.getElementById(btn.dataset.target);
     if(target){ target.classList.add('active'); }
-    // Redimensionne canvas visibles
     target.querySelectorAll('canvas.signature').forEach(c=>makeSign(c.id));
   });
 });
@@ -143,7 +138,6 @@ function handlePhoto(imgId,inputId){
     reader.readAsDataURL(file);
   });
 }
-
 ['cvPhoto','cartePhoto'].forEach(id=>handlePhoto(id,id+'Input'));
 
 // ======================= SIGNATURE =======================
@@ -154,10 +148,7 @@ function makeSign(id){
   c.height=c.clientHeight*devicePixelRatio;
   const ctx=c.getContext('2d');
   ctx.scale(devicePixelRatio,devicePixelRatio);
-  ctx.lineJoin='round';
-  ctx.lineCap='round';
-  ctx.strokeStyle='#222';
-  ctx.lineWidth=2;
+  ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
   let drawing=false;
   function pos(e){const r=c.getBoundingClientRect();if(e.touches&&e.touches[0])return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};return{x:e.clientX-r.left,y:e.clientY-r.top};}
   function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
@@ -178,7 +169,6 @@ async function exportDoc(id,act){
   const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.doc'; a.click();
 }
-
 function openPayment(id,act){
   window.__doc=id; window.__act=act;
   document.getElementById('popupOverlay').style.display='flex';
@@ -189,11 +179,13 @@ function openPayment(id,act){
 <div style="display:flex; gap:12px;">
   <div>
     <p class="muted">Recto</p>
-    <img id="cniRecto" class="photo" src="" style="width:140px;height:100px;"><input type="file" id="cniRectoInput" style="display:none;">
+    <img id="cniRecto" class="photo" src="" style="width:140px;height:100px;">
+    <input type="file" id="cniRectoInput" style="display:none;">
   </div>
   <div>
     <p class="muted">Verso</p>
-    <img id="cniVerso" class="photo" src="" style="width:140px;height:100px;"><input type="file" id="cniVersoInput" style="display:none;">
+    <img id="cniVerso" class="photo" src="" style="width:140px;height:100px;">
+    <input type="file" id="cniVersoInput" style="display:none;">
   </div>
 </div>
 <canvas id="cniSign" class="signature" style="width:120px;height:60px;margin-top:10px; border:1px solid #222;"></canvas>
@@ -203,7 +195,7 @@ function openPayment(id,act){
 </div>
 </section>
 
-<!-- =======================photo passeport (4×4)======================= -->
+<!-- ======================= PHOTO PASSEPORT ======================= -->
 <section id="photosDoc">
 <h2>Photocopies</h2>
 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
@@ -260,45 +252,14 @@ function openPayment(id,act){
   </div>
 </div>
 
-<script>
-// ======================= PHOTOS CNI/PHOTOCOPIES/LETTRE =======================
-['cniRecto','cniVerso','photo1','photo2','photo3','photo4','lettrePhoto'].forEach(id=>{
-  handlePhoto(id,id+'Input');
-});
-
-// ======================= SIGNATURE =======================
-['cniSign','photosSign','lettreSign'].forEach(makeSign);
-
-// ======================= POPUP PAIEMENT =======================
-let multiplier=1,UNIT=100,BENEF='Wirnkar Loveline',ADMIN='xz233233',usedTransactions=[];
-function multPlus(){multiplier++;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}
-function multMinus(){if(multiplier>1){multiplier--;document.getElementById('mult').innerText=multiplier;document.getElementById('total').innerText=UNIT*multiplier;}}
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
-function validatePay(){
-  const admin=document.getElementById('admin').value.trim();
-  const msg=document.getElementById('momo').value.trim();
-  const tx=document.getElementById('tx').value.trim();
-  const now=new Date();
-  if(admin===ADMIN){ exportDoc(window.__doc,window.__act); closePopup(); return; }
-  if(!msg||!tx){alert("Message et ID requis"); return;}
-  if(!msg.toLowerCase().includes(BENEF.toLowerCase())){alert("Nom bénéficiaire incorrect"); return;}
-  const amt=parseInt(msg.match(/\d+/)?.[0],10);
-  if(amt!==UNIT*multiplier){alert("Montant incorrect"); return;}
-  if(usedTransactions.some(t=>t.id===tx)){alert("Cette transaction a déjà été utilisée !"); return;}
-  const timeMatch=msg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
-  if(timeMatch){const msgTime=new Date(timeMatch[0]); if(Math.abs(now-msgTime)/60000>10){alert("L'heure de la transaction est incorrecte (>10 min)"); return;}}
-  usedTransactions.push({id:tx,time:now});
-  exportDoc(window.__doc,window.__act);
-  closePopup();
-}
-</script><!-- ======================= PLAN DE LOCALISATION ======================= -->
+<!-- ======================= PLAN DE LOCALISATION ======================= -->
 <section id="planDoc">
 <h2>Plan de Localisation</h2>
 <div style="position:relative; width:100%; min-height:300px; background:linear-gradient(135deg,#c5e1a5,#aed581); padding:10px; border-radius:10px;">
   <img id="planPhoto" class="photo" src="" style="width:100px;height:100px; float:right; margin-left:10px;">
   <input type="file" id="planPhotoInput" style="display:none;">
   <div id="planTexte" contenteditable="true" class="text-area" data-placeholder="Cliquez ici pour décrire le plan…">Cliquez ici pour décrire le plan…</div>
-  <canvas id="planSign" class="signature" style="width:120px;height:60px;margin-top:10px; border:1px solid #222;"></canvas>
+  <canvas id="planSign" class="signature" style="width:120px;height:60px;margin-top:10px;border:1px solid #222;"></canvas>
   <div class="actions">
     <button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
     <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
@@ -306,26 +267,40 @@ function validatePay(){
 </div>
 </section>
 
-<!-- ======================= FICHE ENTREPRISE ======================= -->
+<script>
+// ======================= PHOTOS =======================
+['cniRecto','cniVerso','photo1','photo2','photo3','photo4','lettrePhoto','planPhoto'].forEach(id=>handlePhoto(id,id+'Input'));
+
+// ======================= SIGNATURE =======================
+['cniSign','photosSign','lettreSign','planSign'].forEach(makeSign);
+
+// ======================= POPUP PAIEMENT LOGIC =======================
+let quantity = 1;
+function multPlus(){quantity++; updateTotal();}
+function multMinus(){if(quantity>1)quantity--; updateTotal();}
+function updateTotal(){document.getElementById('mult').innerText=quantity; document.getElementById('total').innerText=100*quantity;}
+function closePopup(){document.getElementById('popupOverlay').style.display='none';}
+function validatePay(){
+  alert(`Paiement validé pour ${quantity} unité(s)\nMessage: ${document.getElementById('momo').value}\nTransaction ID: ${document.getElementById('tx').value}`);
+  closePopup();
+}
+</script><!-- ======================= FICHE ENTREPRISE ======================= -->
 <section id="ficheEntreprise">
 <h2>Fiche Entreprise</h2>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
   <div contenteditable="true" style="font-weight:bold;font-size:20px;color:#d32f2f;">Nom de l'entreprise</div>
-  <img id="logo" src="" alt="Logo" style="width:60px;height:60px;object-fit:cover; border-radius:6px; cursor:pointer;">
+  <img id="logo" src="" alt="Logo" style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;">
   <input type="file" id="logoInput" style="display:none;">
 </div>
 
-<!-- Grille noms éditables -->
 <div id="listeNoms" class="grid"></div>
 
-<!-- Signature + nom signataire -->
 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
   <canvas id="sign" class="signature" style="height:60px; border:1px solid #43a047; border-radius:6px;"></canvas>
   <div contenteditable="true" style="font-weight:bold;">Nom du signataire</div>
 </div>
 
-<!-- Pagination -->
 <div style="display:flex; justify-content:center; gap:12px; margin-top:12px;">
   <button class="btn secondary" id="prevPage">← Page précédente</button>
   <span id="pageIndicator">Page 1</span>
@@ -339,14 +314,51 @@ function validatePay(){
 </div>
 </section>
 
+<!-- ======================= SITE STATISTIQUE ======================= -->
+<section id="siteStatDoc">
+<h2>Site Statistique - Lesfacilitateurs</h2>
+<div style="position:relative; width:100%; min-height:400px; background:linear-gradient(135deg,#ffe0b2,#ffb74d); padding:10px; border-radius:10px;">
+  <div>
+    Nom du site: <span id="siteNom" contenteditable="true" style="font-weight:bold; font-size:28px; font-family:'Segoe UI', cursive; color:#c2185b;">Mini Secrétariat Lesfacilitateurs</span>
+  </div>
+  <div id="sitePhotos" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"></div>
+  <input type="file" id="sitePhotoInput" multiple style="display:none;">
+  <button class="btn secondary" onclick="document.getElementById('sitePhotoInput').click();">Importer photos</button>
+
+  <canvas id="siteSign" class="signature" style="width:120px;height:60px;margin-top:10px;border:1px solid #222;"></canvas>
+
+  <div class="actions" style="margin-top:10px;">
+    <button class="btn" onclick="openPayment('siteStatDoc','pdf')">PDF</button>
+    <button class="btn" onclick="openPayment('siteStatDoc','word')">Word</button>
+  </div>
+</div>
+</section>
+
 <script>
-// ======================= PHOTOS =======================
-['planPhoto','logo'].forEach(id=>handlePhoto(id,id+'Input'));
+// ======================= PHOTOS SITE =======================
+document.getElementById('sitePhotoInput').addEventListener('change', e => {
+  const container = document.getElementById('sitePhotos');
+  Array.from(e.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const div = document.createElement('div');
+      div.style.position = 'relative';
+      div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:120px;object-fit:cover;border:1px solid #aaa;border-radius:6px;">
+                       <textarea placeholder="Commentaire..." style="width:100%;margin-top:2px;"></textarea>`;
+      container.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+});
 
-// ======================= SIGNATURE =======================
-['planSign','sign'].forEach(makeSign);
+// ======================= SIGNATURE SITE =======================
+makeSign('siteSign');
 
-// ======================= FICHE ENTREPRISE =======================
+// ======================= FICHE ENTREPRISE PHOTOS & SIGN =======================
+['logo'].forEach(id=>handlePhoto(id,id+'Input'));
+['sign'].forEach(makeSign);
+
+// ======================= FICHE ENTREPRISE NAVIGATION =======================
 let noms = Array.from({length:140},(_,i)=>`Nom ${i+1}`);
 let currentPage=0,perPage=70;
 
@@ -356,13 +368,10 @@ function renderFiche(){
   const start=currentPage*perPage;
   const end=start+perPage;
   const pageNoms=noms.slice(start,end);
-
   const col1 = pageNoms.slice(0,35);
   const col2 = pageNoms.slice(35,70);
-
   const col1Html = col1.map(n=>`<div class="nom-cell" contenteditable="true" style="font-weight:bold; color:#${Math.floor(Math.random()*16777215).toString(16)}">${n}</div>`).join('');
   const col2Html = col2.map(n=>`<div class="nom-cell" contenteditable="true" style="font-weight:bold; color:#${Math.floor(Math.random()*16777215).toString(16)}">${n}</div>`).join('');
-
   grid.innerHTML = `<div>${col1Html}</div><div>${col2Html}</div>`;
   document.getElementById('pageIndicator').innerText=`Page ${currentPage+1} / ${Math.ceil(noms.length/perPage)}`;
 }
