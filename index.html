@@ -226,31 +226,7 @@ function openPayment(id,act){
 </div>
 </section>
 
-<!-- ======================= POPUP PAIEMENT ======================= -->
-<div id="popupOverlay" style="display:none; position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
-  <div id="popup" style="background:#fff;padding:20px;border-radius:10px;width:320px;max-width:90%;">
-    <h3>Paiement requis</h3>
-    <p class="muted">Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-    <p class="muted">Numéros: MTN 676353859 / Orange 640647072</p>
-    <p class="muted">Prix unitaire: <strong>100 FCFA / unité</strong></p>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
-      <button onclick="multPlus()" class="btn secondary">+</button>
-      <div class="muted">Quantité: <span id="mult">1</span></div>
-      <button onclick="multMinus()" class="btn secondary">-</button>
-      <div style="margin-left:auto;" class="muted">Total: <strong><span id="total">100</span> FCFA</strong></div>
-    </div>
-    <label>Message Mobile Money</label>
-    <textarea id="momo" placeholder="Ex : Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
-    <label>ID Transaction</label>
-    <input id="tx" type="text" placeholder="ID transaction">
-    <label>Code admin (optionnel)</label>
-    <input id="admin" type="password" placeholder="Code admin">
-    <div class="actions" style="margin-top:10px;">
-      <button class="btn" onclick="validatePay()">Valider</button>
-      <button class="btn secondary" onclick="closePopup()">Annuler</button>
-    </div>
-  </div>
-</div>
+<
 
 <!-- ======================= PLAN DE LOCALISATION ======================= -->
 <section id="planDoc">
@@ -268,6 +244,123 @@ function openPayment(id,act){
 </section>
 
 <script>
+<!-- ======================= POPUP PAIEMENT ======================= -->
+<div id="popupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center;">
+  <div id="popup" style="background:#fff;padding:20px;border-radius:10px;width:320px;max-width:90%;">
+    <h3>Paiement requis</h3>
+    <p class="muted">Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
+    <p class="muted">Numéros: MTN 676353859 / Orange 640647072</p>
+    <p class="muted">Prix unitaire: <strong>100 FCFA / unité</strong></p>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+      <button onclick="multPlus()" class="btn secondary">+</button>
+      <div class="muted">Quantité: <span id="mult">1</span></div>
+      <button onclick="multMinus()" class="btn secondary">-</button>
+      <div style="margin-left:auto;" class="muted">Total: <strong><span id="total">100</span> FCFA</strong></div>
+    </div>
+    <label>Message Mobile Money</label>
+    <textarea id="momo" placeholder="Ex : Wirnkar Loveline 100 2025-09-30T12:00"></textarea>
+    <label>ID Transaction</label>
+    <input id="tx" type="text" placeholder="ID transaction">
+    <label>Code admin (optionnel)</label>
+    <input id="admin" type="password" placeholder="Code admin">
+    <div class="actions" style="margin-top:10px;">
+      <button class="btn" onclick="validatePay()">Valider</button>
+      <button class="btn secondary" onclick="closePopup()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === Gestion quantité ===
+function multPlus() {
+  let qty = parseInt(document.getElementById('mult').textContent);
+  qty++;
+  document.getElementById('mult').textContent = qty;
+  document.getElementById('total').textContent = qty * 100;
+}
+
+function multMinus() {
+  let qty = parseInt(document.getElementById('mult').textContent);
+  if(qty>1) qty--;
+  document.getElementById('mult').textContent = qty;
+  document.getElementById('total').textContent = qty * 100;
+}
+
+// === Fermeture popup ===
+function closePopup() {
+  document.getElementById('popupOverlay').style.display='none';
+}
+
+// === Mémoire pour éviter doublons ===
+let transactionHistory = JSON.parse(localStorage.getItem('txHistory') || "[]");
+
+// === Validation stricte paiement ===
+function validatePay() {
+  const momoMsg = document.getElementById('momo').value.trim();
+  const txId = document.getElementById('tx').value.trim();
+  const adminCode = document.getElementById('admin').value.trim();
+  const now = new Date();
+
+  // Vérification minimum
+  if(!momoMsg || !txId) {
+    alert("Veuillez remplir le message Mobile Money et l'ID transaction.");
+    return;
+  }
+
+  // Eviter doublons
+  if(transactionHistory.includes(txId)) {
+    alert("Transaction déjà utilisée.");
+    return;
+  }
+
+  // Vérification nom et numéro dans message
+  const nomBene = "Wirnkar Loveline";
+  const numeros = ["676353859","640647072"];
+  let validNom = momoMsg.includes(nomBene);
+  let validNum = numeros.some(n => momoMsg.includes(n));
+  if(!validNom || !validNum) {
+    alert("Nom ou numéro invalide dans le message.");
+    return;
+  }
+
+  // Vérification date <=10min
+  let dateMatch = momoMsg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  if(!dateMatch) {
+    alert("Date/heure non trouvée dans le message.");
+    return;
+  }
+  let msgDate = new Date(dateMatch[0]);
+  if(Math.abs(now - msgDate)/60000 > 10) {
+    alert("Transaction expirée (>10 minutes).");
+    return;
+  }
+
+  // Vérification code admin si nécessaire
+  if(adminCode && adminCode !== "233233") {
+    alert("Code admin invalide.");
+    return;
+  }
+
+  // Tout est valide : sauvegarde et téléchargement automatique
+  transactionHistory.push(txId);
+  localStorage.setItem('txHistory', JSON.stringify(transactionHistory));
+
+  alert("Paiement validé ! Téléchargement lancé...");
+  downloadDocument();
+  closePopup();
+}
+
+// === Fonction téléchargement simulé ===
+function downloadDocument() {
+  const blob = new Blob(["Contenu PDF simulé"], {type:"application/pdf"});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = "document.pdf";
+  link.click();
+}
+</script>
+
+
 // ======================= PHOTOS =======================
 ['cniRecto','cniVerso','photo1','photo2','photo3','photo4','lettrePhoto','planPhoto'].forEach(id=>handlePhoto(id,id+'Input'));
 
