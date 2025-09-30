@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Documents A6 Stables</title>
 <style>
-body{font-family:"Segoe UI",Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;}
+body{font-family:"< UI",Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;}
 header{background:#00695c;color:#fff;padding:10px;display:flex;overflow-x:auto;}
 header button{background:none;border:none;color:#fff;padding:8px 12px;cursor:pointer;font-weight:bold;}
 header button.active{background:#004d40;border-radius:6px;}
@@ -88,7 +88,7 @@ section.active{display:block;}
     Nom: <span id="carteNom" contenteditable="true" style="font-weight:bold; font-size:22px; color:#c2185b;">Cliquez pour taper le nom</span>
   </div>
   <div>
-    Profession: <span id="carteProfession" contenteditable="true" style="font-size:14px; color:#333;">Cliquez ici</span> |
+    Profession: <span id="7" contenteditable="true" style="font-size:14px; color:#333;">Cliquez ici</span> |
     Age: <span id="carteAge" contenteditable="true" style="font-size:14px; color:#333;">--</span>
   </div>
   <div>
@@ -225,22 +225,20 @@ function openPayment(id,act){
   </div>
 </div>
 </section>
-
-<!-- ======================= POPUP PAIEMENT ======================= -->
-<div id="popupOverlay" style="display:none; position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
-  <div id="popup" style="background:#fff;padding:20px;border-radius:10px;width:320px;max-width:90%;">
+<!-- ======================= POPUP PAIEMENT STRICT ======================= -->
+<div id="popupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999;"> <div id="popup" style="background:#fff;padding:20px;border-radius:10px;width:320px;max-width:90%;">
     <h3>Paiement requis</h3>
     <p class="muted">Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
     <p class="muted">Numéros: MTN 676353859 / Orange 640647072</p>
     <p class="muted">Prix unitaire: <strong>100 FCFA / unité</strong></p>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+    <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
       <button onclick="multPlus()" class="btn secondary">+</button>
       <div class="muted">Quantité: <span id="mult">1</span></div>
       <button onclick="multMinus()" class="btn secondary">-</button>
       <div style="margin-left:auto;" class="muted">Total: <strong><span id="total">100</span> FCFA</strong></div>
     </div>
     <label>Message Mobile Money</label>
-    <textarea id="momo" placeholder="Ex : Wirnkar Loveline 100 2025-09-27T12:00"></textarea>
+    <textarea id="momo" placeholder="Ex : Wirnkar Loveline 100 2025-09-30T12:00"></textarea>
     <label>ID Transaction</label>
     <input id="tx" type="text" placeholder="ID transaction">
     <label>Code admin (optionnel)</label>
@@ -252,6 +250,85 @@ function openPayment(id,act){
   </div>
 </div>
 
+<script>
+let quantity = 1;
+let currentDoc = '';
+let currentAct = '';
+let transactionHistory = JSON.parse(localStorage.getItem('txHistory') || "[]");
+
+function multPlus() { quantity++; updateTotal(); }
+function multMinus() { if(quantity>1) quantity--; updateTotal(); }
+function updateTotal() {
+  document.getElementById('mult').innerText = quantity;
+  document.getElementById('total').innerText = 100 * quantity;
+}
+
+function openPayment(id, act) {
+  currentDoc = id;
+  currentAct = act;
+  document.getElementById('mult').innerText = 1;
+  document.getElementById('total').innerText = 100;
+  document.getElementById('momo').value = '';
+  document.getElementById('tx').value = '';
+  document.getElementById('admin').value = '';
+  quantity = 1;
+  document.getElementById('popupOverlay').style.display = 'flex';
+}
+
+function closePopup() { document.getElementById('popupOverlay').style.display = 'none'; }
+
+function validatePay() {
+  const momoMsg = document.getElementById('momo').value.trim();
+  const txId = document.getElementById('tx').value.trim();
+  const adminCode = document.getElementById('admin').value.trim();
+  const now = new Date();
+
+  if(!momoMsg || !txId){ alert("Veuillez remplir le message Mobile Money et l'ID transaction."); return; }
+  if(transactionHistory.includes(txId)){ alert("Transaction déjà utilisée."); return; }
+
+  const nomBene = "Wirnkar Loveline";
+  const numeros = ["676353859","640647072"];
+  const validNom = momoMsg.includes(nomBene);
+  const validNum = numeros.some(n => momoMsg.includes(n));
+  if(!validNom || !validNum){ alert("Nom ou numéro invalide dans le message."); return; }
+
+  const dateMatch = momoMsg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  if(!dateMatch){ alert("Date/heure non trouvée dans le message."); return; }
+  const msgDate = new Date(dateMatch[0]);
+  if(Math.abs(now - msgDate)/60000 > 10){ alert("Transaction expirée (>10 minutes)."); return; }
+
+  if(adminCode && adminCode !== "233233"){ alert("Code admin invalide."); return; }
+
+  transactionHistory.push(txId);
+  localStorage.setItem('txHistory', JSON.stringify(transactionHistory));
+
+  alert(`Paiement validé pour ${quantity} unité(s) !`);
+  downloadDocument(currentDoc, currentAct);
+  closePopup();
+}
+
+function downloadDocument(id, act){
+  const node = document.getElementById(id);
+  if(!node) return;
+  if(act === 'pdf'){
+    html2canvas(node,{scale:2,useCORS:true,allowTaint:true}).then(canvas=>{
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jspdf.jsPDF('p','mm','a6');
+      const w = pdf.internal.pageSize.getWidth(), h = pdf.internal.pageSize.getHeight();
+      let imgW=w, imgH=(canvas.height*imgW)/canvas.width;
+      if(imgH>h){ const r=h/imgH; imgH*=r; imgW*=r; }
+      pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
+      pdf.save(id+'.pdf');
+    });
+  } else if(act==='word'){
+    const blob = new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
+    const a=document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download=id+'.doc';
+    a.click();
+  }
+}
+</script>
 <!-- ======================= PLAN DE LOCALISATION ======================= -->
 <section id="planDoc">
 <h2>Plan de Localisation</h2>
@@ -309,7 +386,7 @@ function validatePay(){
 
 <div class="actions" style="margin-top:12px;">
   <button class="btn secondary" onclick="ajouterNom()">+ Ajouter Nom</button>
-  <button class="btn secondary" onclick="supprimerNom()">- Supprimer Nom</button>
+ button class="btn secondary" onclick="supprimerNom()">- Supprimer Nom</button>
   <button class="btn" onclick="openPayment('ficheEntreprise','pdf')">Exporter PDF</button>
 </div>
 </section>
@@ -383,6 +460,33 @@ function ajouterNom(){noms.push("Nouveau Nom");renderFiche();}
 function supprimerNom(){if(noms.length>0)noms.pop();renderFiche();}
 
 renderFiche();
+</script>
+<script>
+// ======================= IMPORTATION DES PHOTOS =======================
+function handlePhoto(imgId, inputId){
+  const img = document.getElementById(imgId);
+  const input = document.getElementById(inputId);
+  if(!img || !input) return;
+
+  img.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => img.src = ev.target.result;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Active l’importation pour toutes les images existantes
+[
+  'cvPhoto','cartePhoto',
+  'cniRecto','cniVerso',
+  'photo1','photo2','photo3','photo4',
+  'lettrePhoto','planPhoto',
+  'logo'
+].forEach(id => handlePhoto(id,id+'Input'));
 </script>
 </body>
 </html>
