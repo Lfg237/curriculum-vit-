@@ -61,7 +61,7 @@ button:hover{background:#004d40;}
 <div class="field"><label>Expériences :</label><textarea id="experienceCV" rows="3">Développeur Front-end chez X</textarea></div>
 <div class="field"><label>Signature :</label><br><canvas id="signatureCV" width="300" height="80"></canvas><br>
 <button onclick="clearSignature('CV')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownload('CV')">💳 Télécharger PDF (Paiement)</button>
+<button onclick="checkAccessAndDownloadFull('CV')">💳 Télécharger PDF (Paiement)</button>
 <div class="accessTimer"></div>
 </div>
 
@@ -75,7 +75,7 @@ button:hover{background:#004d40;}
 <div class="field"><label>Téléphone :</label><input id="phoneCard" value="+237 650 000 000"></div>
 <div class="field"><label>Signature :</label><br><canvas id="signatureCard" width="300" height="50"></canvas><br>
 <button onclick="clearSignature('Card')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownload('Card')">💳 Télécharger PDF (Paiement)</button>
+<button onclick="checkAccessAndDownloadFull('Card')">💳 Télécharger PDF (Paiement)</button>
 <div class="accessTimer"></div>
 </div>
 
@@ -87,7 +87,7 @@ button:hover{background:#004d40;}
 <div class="field"><label>Liste des noms :</label><div id="nameList" class="name-grid"></div></div>
 <div class="field"><label>Signature :</label><br><canvas id="signatureEntreprise" width="300" height="80"></canvas><br>
 <button onclick="clearSignature('Entreprise')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownload('Entreprise')">💳 Télécharger PDF (Paiement)</button>
+<button onclick="checkAccessAndDownloadFull('Entreprise')">💳 Télécharger PDF (Paiement)</button>
 <div class="accessTimer"></div>
 </div>
 
@@ -104,7 +104,7 @@ button:hover{background:#004d40;}
 </div>
 <div class="field"><label>Signature :</label><br><canvas id="signatureCNI" width="300" height="80"></canvas><br>
 <button onclick="clearSignature('CNI')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownload('CNI')">💳 Télécharger PDF (Paiement)</button>
+<button onclick="checkAccessAndDownloadFull('CNI')">💳 Télécharger PDF (Paiement)</button>
 <div class="accessTimer"></div>
 </div>
 
@@ -114,7 +114,7 @@ button:hover{background:#004d40;}
 <textarea id="lettreText" rows="5" placeholder="Tapez votre lettre ici..."></textarea>
 <div class="field"><label>Signature :</label><br><canvas id="signatureLettre" width="300" height="80"></canvas><br>
 <button onclick="clearSignature('Lettre')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownload('Lettre')">💳 Télécharger PDF (Paiement)</button>
+<button onclick="checkAccessAndDownloadFull('Lettre')">💳 Télécharger PDF (Paiement)</button>
 <div class="accessTimer"></div>
 </div>
 
@@ -126,7 +126,7 @@ button:hover{background:#004d40;}
 </div>
 <div class="field"><label>Signature :</label><br><canvas id="signatureDemande" width="300" height="80"></canvas><br>
 <button onclick="clearSignature('Demande')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownload('Demande')">💳 Télécharger PDF (Paiement)</button>
+<button onclick="checkAccessAndDownloadFull('Demande')">💳 Télécharger PDF (Paiement)</button>
 <div class="accessTimer"></div>
 </div>
 
@@ -190,7 +190,9 @@ function checkAccessAndDownload(doc){
         generatePDF(currentDoc);
         return;
     }
-
+function checkAccessAndDownloadFull(doc){
+    
+}
     showPopup(doc);
 }
 
@@ -268,6 +270,9 @@ function startTimer(doc){
     }
     updateTimer();
     const interval=setInterval(updateTimer,1000);
+}
+
+    generatePDFFull(doc);
 }
 // ===== Générer PDF =====
 async function generatePDF(doc){
