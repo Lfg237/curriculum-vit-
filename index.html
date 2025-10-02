@@ -2,491 +2,296 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Documents A6 Stables</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Secrétariat Multi-Documents Complet</title>
 <style>
-body{font-family:"< UI",Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;}
-header{background:#00695c;color:#fff;padding:10px;display:flex;overflow-x:auto;}
-header button{background:none;border:none;color:#fff;padding:8px 12px;cursor:pointer;font-weight:bold;}
-header button.active{background:#004d40;border-radius:6px;}
-section{display:none;padding:16px;margin:10px;border-radius:10px;}
-section.active{display:block;}
-.text-area{border:1px solid #ccc;border-radius:6px;padding:10px;min-height:80px;cursor:text;background:#fff;}
-.photo{border:1px solid #aaa;border-radius:6px;cursor:pointer;object-fit:cover;}
-.signature{border:1px solid #333;border-radius:6px;cursor:crosshair;}
-.actions{margin-top:10px;display:flex;gap:10px;}
-.btn{background:#00695c;color:#fff;padding:6px 12px;border:none;border-radius:6px;cursor:pointer;}
-.btn.secondary{background:#ccc;color:#000;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.nom-cell{border:1px solid #bbb;padding:4px;border-radius:4px;margin:2px;min-height:20px;cursor:text;}
-.muted{font-size:0.9em;color:#555;}
+body{font-family:Arial,sans-serif;margin:0;padding:0;background:linear-gradient(120deg,#ffecd2,#fcb69f,#a1c4fd,#c2e9fb);background-size:600% 600%;animation:gradientBG 15s ease infinite;overflow-x:hidden;}
+@keyframes gradientBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+header,footer{background:#00796b;color:white;padding:10px;text-align:center;position:fixed;width:100%;z-index:10;}
+header{top:0;} footer{bottom:0;}
+.nav-buttons{position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:10px;background:rgba(255,255,255,0.9);padding:5px 10px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.3);}
+.nav-buttons button{padding:8px 15px;font-size:14px;cursor:pointer;}
+.nav-container{display:flex;overflow-x:auto;scroll-behavior:smooth;margin:100px 0 50px 0;padding:10px;flex-wrap:nowrap;}
+.nav-container::-webkit-scrollbar{height:8px;}
+.nav-container::-webkit-scrollbar-thumb{background:#00796b;border-radius:4px;}
+.doc-card{min-width:360px;height:auto;background:#fff;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,0.2);padding:20px;margin:0 10px;flex-shrink:0;position:relative;display:block;}
+.photo{position:relative;text-align:center;margin-bottom:10px;cursor:pointer;border:2px dashed #00796b;border-radius:8px;width:80px;height:80px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.photo img{width:100%;height:100%;object-fit:cover;}
+.photoRect{width:240px;height:300px;border-radius:5px;object-fit:cover;}
+.field{margin:8px 0;}
+label{font-weight:bold;}
+input,textarea{width:100%;padding:5px;margin-top:2px;border:1px solid #ccc;border-radius:5px;}
+canvas{border:1px solid #00796b;margin-top:5px;touch-action:none;}
+button{background:#00796b;color:white;border:none;padding:10px 20px;margin-top:10px;border-radius:5px;}
+button:hover{background:#004d40;}
+#popupOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:9999;}
+#popup{background:white;padding:20px;border-radius:10px;width:360px;box-shadow:0 0 10px rgba(0,0,0,0.3);}
+#beneficiaryInfo,#paymentStatus,#priceInfo{font-weight:bold;margin-top:10px; white-space: pre-line;}
+.name-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px; max-height:200px; overflow:auto; border:1px solid #ccc; padding:5px;}
+.accessTimer{font-weight:bold;margin-top:5px;color:#d32f2f;}
+.card-voeux {border:3px solid pink;border-radius:15px;padding:10px;position:relative;background:#fff0f6;}
+.card-voeux::before, .card-voeux::after {content:"❤️";font-size:22px;position:absolute;}
+.card-voeux::before {top:-15px; left:10px;}
+.card-voeux::after {bottom:-15px; right:10px;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-<header id="docHeader">
-  <span style="color:#ebb8ff; font-weight:bold; font-size:1.2em; margin-right:20px;">
-  Mini Secrétariat Lesfacilitateurs
-  </span>
-  <button class="active" data-target="cvDoc">CV</button>
-  <button data-target="carteDoc">Carte de Visite</button>
-  <button data-target="cniDoc">CNI</button>
-  <button data-target="photosDoc">Photo passeport (4×4)</button>
-  <button data-target="lettreDoc">Lettre Motivation</button>
-  <button data-target="planDoc">Plan</button>
-  <button data-target="ficheEntreprise">Fiche Entreprise</button>
-  <button data-target="siteStatDoc">Site Statistique</button>
-</header>
+<header>🖥️ Mini Secrétariat - Multi-Documents Complet</header>
 
-<!-- ======================= CV ======================= -->
-<section id="cvDoc" class="active">
-<h2>Curriculum Vitae</h2>
-<div style="position:relative; width:100%; min-height:300px; background:linear-gradient(135deg,#ffe082,#ffcc80); padding:10px; border-radius:10px;">
-  <img id="cvPhoto" class="photo" src="" style="width:100px;height:100px; float:right; margin-left:10px;">
-  <input type="file" id="cvPhotoInput" style="display:none;">
-  <div style="margin-bottom:10px;">
-    Nom: <span id="cvNom" contenteditable="true" style="font-weight:bold; font-size:24px; color:#d32f2f;">Cliquez pour taper le nom</span>
-  </div>
-  <div>
-    Profession: <span id="cvProfession" contenteditable="true" style="font-size:14px; color:#333;">Cliquez ici</span> |
-    Age: <span id="cvAge" contenteditable="true" style="font-size:14px; color:#333;">--</span>
-  </div>
-  <div>
-    Email: <span id="cvEmail" contenteditable="true" style="font-size:14px; color:#555;">exemple@email.com</span> |
-    Ville: <span id="cvVille" contenteditable="true" style="font-size:14px; color:#555;">Ville</span>
-  </div>
-  <div>
-    Contact / Parrain: <span id="cvContact" contenteditable="true" style="font-size:14px; color:#555;">Nom contact</span>
-  </div>
-  <div>
-    Dernier poste: <span id="cvPoste" contenteditable="true" style="font-size:14px; color:#555;">Poste</span> |
-    Dernier salaire: <span id="cvSalaire" contenteditable="true" style="font-size:14px; color:#555;">--</span>
-  </div>
-  <div>
-    Expérience: <span id="cvExperience" contenteditable="true" style="font-size:14px; color:#555;">--</span> |
-    Dernier diplôme: <span id="cvDiplome" contenteditable="true" style="font-size:14px; color:#555;">--</span>
-  </div>
-  <div>
-    Marié: <span id="cvMarie" contenteditable="true" style="font-size:14px; color:#555;">Oui / Non</span> |
-    Enfants: <span id="cvEnfants" contenteditable="true" style="font-size:14px; color:#555;">--</span>
-  </div>
-  <canvas id="cvSign" class="signature" style="width:120px;height:60px; margin-top:10px; border:1px solid #222;"></canvas>
-  <div class="actions">
-    <button class="btn" onclick="openPayment('cvDoc','pdf')">PDF</button>
-    <button class="btn" onclick="openPayment('cvDoc','word')">Word</button>
-  </div>
+<div class="nav-buttons">
+  <button onclick="scrollPrev()">⬅️ Précédent</button>
+  <button onclick="scrollNext()">➡️ Suivant</button>
+  <button onclick="showAll()">📄 Tous</button>
 </div>
-</section>
 
-<!-- ======================= CARTE DE VISITE ======================= -->
-<section id="carteDoc">
-<h2>Carte de Visite</h2>
-<div style="position:relative; width:100%; min-height:200px; background:linear-gradient(135deg,#b2dfdb,#80cbc4); padding:10px; border-radius:10px;">
-  <img id="cartePhoto" class="photo" src="" style="width:80px;height:80px; float:right; margin-left:10px;">
-  <input type="file" id="cartePhotoInput" style="display:none;">
-  <div>
-    Nom: <span id="carteNom" contenteditable="true" style="font-weight:bold; font-size:22px; color:#c2185b;">Cliquez pour taper le nom</span>
-  </div>
-  <div>
-    Profession: <span id="7" contenteditable="true" style="font-size:14px; color:#333;">Cliquez ici</span> |
-    Age: <span id="carteAge" contenteditable="true" style="font-size:14px; color:#333;">--</span>
-  </div>
-  <div>
-    Email: <span id="carteEmail" contenteditable="true" style="font-size:14px; color:#555;">exemple@email.com</span> |
-    Ville: <span id="carteVille" contenteditable="true" style="font-size:14px; color:#555;">Ville</span>
-  </div>
-  <div>
-    Nom de l'entreprise: <span id="carteEntreprise" contenteditable="true" style="font-size:14px; color:#555;">Entreprise</span> |
-    Contact / Parrain: <span id="carteContact" contenteditable="true" style="font-size:14px; color:#555;">Nom contact</span>
-  </div>
-  <canvas id="carteSign" class="signature" style="width:120px;height:60px; margin-top:10px; border:1px solid #222;"></canvas>
-  <div class="actions">
-    <button class="btn" onclick="openPayment('carteDoc','pdf')">PDF</button>
-    <button class="btn" onclick="openPayment('carteDoc','word')">Word</button>
-  </div>
+<div class="nav-container" id="docNav">
+
+<!-- CV -->
+<div class="doc-card" data-doc="CV">
+<h3>📄 CV Pro Enrichi</h3>
+<div class="photo" onclick="choosePhoto('CV')"><img id="profilePhotoCV" src="https://via.placeholder.com/80"></div>
+<input type="file" id="photoInputCV" accept="image/*" style="display:none" onchange="updatePhoto('CV',this)">
+<div class="field"><label>Nom :</label><input id="nameCV" value="Jean Dupont"></div>
+<div class="field"><label>Profession :</label><input id="professionCV" value="Développeur Web"></div>
+<div class="field"><label>Email :</label><input id="emailCV" value="jean.dupont@email.com"></div>
+<div class="field"><label>Compétences :</label><textarea id="skillsCV" rows="3">HTML, CSS, JS</textarea></div>
+<div class="field"><label>Formations :</label><textarea id="educationCV" rows="3">Licence Informatique</textarea></div>
+<div class="field"><label>Expériences :</label><textarea id="experienceCV" rows="3">Développeur Front-end chez X</textarea></div>
+<div class="field"><label>Signature :</label><br><canvas id="signatureCV" width="300" height="80"></canvas><br>
+<button onclick="clearSignature('CV')">🗑️ Effacer Signature</button></div>
+<button onclick="checkAccessAndDownload('CV')">💳 Télécharger PDF (Paiement)</button>
+<div class="accessTimer"></div>
 </div>
-</section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Carte de visite -->
+<div class="doc-card" data-doc="Card">
+<h3>💳 Carte de Visite</h3>
+<div class="photo" onclick="choosePhoto('Card')"><img id="profilePhotoCard" src="https://via.placeholder.com/80"></div>
+<input type="file" id="photoInputCard" accept="image/*" style="display:none" onchange="updatePhoto('Card',this)">
+<div class="field"><label>Nom :</label><input id="nameCard" value="Jean Dupont"></div>
+<div class="field"><label>Profession :</label><input id="professionCard" value="Développeur Web"></div>
+<div class="field"><label>Téléphone :</label><input id="phoneCard" value="+237 650 000 000"></div>
+<div class="field"><label>Signature :</label><br><canvas id="signatureCard" width="300" height="50"></canvas><br>
+<button onclick="clearSignature('Card')">🗑️ Effacer Signature</button></div>
+<button onclick="checkAccessAndDownload('Card')">💳 Télécharger PDF (Paiement)</button>
+<div class="accessTimer"></div>
+</div>
+
+<!-- Entreprise -->
+<div class="doc-card" data-doc="Entreprise">
+<h3>🏢 Fiche de l'Entreprise</h3>
+<div class="field"><label>Nom du Signataire :</label><input id="signerName" value="Pierre Paul"></div>
+<div class="field"><label>Ajouter un nom :</label><input id="newName" placeholder="Nom à ajouter"><button onclick="addName()">📝 Ajouter</button></div>
+<div class="field"><label>Liste des noms :</label><div id="nameList" class="name-grid"></div></div>
+<div class="field"><label>Signature :</label><br><canvas id="signatureEntreprise" width="300" height="80"></canvas><br>
+<button onclick="clearSignature('Entreprise')">🗑️ Effacer Signature</button></div>
+<button onclick="checkAccessAndDownload('Entreprise')">💳 Télécharger PDF (Paiement)</button>
+<div class="accessTimer"></div>
+</div>
+
+<!-- CNI recto/verso -->
+<div class="doc-card" data-doc="CNI">
+<h3>🆔 Photocopie CNI</h3>
+<div class="field"><label>Photo Recto :</label>
+<div class="photo photoRect" onclick="choosePhoto('CNIRecto')"><img id="cniRectoImg" src="https://via.placeholder.com/240x300"></div>
+<input type="file" id="photoInputCNIRecto" accept="image/*" style="display:none" onchange="updatePhoto('CNIRecto',this)">
+</div>
+<div class="field"><label>Photo Verso :</label>
+<div class="photo photoRect" onclick="choosePhoto('CNIVerso')"><img id="cniVersoImg" src="https://via.placeholder.com/240x300"></div>
+<input type="file" id="photoInputCNIVerso" accept="image/*" style="display:none" onchange="updatePhoto('CNIVerso',this)">
+</div>
+<div class="field"><label>Signature :</label><br><canvas id="signatureCNI" width="300" height="80"></canvas><br>
+<button onclick="clearSignature('CNI')">🗑️ Effacer Signature</button></div>
+<button onclick="checkAccessAndDownload('CNI')">💳 Télécharger PDF (Paiement)</button>
+<div class="accessTimer"></div>
+</div>
+
+<!-- Lettre de motivation -->
+<div class="doc-card" data-doc="Lettre">
+<h3>✉️ Lettre de motivation</h3>
+<textarea id="lettreText" rows="5" placeholder="Tapez votre lettre ici..."></textarea>
+<div class="field"><label>Signature :</label><br><canvas id="signatureLettre" width="300" height="80"></canvas><br>
+<button onclick="clearSignature('Lettre')">🗑️ Effacer Signature</button></div>
+<button onclick="checkAccessAndDownload('Lettre')">💳 Télécharger PDF (Paiement)</button>
+<div class="accessTimer"></div>
+</div>
+
+<!-- Carte de vœux / Demande -->
+<div class="doc-card" data-doc="Demande">
+<h3>📝 Carte de Vœux</h3>
+<div class="card-voeux">
+<textarea id="demandeText" rows="5" placeholder="Écrivez votre message ici..."></textarea>
+</div>
+<div class="field"><label>Signature :</label><br><canvas id="signatureDemande" width="300" height="80"></canvas><br>
+<button onclick="clearSignature('Demande')">🗑️ Effacer Signature</button></div>
+<button onclick="checkAccessAndDownload('Demande')">💳 Télécharger PDF (Paiement)</button>
+<div class="accessTimer"></div>
+</div>
+
+</div> <!-- nav-container -->
+
+<footer>© 2025 Mini Secrétariat</footer>
+
+<div id="popupOverlay"><div id="popup"></div></div>
 
 <script>
-// ======================= NAVIGATION =======================
-const buttons = document.querySelectorAll('header button');
-const sections = document.querySelectorAll('section');
-buttons.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    buttons.forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    sections.forEach(sec=>sec.classList.remove('active'));
-    const target = document.getElementById(btn.dataset.target);
-    if(target){ target.classList.add('active'); }
-    target.querySelectorAll('canvas.signature').forEach(c=>makeSign(c.id));
-  });
-});
+// ===== Navigation =====
+const nav=document.getElementById('docNav');
+function scrollNext(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:w,behavior:'smooth'});}
+function scrollPrev(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:-w,behavior:'smooth'});}
+function showAll(){nav.scrollTo({left:0,behavior:'smooth'});}
 
-// ======================= PHOTOS =======================
-function handlePhoto(imgId,inputId){
-  const img=document.getElementById(imgId);
-  const input=document.getElementById(inputId);
-  img.addEventListener('click',()=>input.click());
-  input.addEventListener('change',e=>{
-    const file=e.target.files[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>img.src=ev.target.result;
-    reader.readAsDataURL(file);
-  });
-}
-['cvPhoto','cartePhoto'].forEach(id=>handlePhoto(id,id+'Input'));
-
-// ======================= SIGNATURE =======================
-function makeSign(id){
-  const c=document.getElementById(id);
-  if(!c)return;
-  c.width=c.clientWidth*devicePixelRatio;
-  c.height=c.clientHeight*devicePixelRatio;
-  const ctx=c.getContext('2d');
-  ctx.scale(devicePixelRatio,devicePixelRatio);
-  ctx.lineJoin='round'; ctx.lineCap='round'; ctx.strokeStyle='#222'; ctx.lineWidth=2;
-  let drawing=false;
-  function pos(e){const r=c.getBoundingClientRect();if(e.touches&&e.touches[0])return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};return{x:e.clientX-r.left,y:e.clientY-r.top};}
-  function start(e){drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault&&e.preventDefault();}
-  function move(e){if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();}
-  function end(){drawing=false; ctx.closePath();}
-  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); c.addEventListener('mouseup',end); c.addEventListener('mouseleave',end);
-  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
-}
-
-// ======================= EXPORT PDF/WORD =======================
-async function exportDoc(id,act){
-  let node=document.getElementById(id); if(!node)return;
-  const canvas=await html2canvas(node,{scale:2,useCORS:true,allowTaint:true});
-  const imgData=canvas.toDataURL('image/png'); const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF('p','mm','a6'); const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
-  let imgW=w,imgH=(canvas.height*imgW)/canvas.width; if(imgH>h){const r=h/imgH; imgH*=r; imgW*=r;}
-  pdf.addImage(imgData,'PNG',0,0,imgW,imgH); if(act==='pdf'){pdf.save(id+'.pdf'); return;}
-  const blob=new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.doc'; a.click();
-}
-function openPayment(id,act){
-  window.__doc=id; window.__act=act;
-  document.getElementById('popupOverlay').style.display='flex';
-}
-</script><!-- ======================= CNI ======================= -->
-<section id="cniDoc">
-<h2>Carte Nationale d'Identité</h2>
-<div style="display:flex; gap:12px;">
-  <div>
-    <p class="muted">Recto</p>
-    <img id="cniRecto" class="photo" src="" style="width:140px;height:100px;">
-    <input type="file" id="cniRectoInput" style="display:none;">
-  </div>
-  <div>
-    <p class="muted">Verso</p>
-    <img id="cniVerso" class="photo" src="" style="width:140px;height:100px;">
-    <input type="file" id="cniVersoInput" style="display:none;">
-  </div>
-</div>
-<canvas id="cniSign" class="signature" style="width:120px;height:60px;margin-top:10px; border:1px solid #222;"></canvas>
-<div class="actions">
-  <button class="btn" onclick="openPayment('cniDoc','pdf')">PDF</button>
-  <button class="btn" onclick="openPayment('cniDoc','word')">Word</button>
-</div>
-</section>
-
-<!-- ======================= PHOTO PASSEPORT ======================= -->
-<section id="photosDoc">
-<h2>Photocopies</h2>
-<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-  <div><img id="photo1" class="photo" src="" style="width:100%;height:120px;"><input type="file" id="photo1Input" style="display:none;"></div>
-  <div><img id="photo2" class="photo" src="" style="width:100%;height:120px;"><input type="file" id="photo2Input" style="display:none;"></div>
-  <div><img id="photo3" class="photo" src="" style="width:100%;height:120px;"><input type="file" id="photo3Input" style="display:none;"></div>
-  <div><img id="photo4" class="photo" src="" style="width:100%;height:120px;"><input type="file" id="photo4Input" style="display:none;"></div>
-</div>
-<canvas id="photosSign" class="signature" style="width:120px;height:60px;margin-top:10px; border:1px solid #222;"></canvas>
-<div class="actions">
-  <button class="btn" onclick="openPayment('photosDoc','pdf')">PDF</button>
-  <button class="btn" onclick="openPayment('photosDoc','word')">Word</button>
-</div>
-</section>
-
-<!-- ======================= LETTRE DE MOTIVATION ======================= -->
-<section id="lettreDoc">
-<h2>Lettre de Motivation</h2>
-<div style="position:relative; width:100%; min-height:300px; background:linear-gradient(135deg,#ffecb3,#ffe082); padding:10px; border-radius:10px;">
-  <img id="lettrePhoto" class="photo" src="" style="width:100px;height:100px; float:right; margin-left:10px;">
-  <input type="file" id="lettrePhotoInput" style="display:none;">
-  <div id="lettreTexte" contenteditable="true" class="text-area" data-placeholder="Cliquez ici pour taper votre lettre…">Cliquez ici pour taper votre lettre…</div>
-  <canvas id="lettreSign" class="signature" style="width:120px;height:60px;margin-top:10px; border:1px solid #222;"></canvas>
-  <div class="actions">
-    <button class="btn" onclick="openPayment('lettreDoc','pdf')">PDF</button>
-    <button class="btn" onclick="openPayment('lettreDoc','word')">Word</button>
-  </div>
-</div>
-</section>
-<!-- ======================= POPUP PAIEMENT STRICT ======================= -->
-<div id="popupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999;"> <div id="popup" style="background:#fff;padding:20px;border-radius:10px;width:320px;max-width:90%;">
-    <h3>Paiement requis</h3>
-    <p class="muted">Bénéficiaire: <strong>Wirnkar Loveline</strong></p>
-    <p class="muted">Numéros: MTN 676353859 / Orange 640647072</p>
-    <p class="muted">Prix unitaire: <strong>100 FCFA / unité</strong></p>
-    <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-      <button onclick="multPlus()" class="btn secondary">+</button>
-      <div class="muted">Quantité: <span id="mult">1</span></div>
-      <button onclick="multMinus()" class="btn secondary">-</button>
-      <div style="margin-left:auto;" class="muted">Total: <strong><span id="total">100</span> FCFA</strong></div>
-    </div>
-    <label>Message Mobile Money</label>
-    <textarea id="momo" placeholder="Ex : Wirnkar Loveline 100 2025-09-30T12:00"></textarea>
-    <label>ID Transaction</label>
-    <input id="tx" type="text" placeholder="ID transaction">
-    <label>Code admin (optionnel)</label>
-    <input id="admin" type="password" placeholder="Code admin">
-    <div class="actions" style="margin-top:10px;">
-      <button class="btn" onclick="validatePay()">Valider</button>
-      <button class="btn secondary" onclick="closePopup()">Annuler</button>
-    </div>
-  </div>
-</div>
-
-<script>
-let quantity = 1;
-let currentDoc = '';
-let currentAct = '';
-let transactionHistory = JSON.parse(localStorage.getItem('txHistory') || "[]");
-
-function multPlus() { quantity++; updateTotal(); }
-function multMinus() { if(quantity>1) quantity--; updateTotal(); }
-function updateTotal() {
-  document.getElementById('mult').innerText = quantity;
-  document.getElementById('total').innerText = 100 * quantity;
-}
-
-function openPayment(id, act) {
-  currentDoc = id;
-  currentAct = act;
-  document.getElementById('mult').innerText = 1;
-  document.getElementById('total').innerText = 100;
-  document.getElementById('momo').value = '';
-  document.getElementById('tx').value = '';
-  document.getElementById('admin').value = '';
-  quantity = 1;
-  document.getElementById('popupOverlay').style.display = 'flex';
-}
-
-function closePopup() { document.getElementById('popupOverlay').style.display = 'none'; }
-
-function validatePay() {
-  const momoMsg = document.getElementById('momo').value.trim();
-  const txId = document.getElementById('tx').value.trim();
-  const adminCode = document.getElementById('admin').value.trim();
-  const now = new Date();
-
-  if(!momoMsg || !txId){ alert("Veuillez remplir le message Mobile Money et l'ID transaction."); return; }
-  if(transactionHistory.includes(txId)){ alert("Transaction déjà utilisée."); return; }
-
-  const nomBene = "Wirnkar Loveline";
-  const numeros = ["676353859","640647072"];
-  const validNom = momoMsg.includes(nomBene);
-  const validNum = numeros.some(n => momoMsg.includes(n));
-  if(!validNom || !validNum){ alert("Nom ou numéro invalide dans le message."); return; }
-
-  const dateMatch = momoMsg.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
-  if(!dateMatch){ alert("Date/heure non trouvée dans le message."); return; }
-  const msgDate = new Date(dateMatch[0]);
-  if(Math.abs(now - msgDate)/60000 > 10){ alert("Transaction expirée (>10 minutes)."); return; }
-
-  if(adminCode && adminCode !== "233233"){ alert("Code admin invalide."); return; }
-
-  transactionHistory.push(txId);
-  localStorage.setItem('txHistory', JSON.stringify(transactionHistory));
-
-  alert(`Paiement validé pour ${quantity} unité(s) !`);
-  downloadDocument(currentDoc, currentAct);
-  closePopup();
-}
-
-function downloadDocument(id, act){
-  const node = document.getElementById(id);
-  if(!node) return;
-  if(act === 'pdf'){
-    html2canvas(node,{scale:2,useCORS:true,allowTaint:true}).then(canvas=>{
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jspdf.jsPDF('p','mm','a6');
-      const w = pdf.internal.pageSize.getWidth(), h = pdf.internal.pageSize.getHeight();
-      let imgW=w, imgH=(canvas.height*imgW)/canvas.width;
-      if(imgH>h){ const r=h/imgH; imgH*=r; imgW*=r; }
-      pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
-      pdf.save(id+'.pdf');
-    });
-  } else if(act==='word'){
-    const blob = new Blob(['<html><body>'+node.innerHTML+'</body></html>'],{type:'application/msword'});
-    const a=document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download=id+'.doc';
-    a.click();
-  }
-}
-</script>
-<!-- ======================= PLAN DE LOCALISATION ======================= -->
-<section id="planDoc">
-<h2>Plan de Localisation</h2>
-<div style="position:relative; width:100%; min-height:300px; background:linear-gradient(135deg,#c5e1a5,#aed581); padding:10px; border-radius:10px;">
-  <img id="planPhoto" class="photo" src="" style="width:100px;height:100px; float:right; margin-left:10px;">
-  <input type="file" id="planPhotoInput" style="display:none;">
-  <div id="planTexte" contenteditable="true" class="text-area" data-placeholder="Cliquez ici pour décrire le plan…">Cliquez ici pour décrire le plan…</div>
-  <canvas id="planSign" class="signature" style="width:120px;height:60px;margin-top:10px;border:1px solid #222;"></canvas>
-  <div class="actions">
-    <button class="btn" onclick="openPayment('planDoc','pdf')">PDF</button>
-    <button class="btn" onclick="openPayment('planDoc','word')">Word</button>
-  </div>
-</div>
-</section>
-
-<script>
-// ======================= PHOTOS =======================
-['cniRecto','cniVerso','photo1','photo2','photo3','photo4','lettrePhoto','planPhoto'].forEach(id=>handlePhoto(id,id+'Input'));
-
-// ======================= SIGNATURE =======================
-['cniSign','photosSign','lettreSign','planSign'].forEach(makeSign);
-
-// ======================= POPUP PAIEMENT LOGIC =======================
-let quantity = 1;
-function multPlus(){quantity++; updateTotal();}
-function multMinus(){if(quantity>1)quantity--; updateTotal();}
-function updateTotal(){document.getElementById('mult').innerText=quantity; document.getElementById('total').innerText=100*quantity;}
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
-function validatePay(){
-  alert(`Paiement validé pour ${quantity} unité(s)\nMessage: ${document.getElementById('momo').value}\nTransaction ID: ${document.getElementById('tx').value}`);
-  closePopup();
-}
-</script><!-- ======================= FICHE ENTREPRISE ======================= -->
-<section id="ficheEntreprise">
-<h2>Fiche Entreprise</h2>
-
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-  <div contenteditable="true" style="font-weight:bold;font-size:20px;color:#d32f2f;">Nom de l'entreprise</div>
-  <img id="logo" src="" alt="Logo" style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;">
-  <input type="file" id="logoInput" style="display:none;">
-</div>
-
-<div id="listeNoms" class="grid"></div>
-
-<div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-  <canvas id="sign" class="signature" style="height:60px; border:1px solid #43a047; border-radius:6px;"></canvas>
-  <div contenteditable="true" style="font-weight:bold;">Nom du signataire</div>
-</div>
-
-<div style="display:flex; justify-content:center; gap:12px; margin-top:12px;">
-  <button class="btn secondary" id="prevPage">← Page précédente</button>
-  <span id="pageIndicator">Page 1</span>
-  <button class="btn secondary" id="nextPage">Page suivante →</button>
-</div>
-
-<div class="actions" style="margin-top:12px;">
-  <button class="btn secondary" onclick="ajouterNom()">+ Ajouter Nom</button>
- button class="btn secondary" onclick="supprimerNom()">- Supprimer Nom</button>
-  <button class="btn" onclick="openPayment('ficheEntreprise','pdf')">Exporter PDF</button>
-</div>
-</section>
-
-<!-- ======================= SITE STATISTIQUE ======================= -->
-<section id="siteStatDoc">
-<h2>Site Statistique - Lesfacilitateurs</h2>
-<div style="position:relative; width:100%; min-height:400px; background:linear-gradient(135deg,#ffe0b2,#ffb74d); padding:10px; border-radius:10px;">
-  <div>
-    Nom du site: <span id="siteNom" contenteditable="true" style="font-weight:bold; font-size:28px; font-family:'Segoe UI', cursive; color:#c2185b;">Mini Secrétariat Lesfacilitateurs</span>
-  </div>
-  <div id="sitePhotos" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"></div>
-  <input type="file" id="sitePhotoInput" multiple style="display:none;">
-  <button class="btn secondary" onclick="document.getElementById('sitePhotoInput').click();">Importer photos</button>
-
-  <canvas id="siteSign" class="signature" style="width:120px;height:60px;margin-top:10px;border:1px solid #222;"></canvas>
-
-  <div class="actions" style="margin-top:10px;">
-    <button class="btn" onclick="openPayment('siteStatDoc','pdf')">PDF</button>
-    <button class="btn" onclick="openPayment('siteStatDoc','word')">Word</button>
-  </div>
-</div>
-</section>
-
-<script>
-// ======================= PHOTOS SITE =======================
-document.getElementById('sitePhotoInput').addEventListener('change', e => {
-  const container = document.getElementById('sitePhotos');
-  Array.from(e.target.files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const div = document.createElement('div');
-      div.style.position = 'relative';
-      div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:120px;object-fit:cover;border:1px solid #aaa;border-radius:6px;">
-                       <textarea placeholder="Commentaire..." style="width:100%;margin-top:2px;"></textarea>`;
-      container.appendChild(div);
+// ===== Photos =====
+function choosePhoto(id){document.getElementById('photoInput'+id).click();}
+function updatePhoto(id,input){
+    const f=input.files[0];
+    if(!f) return;
+    const r=new FileReader();
+    r.onload=e=>{
+        const map={'CV':'profilePhotoCV','Card':'profilePhotoCard','CNIRecto':'cniRectoImg','CNIVerso':'cniVersoImg'};
+        if(map[id]) document.getElementById(map[id]).src=e.target.result;
     };
-    reader.readAsDataURL(file);
-  });
-});
-
-// ======================= SIGNATURE SITE =======================
-makeSign('siteSign');
-
-// ======================= FICHE ENTREPRISE PHOTOS & SIGN =======================
-['logo'].forEach(id=>handlePhoto(id,id+'Input'));
-['sign'].forEach(makeSign);
-
-// ======================= FICHE ENTREPRISE NAVIGATION =======================
-let noms = Array.from({length:140},(_,i)=>`Nom ${i+1}`);
-let currentPage=0,perPage=70;
-
-function renderFiche(){
-  const grid=document.getElementById('listeNoms');
-  grid.innerHTML='';
-  const start=currentPage*perPage;
-  const end=start+perPage;
-  const pageNoms=noms.slice(start,end);
-  const col1 = pageNoms.slice(0,35);
-  const col2 = pageNoms.slice(35,70);
-  const col1Html = col1.map(n=>`<div class="nom-cell" contenteditable="true" style="font-weight:bold; color:#${Math.floor(Math.random()*16777215).toString(16)}">${n}</div>`).join('');
-  const col2Html = col2.map(n=>`<div class="nom-cell" contenteditable="true" style="font-weight:bold; color:#${Math.floor(Math.random()*16777215).toString(16)}">${n}</div>`).join('');
-  grid.innerHTML = `<div>${col1Html}</div><div>${col2Html}</div>`;
-  document.getElementById('pageIndicator').innerText=`Page ${currentPage+1} / ${Math.ceil(noms.length/perPage)}`;
+    r.readAsDataURL(f);
 }
 
-document.getElementById('prevPage').addEventListener('click',()=>{if(currentPage>0){currentPage--;renderFiche();}});
-document.getElementById('nextPage').addEventListener('click',()=>{if(currentPage<Math.ceil(noms.length/perPage)-1){currentPage++;renderFiche();}});
+// ===== Signatures =====
+function clearSignature(id){const c=document.getElementById('signature'+id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+function initSignature(id){
+    const c=document.getElementById('signature'+id);
+    const ctx=c.getContext('2d'); ctx.lineWidth=2; ctx.strokeStyle='#00796b';
+    let d=false;
+    c.onpointerdown=e=>{d=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);};
+    c.onpointermove=e=>{if(d){ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();}};
+    c.onpointerup=()=>d=false;
+    c.onpointerleave=()=>d=false;
+}
+['CV','Card','Entreprise','CNI','Lettre','Demande'].forEach(initSignature);
 
-function ajouterNom(){noms.push("Nouveau Nom");renderFiche();}
-function supprimerNom(){if(noms.length>0)noms.pop();renderFiche();}
-
-renderFiche();
-</script>
-<script>
-// ======================= IMPORTATION DES PHOTOS =======================
-function handlePhoto(imgId, inputId){
-  const img = document.getElementById(imgId);
-  const input = document.getElementById(inputId);
-  if(!img || !input) return;
-
-  img.addEventListener('click', () => input.click());
-
-  input.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => img.src = ev.target.result;
-    reader.readAsDataURL(file);
-  });
+// ===== Ajouter nom Entreprise =====
+function addName(){
+    const v=document.getElementById('newName').value.trim();
+    if(!v) return;
+    const el=document.createElement('div');
+    el.textContent=v; el.style.padding='4px';
+    document.getElementById('nameList').appendChild(el);
+    document.getElementById('newName').value='';
 }
 
-// Active l’importation pour toutes les images existantes
-[
-  'cvPhoto','cartePhoto',
-  'cniRecto','cniVerso',
-  'photo1','photo2','photo3','photo4',
-  'lettrePhoto','planPhoto',
-  'logo'
-].forEach(id => handlePhoto(id,id+'Input'));
+// ===== Paiement et PDF =====
+const beneficiaries={'TX111111':{name:'Loveline Wirnkar',momo:'676353859',om:'640647072',time:Date.now()-2*60000}};
+let currentDoc=null, accessExpiration=0, currentDuration=0;
+
+function checkAccessAndDownload(doc){
+    currentDoc=doc;
+    if(Date.now()<accessExpiration){
+        alert(`⏱️ Votre accès pour ${currentDoc} est encore actif !`);
+        generatePDF(currentDoc);
+        return;
+    }
+
+    showPopup(doc);
+}
+
+// ===== Popup Paiement =====
+function showPopup(doc){
+    const popup=document.getElementById('popup');
+    const overlay=document.getElementById('popupOverlay');
+    overlay.style.display='flex';
+
+    popup.innerHTML=`
+        <h3>💳 Paiement pour ${doc}</h3>
+        <div id="beneficiaryInfo">Nom: Loveline Wirnkar\nMOMO: 676353859\nOM: 640647072</div>
+        <div id="priceInfo">100 XAF = 5 min d'accès</div>
+        <input type="text" id="paymentInput" placeholder="ID transaction ou code admin" style="width:100%;padding:5px;margin-top:10px;">
+        <button onclick="validatePayment()">✅ Valider Paiement</button>
+        <button onclick="closePopup()" style="background:#d32f2f;">❌ Annuler</button>
+        <div id="paymentStatus"></div>
+    `;
+}
+
+// ===== Fermer popup =====
+function closePopup(){
+    document.getElementById('popupOverlay').style.display='none';
+}
+
+// ===== Valider paiement =====
+function validatePayment(){
+    const input=document.getElementById('paymentInput').value.trim();
+    const status=document.getElementById('paymentStatus');
+    const now=Date.now();
+
+    // Accès admin
+    if(input==='233233'){
+        status.textContent='✅ Accès administrateur validé !';
+        accessExpiration=now + 5*60*1000; // 5 min par défaut
+        currentDuration=5;
+        closePopup();
+        generatePDF(currentDoc);
+        startTimer(currentDoc);
+        return;
+    }
+
+    // Vérification Mobile Money (exemple simple)
+    if(beneficiaries[input]){
+        const ben=beneficiaries[input];
+        if(now - ben.time > 10*60*1000){
+            status.textContent='❌ Transaction expirée (>10 min)';
+            return;
+        }
+        status.textContent=`✅ Paiement validé pour ${ben.name}`;
+        currentDuration=5; // multiplier ici si nécessaire
+        accessExpiration=now + currentDuration*60*1000;
+        closePopup();
+        generatePDF(currentDoc);
+        startTimer(currentDoc);
+        return;
+    }
+
+    status.textContent='❌ Transaction invalide';
+}
+
+// ===== Timer affichage accès =====
+function startTimer(doc){
+    const timerEl=document.querySelector(`.doc-card[data-doc="${doc}"] .accessTimer`);
+    function updateTimer(){
+        const remaining=Math.max(0, Math.floor((accessExpiration-Date.now())/1000));
+        if(remaining<=0){
+            timerEl.textContent='⏱️ Accès expiré';
+            clearInterval(interval);
+            return;
+        }
+        const min=Math.floor(remaining/60);
+        const sec=remaining%60;
+        timerEl.textContent=`⏱️ Accès restant : ${min}m ${sec}s`;
+    }
+    updateTimer();
+    const interval=setInterval(updateTimer,1000);
+}
+
+// ===== Générer PDF =====
+async function generatePDF(doc){
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    pdf.setFontSize(12);
+    pdf.text(`Document: ${doc}`,10,10);
+
+    if(doc==='CV'){
+        const name=document.getElementById('nameCV').value;
+        const prof=document.getElementById('professionCV').value;
+        const email=document.getElementById('emailCV').value;
+        const skills=document.getElementById('skillsCV').value;
+        pdf.text(`Nom: ${name}`,10,20);
+        pdf.text(`Profession: ${prof}`,10,30);
+        pdf.text(`Email: ${email}`,10,40);
+        pdf.text(`Compétences: ${skills}`,10,50);
+    }
+    // TODO: ajouter export des autres documents ici (Carte, Entreprise, CNI, Lettre, Demande)
+
+    pdf.save(`${doc}.pdf`);
+}
 </script>
+
 </body>
 </html>
