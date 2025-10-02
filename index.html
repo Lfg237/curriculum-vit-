@@ -1,243 +1,207 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Secrétariat Multi-Documents Complet</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mini Secrétariat - Multi-Documents Complet</title>
 <style>
-body{font-family:Arial,sans-serif;margin:0;padding:0;background:linear-gradient(120deg,#ffecd2,#fcb69f,#a1c4fd,#c2e9fb);background-size:600% 600%;animation:gradientBG 15s ease infinite;overflow-x:hidden;}
-@keyframes gradientBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-header,footer{background:#00796b;color:white;padding:10px;text-align:center;position:fixed;width:100%;z-index:10;}
-header{top:0;} footer{bottom:0;}
-.nav-buttons{position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:10px;background:rgba(255,255,255,0.9);padding:5px 10px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.3);}
-.nav-buttons button{padding:8px 15px;font-size:14px;cursor:pointer;}
-.nav-container{display:flex;overflow-x:auto;scroll-behavior:smooth;margin:100px 0 50px 0;padding:10px;flex-wrap:nowrap;}
-.nav-container::-webkit-scrollbar{height:8px;}
-.nav-container::-webkit-scrollbar-thumb{background:#00796b;border-radius:4px;}
-.doc-card{min-width:360px;height:auto;background:#fff;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,0.2);padding:20px;margin:0 10px;flex-shrink:0;position:relative;display:block;}
-.photo{position:relative;text-align:center;margin-bottom:10px;cursor:pointer;border:2px dashed #00796b;border-radius:8px;width:80px;height:80px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.photo img{width:100%;height:100%;object-fit:cover;}
-.photoRect{width:240px;height:300px;border-radius:5px;object-fit:cover;}
-.field{margin:8px 0;}
-label{font-weight:bold;}
-input,textarea{width:100%;padding:5px;margin-top:2px;border:1px solid #ccc;border-radius:5px;}
-canvas{border:1px solid #00796b;margin-top:5px;touch-action:none;}
-button{background:#00796b;color:white;border:none;padding:10px 20px;margin-top:10px;border-radius:5px;}
-button:hover{background:#004d40;}
-#popupOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:9999;}
-#popup{background:white;padding:20px;border-radius:10px;width:360px;box-shadow:0 0 10px rgba(0,0,0,0.3);}
-#beneficiaryInfo,#paymentStatus,#priceInfo{font-weight:bold;margin-top:10px; white-space: pre-line;}
-.name-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px; max-height:200px; overflow:auto; border:1px solid #ccc; padding:5px;}
-.accessTimer{font-weight:bold;margin-top:5px;color:#d32f2f;}
-.card-voeux {border:3px solid pink;border-radius:15px;padding:10px;position:relative;background:#fff0f6;}
-.card-voeux::before, .card-voeux::after {content:"❤️";font-size:22px;position:absolute;}
-.card-voeux::before {top:-15px; left:10px;}
-.card-voeux::after {bottom:-15px; right:10px;}
+  body{font-family:Arial,sans-serif;margin:0;padding:0;background:linear-gradient(120deg,#ffecd2,#fcb69f,#a1c4fd,#c2e9fb);background-size:600% 600%;animation:gradientBG 15s ease infinite;overflow-x:hidden;}
+  @keyframes gradientBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  header,footer{background:#00796b;color:#fff;padding:10px;text-align:center;position:fixed;width:100%;z-index:10;}
+  header{top:0} footer{bottom:0}
+  .nav-buttons{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:8px;padding:6px;border-radius:10px;background:rgba(255,255,255,0.95);}
+  .nav-buttons button{padding:8px 12px;border-radius:6px;border:none;background:#ff7043;color:#fff;font-weight:700;cursor:pointer;}
+  .nav-container{display:flex;overflow-x:auto;scroll-behavior:smooth;margin:120px 0 70px 0;padding:12px;}
+  .doc-card{min-width:360px;background:#fff;border-radius:12px;padding:18px;margin:0 10px;box-shadow:0 6px 18px rgba(0,0,0,0.12);flex-shrink:0;}
+  .photo{width:80px;height:80px;border-radius:10px;border:2px dashed #00796b;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;background:#e8f5f2;}
+  .photo img{width:100%;height:100%;object-fit:cover;}
+  .field{margin:8px 0;}
+  label{font-weight:700;color:#004d40;}
+  input,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:6px;}
+  canvas{border:1px solid #00796b;border-radius:6px;margin-top:6px;touch-action:none;}
+  button.action{background:#00796b;color:#fff;padding:10px 16px;border-radius:8px;border:none;cursor:pointer;}
+  button.ghost{background:#e0e0e0;color:#333;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;margin-left:8px;}
+  #popupOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;padding:12px;}
+  #popup{background:#fff;padding:18px;border-radius:10px;width:420px;max-width:100%;box-shadow:0 8px 30px rgba(0,0,0,0.3);white-space:pre-line;}
+  #beneficiaryInfo{white-space:pre-line;margin-top:10px;font-weight:700;color:#004d40;}
+  .accessTimer{margin-top:8px;color:#d32f2f;font-weight:700;}
+  .small{font-size:12px;color:#666;margin-top:4px;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-
 <header>🖥️ Mini Secrétariat - Multi-Documents Complet</header>
 
 <div class="nav-buttons">
-  <button onclick="scrollPrev()">⬅️ Précédent</button>
-  <button onclick="scrollNext()">➡️ Suivant</button>
+  <button onclick="scrollPrev()">⬅️</button>
+  <button onclick="scrollNext()">➡️</button>
   <button onclick="showAll()">📄 Tous</button>
 </div>
 
 <div class="nav-container" id="docNav">
+  <!-- CV Enrichi -->
+  <div class="doc-card" data-doc="CV">
+    <h3>📄 CV Pro Enrichi</h3>
+    <div class="photo" onclick="choosePhoto('CV')"><img id="profilePhotoCV" src="https://via.placeholder.com/80"></div>
+    <input id="photoInputCV" type="file" accept="image/*" style="display:none" onchange="updatePhoto('CV',this)">
+    <div class="field"><label>Nom</label><input id="nameCV" value="Jean Dupont"></div>
+    <div class="field"><label>Profession</label><input id="professionCV" value="Développeur Web"></div>
+    <div class="field"><label>Email</label><input id="emailCV" value="jean.dupont@email.com"></div>
+    <div class="field"><label>Compétences</label><textarea id="skillsCV" rows="3">HTML, CSS, JS, Node.js</textarea></div>
+    <div class="field"><label>Formations</label><textarea id="educationCV" rows="3">Licence Informatique</textarea></div>
+    <div class="field"><label>Expériences</label><textarea id="experienceCV" rows="3">Développeur Front-end chez X</textarea></div>
+    <div class="field"><label>Signature</label><canvas id="signatureCV" width="300" height="80"></canvas><br>
+    <button class="ghost" onclick="clearSignature('CV')">🗑 Effacer</button></div>
+    <button class="action" onclick="checkAccessAndDownload('CV')">💳 Télécharger PDF (Paiement)</button>
+    <div class="accessTimer" id="timerCV"></div>
+  </div>
 
-<!-- CV -->
-<div class="doc-card" data-doc="CV">
-<h3>📄 CV Pro Enrichi</h3>
-<div class="photo" onclick="choosePhoto('CV')"><img id="profilePhotoCV" src="https://via.placeholder.com/80"></div>
-<input type="file" id="photoInputCV" accept="image/*" style="display:none" onchange="updatePhoto('CV',this)">
-<div class="field"><label>Nom :</label><input id="nameCV" value="Jean Dupont"></div>
-<div class="field"><label>Profession :</label><input id="professionCV" value="Développeur Web"></div>
-<div class="field"><label>Email :</label><input id="emailCV" value="jean.dupont@email.com"></div>
-<div class="field"><label>Compétences :</label><textarea id="skillsCV" rows="3">HTML, CSS, JS</textarea></div>
-<div class="field"><label>Formations :</label><textarea id="educationCV" rows="3">Licence Informatique</textarea></div>
-<div class="field"><label>Expériences :</label><textarea id="experienceCV" rows="3">Développeur Front-end chez X</textarea></div>
-<div class="field"><label>Signature :</label><br><canvas id="signatureCV" width="300" height="80"></canvas><br>
-<button onclick="clearSignature('CV')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownloadFull('CV')">💳 Télécharger PDF (Paiement)</button>
-<div class="accessTimer"></div>
-</div>
+  <!-- Carte de visite -->
+  <div class="doc-card" data-doc="Card">
+    <h3>💳 Carte de Visite</h3>
+    <div class="photo" onclick="choosePhoto('Card')"><img id="profilePhotoCard" src="https://via.placeholder.com/80"></div>
+    <input id="photoInputCard" type="file" accept="image/*" style="display:none" onchange="updatePhoto('Card',this)">
+    <div class="field"><label>Nom</label><input id="nameCard" value="Jean Dupont"></div>
+    <div class="field"><label>Profession</label><input id="professionCard" value="Développeur Web"></div>
+    <div class="field"><label>Téléphone</label><input id="phoneCard" value="+237 650 000 000"></div>
+    <div class="field"><label>Email</label><input id="emailCard" value="jean.dupont@email.com"></div>
+    <div class="field"><label>Signature</label><canvas id="signatureCard" width="300" height="50"></canvas><br>
+    <button class="ghost" onclick="clearSignature('Card')">🗑 Effacer</button></div>
+    <button class="action" onclick="checkAccessAndDownload('Card')">💳 Télécharger PDF (Paiement)</button>
+    <div class="accessTimer" id="timerCard"></div>
+  </div>
 
-<!-- Carte de visite -->
-<div class="doc-card" data-doc="Card">
-<h3>💳 Carte de Visite</h3>
-<div class="photo" onclick="choosePhoto('Card')"><img id="profilePhotoCard" src="https://via.placeholder.com/80"></div>
-<input type="file" id="photoInputCard" accept="image/*" style="display:none" onchange="updatePhoto('Card',this)">
-<div class="field"><label>Nom :</label><input id="nameCard" value="Jean Dupont"></div>
-<div class="field"><label>Profession :</label><input id="professionCard" value="Développeur Web"></div>
-<div class="field"><label>Téléphone :</label><input id="phoneCard" value="+237 650 000 000"></div>
-<div class="field"><label>Signature :</label><br><canvas id="signatureCard" width="300" height="50"></canvas><br>
-<button onclick="clearSignature('Card')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownloadFull('Card')">💳 Télécharger PDF (Paiement)</button>
-<div class="accessTimer"></div>
+  <div id="additionalDocs"></div>
 </div>
-
-<!-- Entreprise -->
-<div class="doc-card" data-doc="Entreprise">
-<h3>🏢 Fiche de l'Entreprise</h3>
-<div class="field"><label>Nom du Signataire :</label><input id="signerName" value="Pierre Paul"></div>
-<div class="field"><label>Ajouter un nom :</label><input id="newName" placeholder="Nom à ajouter"><button onclick="addName()">📝 Ajouter</button></div>
-<div class="field"><label>Liste des noms :</label><div id="nameList" class="name-grid"></div></div>
-<div class="field"><label>Signature :</label><br><canvas id="signatureEntreprise" width="300" height="80"></canvas><br>
-<button onclick="clearSignature('Entreprise')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownloadFull('Entreprise')">💳 Télécharger PDF (Paiement)</button>
-<div class="accessTimer"></div>
-</div>
-
-<!-- CNI recto/verso -->
-<div class="doc-card" data-doc="CNI">
-<h3>🆔 Photocopie CNI</h3>
-<div class="field"><label>Photo Recto :</label>
-<div class="photo photoRect" onclick="choosePhoto('CNIRecto')"><img id="cniRectoImg" src="https://via.placeholder.com/240x300"></div>
-<input type="file" id="photoInputCNIRecto" accept="image/*" style="display:none" onchange="updatePhoto('CNIRecto',this)">
-</div>
-<div class="field"><label>Photo Verso :</label>
-<div class="photo photoRect" onclick="choosePhoto('CNIVerso')"><img id="cniVersoImg" src="https://via.placeholder.com/240x300"></div>
-<input type="file" id="photoInputCNIVerso" accept="image/*" style="display:none" onchange="updatePhoto('CNIVerso',this)">
-</div>
-<div class="field"><label>Signature :</label><br><canvas id="signatureCNI" width="300" height="80"></canvas><br>
-<button onclick="clearSignature('CNI')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownloadFull('CNI')">💳 Télécharger PDF (Paiement)</button>
-<div class="accessTimer"></div>
-</div>
-
-<!-- Lettre de motivation -->
-<div class="doc-card" data-doc="Lettre">
-<h3>✉️ Lettre de motivation</h3>
-<textarea id="lettreText" rows="5" placeholder="Tapez votre lettre ici..."></textarea>
-<div class="field"><label>Signature :</label><br><canvas id="signatureLettre" width="300" height="80"></canvas><br>
-<button onclick="clearSignature('Lettre')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownloadFull('Lettre')">💳 Télécharger PDF (Paiement)</button>
-<div class="accessTimer"></div>
-</div>
-
-<!-- Carte de vœux / Demande -->
-<div class="doc-card" data-doc="Demande">
-<h3>📝 Carte de Vœux</h3>
-<div class="card-voeux">
-<textarea id="demandeText" rows="5" placeholder="Écrivez votre message ici..."></textarea>
-</div>
-<div class="field"><label>Signature :</label><br><canvas id="signatureDemande" width="300" height="80"></canvas><br>
-<button onclick="clearSignature('Demande')">🗑️ Effacer Signature</button></div>
-<button onclick="checkAccessAndDownloadFull('Demande')">💳 Télécharger PDF (Paiement)</button>
-<div class="accessTimer"></div>
-</div>
-
-</div> <!-- nav-container -->
 
 <footer>© 2025 Mini Secrétariat</footer>
 
 <div id="popupOverlay"><div id="popup"></div></div>
 
+<script>
+/* ========== Frontend JS ========== */
+const BENEFICIARY = { name: "Loveline Wirnkar", momo: "676353859", om: "640647072" };
+let currentDoc = null;
 
-       
-  
+// Navigation
+const nav = document.getElementById('docNav');
+function scrollNext(){ const w = document.querySelector('.doc-card').offsetWidth + 20; nav.scrollBy({left:w,behavior:'smooth'}); }
+function scrollPrev(){ const w = document.querySelector('.doc-card').offsetWidth + 20; nav.scrollBy({left:-w,behavior:'smooth'}); }
+function showAll(){ nav.scrollTo({left:0,behavior:'smooth'}); }
 
- 
-   
-  <script>
-// ===== Variables globales =====
-let currentDoc = null, accessExpiration = 0, currentDuration = 0;
+// Photos
+function choosePhoto(id){ document.getElementById('photoInput'+id).click(); }
+function updatePhoto(id,input){ const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = e => {
+  const map = {'CV':'profilePhotoCV','Card':'profilePhotoCard'}; if(map[id]) document.getElementById(map[id]).src = e.target.result; }; r.readAsDataURL(f); }
 
-const beneficiaries = {
-    'TX111111': {name:'Loveline Wirnkar', momo:'676353859', om:'640647072', time: Date.now() - 2*60000}
-};
-
-// ===== Popup =====
-function openPaymentPopup(doc){
-    currentDoc = doc;
-    const popup = document.getElementById('popup');
-    document.getElementById('popupOverlay').style.display='flex';
-    popup.innerHTML=`
-        <h3>💳 Paiement pour ${doc}</h3>
-        <div id="beneficiaryInfo">Informations bénéficiaire ici</div>
-        <label>Montant payé (XAF)</label>
-        <input id="amountPaid" type="number" value="100" min="100" step="100">
-        <div>100 XAF = 5 min</div>
-        <label>ID transaction ou code admin</label>
-        <input id="paymentInput" type="text" placeholder="TX111111 ou 233233">
-        <div style="margin-top:10px">
-        <button onclick="identifyTransaction()">🔍 Identifier</button>
-        <button onclick="closePopup()">❌ Annuler</button></div>
-    `;
+// Signatures: stabilize touch and prevent scroll during signing
+function initSignatures(){
+  const ids = ['CV','Card'];
+  ids.forEach(id=>{
+    const c = document.getElementById('signature'+id);
+    if(!c) return;
+    const ctx = c.getContext('2d'); ctx.lineWidth = 2; ctx.strokeStyle = '#00796b';
+    let drawing = false;
+    c.addEventListener('pointerdown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+    c.addEventListener('pointermove', e => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); }});
+    c.addEventListener('pointerup', e => { drawing = false; });
+    c.addEventListener('pointerleave', e => { drawing = false; });
+    // block touch scroll while interacting
+    c.addEventListener('touchstart', e => { e.preventDefault(); }, {passive:false});
+    c.addEventListener('touchmove', e => { e.preventDefault(); }, {passive:false});
+  });
 }
+function clearSignature(id){ const c = document.getElementById('signature'+id); if(!c) return; c.getContext('2d').clearRect(0,0,c.width,c.height); }
+window.addEventListener('load', initSignatures);
 
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
+// Popup helpers
+function showPopup(content){ const popup = document.getElementById('popup'); popup.innerHTML = content; document.getElementById('popupOverlay').style.display = 'flex'; }
+function hidePopup(){ document.getElementById('popupOverlay').style.display = 'none'; }
 
-// ===== Identifier transaction =====
-function identifyTransaction(){
-    const input = document.getElementById('paymentInput').value.trim();
-    const amount = parseInt(document.getElementById('amountPaid').value);
-    const infoDiv = document.getElementById('beneficiaryInfo');
-
-    // Admin
-    if(input === '233233'){
-        currentDuration = Math.floor(amount/100)*5*60*1000;
-        accessExpiration = Date.now() + currentDuration;
-        infoDiv.innerText = `✅ Accès admin validé\nDurée: ${currentDuration/60000} min`;
-        closePopup();
-        generatePDF(currentDoc);
-        return;
-    }
-
-    // Mobile Money
-    if(beneficiaries[input]){
-        const tx = beneficiaries[input];
-        const elapsed = Date.now() - tx.time;
-        if(elapsed > 10*60000){
-            infoDiv.innerText = `❌ Transaction expirée (>10min)`;
-            return;
-        }
-        currentDuration = Math.floor(amount/100)*5*60*1000;
-        accessExpiration = Date.now() + currentDuration;
-        infoDiv.innerText = `✅ Transaction validée\nNom: ${tx.name}\nMOMO: ${tx.momo}\nOM: ${tx.om}\nDurée: ${currentDuration/60000} min`;
-        closePopup();
-        generatePDF(currentDoc);
-        return;
-    }
-
-    infoDiv.innerText = `❌ Transaction invalide`;
-}
-
-// ===== Vérification avant PDF =====
+// ========== Validation + Secure download flow (frontend) ==========
+// Affiche popup et envoie adminCode / momoMessage à /api/validate
 function checkAccessAndDownload(doc){
-    currentDoc = doc;
-    if(Date.now() < accessExpiration){
-        generatePDF(doc);
-    } else {
-        openPaymentPopup(doc);
-    }
+  currentDoc = doc;
+  let content = `<h3>💳 Paiement pour ${doc}</h3>`;
+  content += `<div id="beneficiaryInfo">Bénéficiaire: ${BENEFICIARY.name}\nMomo: ${BENEFICIARY.momo}\nOM: ${BENEFICIARY.om}</div>`;
+  content += `<div style="margin-top:10px;"><label>Code Admin (si disponible):</label><input id="adminCode" placeholder="Code admin" style="width:100%"></div>`;
+  content += `<div style="margin-top:10px;"><label>Message Mobile Money :</label><input id="momoMessage" placeholder="Copie ici le message de paiement" style="width:100%"></div>`;
+  content += `<div style="margin-top:10px;"><button onclick="submitForValidation()">✅ Envoyer pour validation</button> <button onclick="hidePopup()">❌ Annuler</button></div>`;
+  showPopup(content);
 }
 
-// ===== Génération PDF =====
-async function generatePDF(doc){
-    const card = [...document.querySelectorAll('.doc-card')].find(c=>c.dataset.doc===doc);
-    if(!card) return;
+async function submitForValidation(){
+  const code = document.getElementById('adminCode').value.trim();
+  const msg  = document.getElementById('momoMessage').value.trim();
 
-    // Capture HTML complet
-    const canvas = await html2canvas(card, {scale:2, useCORS:true});
-    const imgData = canvas.toDataURL('image/png');
+  try {
+    const res = await fetch('/api/validate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ adminCode: code, momoMessage: msg, doc: currentDoc })
+    });
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p','mm','a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    if(!res.ok){
+      const txt = await res.text();
+      console.error('validate http error', res.status, txt);
+      alert('Erreur serveur lors de la validation');
+      return;
+    }
 
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfRatio = Math.min(pageWidth/imgProps.width, pageHeight/imgProps.height);
+    const j = await res.json();
+    if(j.ok){
+      hidePopup();
+      alert(`✅ Paiement validé (${j.method}). Téléchargement en cours...`);
+      // j.token doit exister (token usage unique TTL)
+      if(!j.token){
+        console.error('Aucun token reçu depuis /api/validate. Vérifie le backend.');
+        alert('Erreur: aucun token reçu.');
+        return;
+      }
+      await downloadPDFServer(currentDoc, j.token);
+    } else {
+      alert('❌ Validation refusée : ' + (j.reason || 'invalide'));
+    }
+  } catch (err) {
+    console.error('submitForValidation error', err);
+    alert('Erreur réseau ou serveur. Regarde la console pour plus de détails.');
+  }
+}
 
-    const imgWidth = imgProps.width * pdfRatio;
-    const imgHeight = imgProps.height * pdfRatio;
+// Appelle /api/get-file avec token pour récupérer le PDF (dataURI) et forcer téléchargement
+async function downloadPDFServer(doc, token){
+  if(!token){ alert('Aucun token fourni — impossible de télécharger.'); return; }
 
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    pdf.save(`${doc}.pdf`);
+  try {
+    const res = await fetch('/api/get-file', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token, docName: doc })
+    });
+
+    if(!res.ok){
+      const txt = await res.text();
+      console.error('get-file http error', res.status, txt);
+      alert('Erreur lors du téléchargement (serveur).');
+      return;
+    }
+
+    const j = await res.json();
+    if(j.ok && j.pdf){
+      // j.pdf is data URI: "data:application/pdf;base64,...."
+      const link = document.createElement('a');
+      link.href = j.pdf;
+      link.download = `${doc}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      alert('Erreur téléchargement : ' + (j.reason || 'PDF non disponible'));
+      console.error('get-file response', j);
+    }
+  } catch (err) {
+    console.error('downloadPDFServer error', err);
+    alert('Erreur réseau ou serveur pendant le téléchargement.');
+  }
 }
 </script>
 </body>
