@@ -290,6 +290,118 @@ async function generatePDF(doc){
     // TODO: ajouter export des autres documents ici (Carte, Entreprise, CNI, Lettre, Demande)
 
     pdf.save(`${doc}.pdf`);
+async function generatePDF(doc){
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    pdf.setFontSize(12);
+    pdf.text(`Document: ${doc}`,10,10);
+    let y=20;
+
+    // CV
+    if(doc==='CV'){
+        const name=document.getElementById('nameCV').value;
+        const prof=document.getElementById('professionCV').value;
+        const email=document.getElementById('emailCV').value;
+        const skills=document.getElementById('skillsCV').value;
+        const education=document.getElementById('educationCV').value;
+        const experience=document.getElementById('experienceCV').value;
+        pdf.text(`Nom: ${name}`,10,y); y+=10;
+        pdf.text(`Profession: ${prof}`,10,y); y+=10;
+        pdf.text(`Email: ${email}`,10,y); y+=10;
+        pdf.text(`Compétences: ${skills}`,10,y); y+=10;
+        pdf.text(`Formations: ${education}`,10,y); y+=10;
+        pdf.text(`Expériences: ${experience}`,10,y); y+=10;
+
+        // Signature
+        const sig=document.getElementById('signatureCV');
+        if(sig){
+            const imgData=sig.toDataURL();
+            pdf.addImage(imgData,'PNG',10,y,60,20);
+            y+=25;
+        }
+    }
+
+    // Carte de visite
+    if(doc==='Card'){
+        const name=document.getElementById('nameCard').value;
+        const prof=document.getElementById('professionCard').value;
+        const phone=document.getElementById('phoneCard').value;
+        pdf.text(`Nom: ${name}`,10,y); y+=10;
+        pdf.text(`Profession: ${prof}`,10,y); y+=10;
+        pdf.text(`Téléphone: ${phone}`,10,y); y+=10;
+        const sig=document.getElementById('signatureCard');
+        if(sig){
+            const imgData=sig.toDataURL();
+            pdf.addImage(imgData,'PNG',10,y,60,15);
+            y+=20;
+        }
+    }
+
+    // Entreprise
+    if(doc==='Entreprise'){
+        const signer=document.getElementById('signerName').value;
+        pdf.text(`Signataire: ${signer}`,10,y); y+=10;
+        const names=document.querySelectorAll('#nameList div');
+        if(names.length){
+            pdf.text('Liste des noms:',10,y); y+=10;
+            names.forEach(n=>{
+                pdf.text(`- ${n.textContent}`,10,y); y+=8;
+            });
+        }
+        const sig=document.getElementById('signatureEntreprise');
+        if(sig){
+            const imgData=sig.toDataURL();
+            pdf.addImage(imgData,'PNG',10,y,60,20);
+            y+=25;
+        }
+    }
+
+    // CNI Recto/Verso
+    if(doc==='CNI'){
+        const recto=document.getElementById('cniRectoImg').src;
+        const verso=document.getElementById('cniVersoImg').src;
+        pdf.text('Recto:',10,y); y+=10;
+        pdf.addImage(recto,'PNG',10,y,60,80); y+=85;
+        pdf.text('Verso:',10,y); y+=10;
+        pdf.addImage(verso,'PNG',10,y,60,80); y+=85;
+        const sig=document.getElementById('signatureCNI');
+        if(sig){
+            const imgData=sig.toDataURL();
+            pdf.addImage(imgData,'PNG',10,y,60,20);
+            y+=25;
+        }
+    }
+
+    // Lettre de motivation
+    if(doc==='Lettre'){
+        const texte=document.getElementById('lettreText').value;
+        pdf.text('Lettre:',10,y); y+=10;
+        const lines=pdf.splitTextToSize(texte,180);
+        pdf.text(lines,10,y); y+=lines.length*7;
+        const sig=document.getElementById('signatureLettre');
+        if(sig){
+            const imgData=sig.toDataURL();
+            pdf.addImage(imgData,'PNG',10,y,60,20);
+            y+=25;
+        }
+    }
+
+    // Carte de vœux / Demande
+    if(doc==='Demande'){
+        const texte=document.getElementById('demandeText').value;
+        pdf.text('Message:',10,y); y+=10;
+        const lines=pdf.splitTextToSize(texte,180);
+        pdf.text(lines,10,y); y+=lines.length*7;
+        const sig=document.getElementById('signatureDemande');
+        if(sig){
+            const imgData=sig.toDataURL();
+            pdf.addImage(imgData,'PNG',10,y,60,20);
+            y+=25;
+        }
+    }
+
+    pdf.save(`${doc}.pdf`);
+}
 }
 </script>
 
