@@ -136,18 +136,16 @@ button:hover{background:#004d40;}
 
 <div id="popupOverlay"><div id="popup"></div></div>
 
-<script>
-// ===== Navigation =====
-const nav=document.getElementById('docNav');
-function scrollNext(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:w,behavior:'smooth'});}
-function scrollPrev(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:-w,behavior:'smooth'});}
-function showAll(){nav.scrollTo({left:0,behavior:'smooth'});}
 
+  
+ 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
 // ===== Photos =====
 function choosePhoto(id){document.getElementById('photoInput'+id).click();}
 function updatePhoto(id,input){
-    const f=input.files[0];
-    if(!f) return;
+    const f=input.files[0]; if(!f) return;
     const r=new FileReader();
     r.onload=e=>{
         const map={'CV':'profilePhotoCV','Card':'profilePhotoCard','CNIRecto':'cniRectoImg','CNIVerso':'cniVersoImg'};
@@ -164,17 +162,14 @@ function initSignature(id){
     let d=false;
     c.onpointerdown=e=>{d=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);};
     c.onpointermove=e=>{if(d){ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();}};
-    c.onpointerup=()=>d=false;
-    c.onpointerleave=()=>d=false;
+    c.onpointerup=()=>d=false; c.onpointerleave=()=>d=false;
 }
 ['CV','Card','Entreprise','CNI','Lettre','Demande'].forEach(initSignature);
 
 // ===== Ajouter nom Entreprise =====
 function addName(){
-    const v=document.getElementById('newName').value.trim();
-    if(!v) return;
-    const el=document.createElement('div');
-    el.textContent=v; el.style.padding='4px';
+    const v=document.getElementById('newName').value.trim(); if(!v) return;
+    const el=document.createElement('div'); el.textContent=v; el.style.padding='4px';
     document.getElementById('nameList').appendChild(el);
     document.getElementById('newName').value='';
 }
@@ -183,232 +178,97 @@ function addName(){
 const beneficiaries={'TX111111':{name:'Loveline Wirnkar',momo:'676353859',om:'640647072',time:Date.now()-2*60000}};
 let currentDoc=null, accessExpiration=0, currentDuration=0;
 
-function checkAccessAndDownload(doc){
+// Fonction principale pour vérifier accès et téléchargement
+function checkAccessAndDownloadFull(doc){
     currentDoc=doc;
     if(Date.now()<accessExpiration){
-        alert(`⏱️ Votre accès pour ${currentDoc} est encore actif !`);
-        generatePDF(currentDoc);
-        return;
+        generatePDFFull(doc);
+    } else {
+        openPaymentPopup(doc);
     }
-function checkAccessAndDownloadFull(doc){
-    
-}
-    showPopup(doc);
 }
 
-// ===== Popup Paiement =====
-function showPopup(doc){
-    const popup=document.getElementById('popup');
-    const overlay=document.getElementById('popupOverlay');
-    overlay.style.display='flex';
-
-    popup.innerHTML=`
+// Popup paiement
+function openPaymentPopup(doc){
+    currentDoc=doc;
+    document.getElementById('popupOverlay').style.display='flex';
+    document.getElementById('popup').innerHTML=`
         <h3>💳 Paiement pour ${doc}</h3>
-        <div id="beneficiaryInfo">Nom: Loveline Wirnkar\nMOMO: 676353859\nOM: 640647072</div>
-        <div id="priceInfo">100 XAF = 5 min d'accès</div>
-        <input type="text" id="paymentInput" placeholder="ID transaction ou code admin" style="width:100%;padding:5px;margin-top:10px;">
-        <button onclick="validatePayment()">✅ Valider Paiement</button>
-        <button onclick="closePopup()" style="background:#d32f2f;">❌ Annuler</button>
+        <label>Montant payé (XAF)</label>
+        <input id="amountPaid" type="number" value="100" min="100" step="100">
+        <div class="small">100 XAF = 5 min</div>
+        <label>ID transaction ou code admin</label>
+        <input id="paymentInput" type="text" placeholder="TX111111 ou 233233">
+        <div style="margin-top:10px">
+            <button onclick="identifyTransaction()">🔍 Vérifier</button>
+        </div>
+        <div id="beneficiaryInfo"></div>
         <div id="paymentStatus"></div>
+        <button onclick="closePopup()" style="margin-top:10px">❌ Fermer</button>
     `;
 }
 
-// ===== Fermer popup =====
-function closePopup(){
-    document.getElementById('popupOverlay').style.display='none';
-}
+// Fermer popup
+function closePopup(){document.getElementById('popupOverlay').style.display='none';}
 
-// ===== Valider paiement =====
-function validatePayment(){
+// Identifier la transaction ou code admin
+function identifyTransaction(){
     const input=document.getElementById('paymentInput').value.trim();
+    const amount=parseInt(document.getElementById('amountPaid').value);
+    const info=document.getElementById('beneficiaryInfo');
     const status=document.getElementById('paymentStatus');
-    const now=Date.now();
-
+    
     // Accès admin
     if(input==='233233'){
-        status.textContent='✅ Accès administrateur validé !';
-        accessExpiration=now + 5*60*1000; // 5 min par défaut
-        currentDuration=5;
+        accessExpiration=Date.now() + amount*5*60/100; // multiplier 100xaf=5min
+        currentDuration=amount*5/100;
+        status.textContent='✅ Accès admin validé';
         closePopup();
-        generatePDF(currentDoc);
-        startTimer(currentDoc);
+        generatePDFFull(currentDoc);
         return;
     }
 
-    // Vérification Mobile Money (exemple simple)
+    // Vérification Mobile Money
     if(beneficiaries[input]){
-        const ben=beneficiaries[input];
-        if(now - ben.time > 10*60*1000){
-            status.textContent='❌ Transaction expirée (>10 min)';
-            return;
+        const tx=beneficiaries[input];
+        info.textContent=`Nom: ${tx.name}\nMomo: ${tx.momo}\nOM: ${tx.om}\nID: ${input}\nHeure: ${new Date(tx.time).toLocaleTimeString()}`;
+        if(Date.now()-tx.time<10*60000){
+            accessExpiration=Date.now() + amount*5*60/100;
+            currentDuration=amount*5/100;
+            status.textContent='✅ Paiement validé, téléchargement activé';
+            closePopup();
+            generatePDFFull(currentDoc);
+        } else {
+            status.textContent='❌ Transaction trop ancienne (>10min)';
         }
-        status.textContent=`✅ Paiement validé pour ${ben.name}`;
-        currentDuration=5; // multiplier ici si nécessaire
-        accessExpiration=now + currentDuration*60*1000;
-        closePopup();
-        generatePDF(currentDoc);
-        startTimer(currentDoc);
-        return;
+    } else {
+        status.textContent='❌ Transaction non trouvée';
     }
-
-    status.textContent='❌ Transaction invalide';
 }
 
-// ===== Timer affichage accès =====
-function startTimer(doc){
-    const timerEl=document.querySelector(`.doc-card[data-doc="${doc}"] .accessTimer`);
-    function updateTimer(){
-        const remaining=Math.max(0, Math.floor((accessExpiration-Date.now())/1000));
-        if(remaining<=0){
-            timerEl.textContent='⏱️ Accès expiré';
-            clearInterval(interval);
-            return;
-        }
-        const min=Math.floor(remaining/60);
-        const sec=remaining%60;
-        timerEl.textContent=`⏱️ Accès restant : ${min}m ${sec}s`;
-    }
-    updateTimer();
-    const interval=setInterval(updateTimer,1000);
-}
-
-    generatePDFFull(doc);
-}
-// ===== Générer PDF =====
-async function generatePDF(doc){
+// ===== Générer PDF complet avec html2canvas =====
+async function generatePDFFull(doc){
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.setFontSize(12);
-    pdf.text(`Document: ${doc}`,10,10);
+    const pdf=new jsPDF('p','mm','a4');
+    const docCard=document.querySelector(`.doc-card[data-doc="${doc}"]`);
+    const canvas=await html2canvas(docCard,{scale:2, useCORS:true});
+    const imgData=canvas.toDataURL('image/png');
+    
+    const pdfWidth=pdf.internal.pageSize.getWidth();
+    const pdfHeight=pdf.internal.pageSize.getHeight();
+    const ratio=Math.min(pdfWidth/canvas.width, pdfHeight/canvas.height);
+    const imgW=canvas.width*ratio;
+    const imgH=canvas.height*ratio;
 
-    if(doc==='CV'){
-        const name=document.getElementById('nameCV').value;
-        const prof=document.getElementById('professionCV').value;
-        const email=document.getElementById('emailCV').value;
-        const skills=document.getElementById('skillsCV').value;
-        pdf.text(`Nom: ${name}`,10,20);
-        pdf.text(`Profession: ${prof}`,10,30);
-        pdf.text(`Email: ${email}`,10,40);
-        pdf.text(`Compétences: ${skills}`,10,50);
-    }
-    // TODO: ajouter export des autres documents ici (Carte, Entreprise, CNI, Lettre, Demande)
-
-    pdf.save(`${doc}.pdf`);
-async function generatePDF(doc){
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.setFontSize(12);
-    pdf.text(`Document: ${doc}`,10,10);
-    let y=20;
-
-    // CV
-    if(doc==='CV'){
-        const name=document.getElementById('nameCV').value;
-        const prof=document.getElementById('professionCV').value;
-        const email=document.getElementById('emailCV').value;
-        const skills=document.getElementById('skillsCV').value;
-        const education=document.getElementById('educationCV').value;
-        const experience=document.getElementById('experienceCV').value;
-        pdf.text(`Nom: ${name}`,10,y); y+=10;
-        pdf.text(`Profession: ${prof}`,10,y); y+=10;
-        pdf.text(`Email: ${email}`,10,y); y+=10;
-        pdf.text(`Compétences: ${skills}`,10,y); y+=10;
-        pdf.text(`Formations: ${education}`,10,y); y+=10;
-        pdf.text(`Expériences: ${experience}`,10,y); y+=10;
-
-        // Signature
-        const sig=document.getElementById('signatureCV');
-        if(sig){
-            const imgData=sig.toDataURL();
-            pdf.addImage(imgData,'PNG',10,y,60,20);
-            y+=25;
-        }
-    }
-
-    // Carte de visite
-    if(doc==='Card'){
-        const name=document.getElementById('nameCard').value;
-        const prof=document.getElementById('professionCard').value;
-        const phone=document.getElementById('phoneCard').value;
-        pdf.text(`Nom: ${name}`,10,y); y+=10;
-        pdf.text(`Profession: ${prof}`,10,y); y+=10;
-        pdf.text(`Téléphone: ${phone}`,10,y); y+=10;
-        const sig=document.getElementById('signatureCard');
-        if(sig){
-            const imgData=sig.toDataURL();
-            pdf.addImage(imgData,'PNG',10,y,60,15);
-            y+=20;
-        }
-    }
-
-    // Entreprise
-    if(doc==='Entreprise'){
-        const signer=document.getElementById('signerName').value;
-        pdf.text(`Signataire: ${signer}`,10,y); y+=10;
-        const names=document.querySelectorAll('#nameList div');
-        if(names.length){
-            pdf.text('Liste des noms:',10,y); y+=10;
-            names.forEach(n=>{
-                pdf.text(`- ${n.textContent}`,10,y); y+=8;
-            });
-        }
-        const sig=document.getElementById('signatureEntreprise');
-        if(sig){
-            const imgData=sig.toDataURL();
-            pdf.addImage(imgData,'PNG',10,y,60,20);
-            y+=25;
-        }
-    }
-
-    // CNI Recto/Verso
-    if(doc==='CNI'){
-        const recto=document.getElementById('cniRectoImg').src;
-        const verso=document.getElementById('cniVersoImg').src;
-        pdf.text('Recto:',10,y); y+=10;
-        pdf.addImage(recto,'PNG',10,y,60,80); y+=85;
-        pdf.text('Verso:',10,y); y+=10;
-        pdf.addImage(verso,'PNG',10,y,60,80); y+=85;
-        const sig=document.getElementById('signatureCNI');
-        if(sig){
-            const imgData=sig.toDataURL();
-            pdf.addImage(imgData,'PNG',10,y,60,20);
-            y+=25;
-        }
-    }
-
-    // Lettre de motivation
-    if(doc==='Lettre'){
-        const texte=document.getElementById('lettreText').value;
-        pdf.text('Lettre:',10,y); y+=10;
-        const lines=pdf.splitTextToSize(texte,180);
-        pdf.text(lines,10,y); y+=lines.length*7;
-        const sig=document.getElementById('signatureLettre');
-        if(sig){
-            const imgData=sig.toDataURL();
-            pdf.addImage(imgData,'PNG',10,y,60,20);
-            y+=25;
-        }
-    }
-
-    // Carte de vœux / Demande
-    if(doc==='Demande'){
-        const texte=document.getElementById('demandeText').value;
-        pdf.text('Message:',10,y); y+=10;
-        const lines=pdf.splitTextToSize(texte,180);
-        pdf.text(lines,10,y); y+=lines.length*7;
-        const sig=document.getElementById('signatureDemande');
-        if(sig){
-            const imgData=sig.toDataURL();
-            pdf.addImage(imgData,'PNG',10,y,60,20);
-            y+=25;
-        }
-    }
-
+    pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
     pdf.save(`${doc}.pdf`);
 }
-}
 
+// ===== Navigation =====
+const nav=document.getElementById('docNav');
+function scrollNext(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:w,behavior:'smooth'});}
+function scrollPrev(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:-w,behavior:'smooth'});}
+function showAll(){nav.scrollTo({left:0,behavior:'smooth'});}
 </script>
-
 </body>
 </html>
