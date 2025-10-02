@@ -269,7 +269,6 @@ function startTimer(doc){
     updateTimer();
     const interval=setInterval(updateTimer,1000);
 }
-
 // ===== Générer PDF =====
 async function generatePDF(doc){
     const { jsPDF } = window.jspdf;
@@ -403,6 +402,7 @@ async function generatePDF(doc){
     pdf.save(`${doc}.pdf`);
 }
 }
+
 </script>
 
 </body>
