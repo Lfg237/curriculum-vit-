@@ -139,15 +139,32 @@ button:hover{background:#004d40;}
 
   
  
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+     
+         
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+const beneficiaries = {
+    'TX111111': {name:'Loveline Wirnkar', momo:'676353859', om:'640647072', time:Date.now()-2*60000}
+};
+
+let currentDoc = null;
+let accessExpiration = 0;
+let currentDuration = 0; // minutes
+
+// ===== Navigation =====
+const nav = document.getElementById('docNav');
+function scrollNext(){const w=document.querySelector('.doc-card').offsetWidth+20; nav.scrollBy({left:w,behavior:'smooth'});}
+function scrollPrev(){const w=document.querySelector('.doc-card').offsetWidth+20; nav.scrollBy({left:-w,behavior:'smooth'});}
+function showAll(){nav.scrollTo({left:0,behavior:'smooth'});}
+
 // ===== Photos =====
 function choosePhoto(id){document.getElementById('photoInput'+id).click();}
 function updatePhoto(id,input){
     const f=input.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=e=>{
+    const r = new FileReader();
+    r.onload = e => {
         const map={'CV':'profilePhotoCV','Card':'profilePhotoCard','CNIRecto':'cniRectoImg','CNIVerso':'cniVersoImg'};
         if(map[id]) document.getElementById(map[id]).src=e.target.result;
     };
@@ -155,14 +172,18 @@ function updatePhoto(id,input){
 }
 
 // ===== Signatures =====
-function clearSignature(id){const c=document.getElementById('signature'+id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+function clearSignature(id){
+    const c=document.getElementById('signature'+id);
+    c.getContext('2d').clearRect(0,0,c.width,c.height);
+}
 function initSignature(id){
     const c=document.getElementById('signature'+id);
-    const ctx=c.getContext('2d'); ctx.lineWidth=2; ctx.strokeStyle='#00796b';
+    const ctx = c.getContext('2d'); ctx.lineWidth=2; ctx.strokeStyle='#00796b';
     let d=false;
     c.onpointerdown=e=>{d=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);};
     c.onpointermove=e=>{if(d){ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();}};
-    c.onpointerup=()=>d=false; c.onpointerleave=()=>d=false;
+    c.onpointerup=()=>d=false;
+    c.onpointerleave=()=>d=false;
 }
 ['CV','Card','Entreprise','CNI','Lettre','Demande'].forEach(initSignature);
 
@@ -174,101 +195,95 @@ function addName(){
     document.getElementById('newName').value='';
 }
 
-// ===== Paiement et PDF =====
-const beneficiaries={'TX111111':{name:'Loveline Wirnkar',momo:'676353859',om:'640647072',time:Date.now()-2*60000}};
-let currentDoc=null, accessExpiration=0, currentDuration=0;
-
-// Fonction principale pour vérifier accès et téléchargement
-function checkAccessAndDownloadFull(doc){
-    currentDoc=doc;
-    if(Date.now()<accessExpiration){
-        generatePDFFull(doc);
+// ===== Paiement & Accès =====
+function checkAccessAndDownload(doc){
+    currentDoc = doc;
+    if(Date.now() < accessExpiration){
+        generatePDF(doc);
     } else {
         openPaymentPopup(doc);
     }
 }
 
-// Popup paiement
 function openPaymentPopup(doc){
-    currentDoc=doc;
+    currentDoc = doc;
+    const popup = document.getElementById('popup');
     document.getElementById('popupOverlay').style.display='flex';
-    document.getElementById('popup').innerHTML=`
+    popup.innerHTML = `
         <h3>💳 Paiement pour ${doc}</h3>
+        <div id="beneficiaryInfo"></div>
         <label>Montant payé (XAF)</label>
         <input id="amountPaid" type="number" value="100" min="100" step="100">
         <div class="small">100 XAF = 5 min</div>
-        <label>ID transaction ou code admin</label>
+        <label>Code Transaction ou Admin</label>
         <input id="paymentInput" type="text" placeholder="TX111111 ou 233233">
         <div style="margin-top:10px">
-            <button onclick="identifyTransaction()">🔍 Vérifier</button>
+            <button onclick="identifyTransaction()">🔍 Identifier & Valider</button>
+            <button onclick="closePopup()">❌ Annuler</button>
         </div>
-        <div id="beneficiaryInfo"></div>
         <div id="paymentStatus"></div>
-        <button onclick="closePopup()" style="margin-top:10px">❌ Fermer</button>
     `;
+    // afficher bénéficiaire connu pour info
+    const infoDiv = document.getElementById('beneficiaryInfo');
+    infoDiv.textContent = `Nom: Loveline Wirnkar\nMomo: 676353859\nOM: 640647072`;
 }
 
-// Fermer popup
-function closePopup(){document.getElementById('popupOverlay').style.display='none';}
+function closePopup(){
+    document.getElementById('popupOverlay').style.display='none';
+}
 
-// Identifier la transaction ou code admin
 function identifyTransaction(){
-    const input=document.getElementById('paymentInput').value.trim();
-    const amount=parseInt(document.getElementById('amountPaid').value);
-    const info=document.getElementById('beneficiaryInfo');
-    const status=document.getElementById('paymentStatus');
-    
-    // Accès admin
-    if(input==='233233'){
-        accessExpiration=Date.now() + amount*5*60/100; // multiplier 100xaf=5min
-        currentDuration=amount*5/100;
-        status.textContent='✅ Accès admin validé';
-        closePopup();
-        generatePDFFull(currentDoc);
-        return;
+    const input = document.getElementById('paymentInput').value.trim();
+    const amount = parseInt(document.getElementById('amountPaid').value) || 100;
+    const multiplier = Math.floor(amount/100); // 100 XAF = 5min
+    let valid = false;
+
+    if(input === '233233'){ // admin
+        valid = true;
+    } else if(beneficiaries[input]){
+        const tx = beneficiaries[input];
+        const now = Date.now();
+        if((now - tx.time) <= 10*60000){ // max 10 min
+            valid = true;
+        }
     }
 
-    // Vérification Mobile Money
-    if(beneficiaries[input]){
-        const tx=beneficiaries[input];
-        info.textContent=`Nom: ${tx.name}\nMomo: ${tx.momo}\nOM: ${tx.om}\nID: ${input}\nHeure: ${new Date(tx.time).toLocaleTimeString()}`;
-        if(Date.now()-tx.time<10*60000){
-            accessExpiration=Date.now() + amount*5*60/100;
-            currentDuration=amount*5/100;
-            status.textContent='✅ Paiement validé, téléchargement activé';
-            closePopup();
-            generatePDFFull(currentDoc);
-        } else {
-            status.textContent='❌ Transaction trop ancienne (>10min)';
-        }
+    const statusDiv = document.getElementById('paymentStatus');
+    if(valid){
+        currentDuration = multiplier*5; // minutes
+        accessExpiration = Date.now() + currentDuration*60000;
+        statusDiv.textContent = `✅ Paiement validé ! Accès ${currentDuration} min.`;
+        setTimeout(()=>{closePopup(); generatePDF(currentDoc);},500);
     } else {
-        status.textContent='❌ Transaction non trouvée';
+        statusDiv.textContent = `❌ Paiement invalide ou expiré`;
     }
 }
 
-// ===== Générer PDF complet avec html2canvas =====
-async function generatePDFFull(doc){
-    const { jsPDF } = window.jspdf;
-    const pdf=new jsPDF('p','mm','a4');
-    const docCard=document.querySelector(`.doc-card[data-doc="${doc}"]`);
-    const canvas=await html2canvas(docCard,{scale:2, useCORS:true});
-    const imgData=canvas.toDataURL('image/png');
-    
-    const pdfWidth=pdf.internal.pageSize.getWidth();
-    const pdfHeight=pdf.internal.pageSize.getHeight();
-    const ratio=Math.min(pdfWidth/canvas.width, pdfHeight/canvas.height);
-    const imgW=canvas.width*ratio;
-    const imgH=canvas.height*ratio;
+// ===== Génération PDF A4 complet =====
+async function generatePDF(doc){
+    const card = [...document.querySelectorAll('.doc-card')].find(c=>c.dataset.doc===doc);
+    if(!card) return;
 
-    pdf.addImage(imgData,'PNG',0,0,imgW,imgH);
+    // capture HTML complet du document
+    const canvas = await html2canvas(card, {scale:2});
+    const imgData = canvas.toDataURL('image/png');
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    // calcul ratio pour remplir page A4
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfRatio = Math.min(pageWidth/imgProps.width, pageHeight/imgProps.height);
+
+    const imgWidth = imgProps.width * pdfRatio;
+    const imgHeight = imgProps.height * pdfRatio;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
     pdf.save(`${doc}.pdf`);
 }
-
-// ===== Navigation =====
-const nav=document.getElementById('docNav');
-function scrollNext(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:w,behavior:'smooth'});}
-function scrollPrev(){const w=document.querySelector('.doc-card').offsetWidth+20;nav.scrollBy({left:-w,behavior:'smooth'});}
-function showAll(){nav.scrollTo({left:0,behavior:'smooth'});}
 </script>
 </body>
 </html>
