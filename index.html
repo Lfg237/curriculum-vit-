@@ -19,12 +19,32 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
 .main{background:rgba(255,255,255,0.85);padding:14px;border-radius:14px;min-height:80vh;}
 .doc-title{font-family:Dancing Script,cursive;font-size:22px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:28px;color:#2c3e50;}
-.doc-photo{width:120px;height:120px;object-fit:cover;border-radius:10px;margin-left:12px;border:3px solid white;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
+.doc-photo{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  border-radius:10px;
+  border:3px solid white;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  float:left; /* photo flottante */
+  margin-right:12px;
+  margin-bottom:12px;
+  cursor:pointer;
+}
 .signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;}
 .field{margin-bottom:8px;}
 .field label{display:block;font-size:13px;color:#555;margin-bottom:4px;}
-.field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #eee;}
-textarea{resize:vertical;}
+.field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{
+  width:100%;
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #eee;
+}
+textarea{
+  resize:none;
+  min-height:60px;
+  overflow-y:hidden;
+}
 .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;}
@@ -100,35 +120,6 @@ function openDoc(doc){
   initSignatures();
 }
 
-
-
-
-// --- Fiche entreprise ---
-function ficheHtml(){
-  let html=`<div class="field"><label>Nom entreprise</label><input type="text"></div>
-  <div class="field"><label>Nom signataire</label><input type="text"></div>
-  <div class="field">
-    <label>Signature</label>
-    <canvas id="sigFiche" width="300" height="80" class="signature-area"></canvas><br>
-    <button class="btn btn-ghost" onclick="clearSignature('sigFiche')">Effacer Signature</button>
-  </div>
-  <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
-  <table class="table" id="ficheTable"><tbody>`;
-  for(let i=0;i<70;i++){
-    if(i%35===0) html+=`<tr>`;
-    html+=`<td><input type="text" placeholder="Nom ${i+1}"></td>`;
-    if(i%35===34) html+=`</tr>`;
-  }
-  html+=`</tbody></table>
-  <button class="btn btn-ghost" onclick="addNom()">Ajouter Nom</button>
-  <button class="btn btn-ghost" onclick="removeNom()">Supprimer Nom</button>`;
-  return html;
-}
-
-
-
-
-
 // --- Générer HTML pour documents ---
 function generateDocHTML(doc){
   const sigId = 'sig'+doc;
@@ -137,9 +128,12 @@ function generateDocHTML(doc){
 
   return `
 <div style="display:flex;align-items:center;gap:12px;">
-  <button class="btn btn-primary" onclick="importPhoto('photo${doc}','img${doc}')">📸 Importer photo pour ${doc}</button>
+  <!-- input caché -->
   <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
-  <img id="img${doc}" class="doc-photo"/>
+  <!-- image cliquable -->
+  <label for="photo${doc}">
+    <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
+  </label>
 </div>
 <div class="field"><label>Texte</label><textarea rows="3"></textarea></div>
 ${sigCanvas}
@@ -156,10 +150,6 @@ function displayPhoto(inputId, imgId){
   }
 }
 
-function importPhoto(inputId, imgId){
-  document.getElementById(inputId).click();
-}
-
 // --- Effacer canvas ---
 function clearCanvas(id){
   const canvas=document.getElementById(id);
@@ -172,13 +162,10 @@ function initSignatures(){
     const ctx = c.getContext('2d'); 
     ctx.strokeStyle = '#000'; 
     ctx.lineWidth = 2;
-
-    // Signature par défaut
     ctx.font = "italic 20px 'Dancing Script', cursive"; 
     ctx.fillStyle = "#2c3e50";
     ctx.fillText("Créé par Lesfacilitateurs Middleman", 10, 50);
 
-    // Dessin manuel possible par-dessus
     let drawing=false;
     c.onmousedown = e => { drawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY); }
     c.onmousemove = e => { if(drawing){ ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); } }
@@ -243,6 +230,17 @@ function downloadPDF(){
     pdf.save(`${pendingDoc}.pdf`);
   });
 }
+
+// --- Auto resize textarea ---
+function autoResizeTextarea(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+document.addEventListener('input', function(e){
+  if(e.target.tagName.toLowerCase() === 'textarea'){
+    autoResizeTextarea(e.target);
+  }
+});
 </script>
 </body>
 </html>
