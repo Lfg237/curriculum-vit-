@@ -220,13 +220,28 @@ function validatePayment(){
 function downloadPDF(){
   if(!pendingDoc) return;
   const app = document.getElementById('app');
+
+  // Créer le PDF
+  const pdf = new jspdf.jsPDF('p','mm','a4');
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+
+  // Ajouter l'image via html2canvas
   html2canvas(app, {scale:2}).then(canvas=>{
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jspdf.jsPDF('p','mm','a4');
     const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
     pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+
+    // Ajouter texte multi-lignes des textarea
+    const textareas = app.querySelectorAll('textarea');
+    pdf.setFontSize(12);
+    let y = 10;
+    textareas.forEach(ta => {
+      const lines = pdf.splitTextToSize(ta.value, pdfWidth - 20);
+      pdf.text(10, y, lines);
+      y += lines.length * 6 + 5; // ajuster l'espacement
+    });
+
     pdf.save(`${pendingDoc}.pdf`);
   });
 }
