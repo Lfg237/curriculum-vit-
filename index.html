@@ -287,21 +287,6 @@ ${sigCanvas}
 <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
 }
 
-function initSignatures(){
-  document.querySelectorAll('canvas.signature-area').forEach(c=>{
-    const ctx = c.getContext('2d'); 
-    ctx.strokeStyle = '#000'; 
-    ctx.lineWidth = 2;
-    // ctx.font = "italic 20px 'Dancing Script', cursive"; 
-    // ctx.fillStyle = "#2c3e50";
-    // ctx.fillText("Créé par Lesfacilitateurs Middleman", 10, 50); // ❌ supprimer
-    let drawing=false;
-    c.onmousedown = e => { drawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY); }
-    c.onmousemove = e => { if(drawing){ ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); } }
-    c.onmouseup = () => drawing=false;
-    c.onmouseleave = () => drawing=false;
-  });
-}
 </script>
 </body>
 </html>
