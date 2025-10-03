@@ -256,6 +256,20 @@ document.addEventListener('input', function(e){
     autoResizeTextarea(e.target);
   }
 });
+function downloadPDF(){
+  if(!pendingDoc) return;
+  const app = document.getElementById('app');
+
+  const opt = {
+    margin:       10,
+    filename:     `${pendingDoc}.pdf`,
+    image:        { type: 'jpeg', quality: 1 },
+    html2canvas:  { scale: 3, letterRendering: true, logging: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'p' }
+  };
+
+  html2pdf().set(opt).from(app).save();
+}
 </script>
 </body>
 </html>
