@@ -100,6 +100,35 @@ function openDoc(doc){
   initSignatures();
 }
 
+
+
+
+// --- Fiche entreprise ---
+function ficheHtml(){
+  let html=`<div class="field"><label>Nom entreprise</label><input type="text"></div>
+  <div class="field"><label>Nom signataire</label><input type="text"></div>
+  <div class="field">
+    <label>Signature</label>
+    <canvas id="sigFiche" width="300" height="80" class="signature-area"></canvas><br>
+    <button class="btn btn-ghost" onclick="clearSignature('sigFiche')">Effacer Signature</button>
+  </div>
+  <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
+  <table class="table" id="ficheTable"><tbody>`;
+  for(let i=0;i<70;i++){
+    if(i%35===0) html+=`<tr>`;
+    html+=`<td><input type="text" placeholder="Nom ${i+1}"></td>`;
+    if(i%35===34) html+=`</tr>`;
+  }
+  html+=`</tbody></table>
+  <button class="btn btn-ghost" onclick="addNom()">Ajouter Nom</button>
+  <button class="btn btn-ghost" onclick="removeNom()">Supprimer Nom</button>`;
+  return html;
+}
+
+
+
+
+
 // --- Générer HTML pour documents ---
 function generateDocHTML(doc){
   const sigId = 'sig'+doc;
