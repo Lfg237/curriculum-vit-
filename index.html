@@ -26,7 +26,7 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
   border-radius:10px;
   border:3px solid white;
   box-shadow:0 6px 18px rgba(0,0,0,0.08);
-  float:left; /* photo flottante */
+  float:left; 
   margin-right:12px;
   margin-bottom:12px;
   cursor:pointer;
@@ -128,9 +128,7 @@ function generateDocHTML(doc){
 
   return `
 <div style="display:flex;align-items:center;gap:12px;">
-  <!-- input caché -->
   <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
-  <!-- image cliquable -->
   <label for="photo${doc}">
     <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
   </label>
@@ -187,7 +185,7 @@ function validatePayment(){
   if(vip === VIP_CODE) valid = true;
 
   if(msg){
-    const re = /MICHEL KONO\s*(\w*)\s*(\d+).*?Id:\s*(\d+).*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i;
+    const re = /MICHEL KONO\s*(\w*)\s*(\d+)\s*.*?Id:\s*(\d+).*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i;
     const m = msg.match(re);
     if(m){
       const [_,name,number,id,dt] = m;
@@ -219,51 +217,12 @@ function validatePayment(){
 // --- Télécharger PDF ---
 function downloadPDF(){
   if(!pendingDoc) return;
-  const pdf = new jspdf.jsPDF('p','mm','a4');
-  pdf.setFontSize(14);
-  
-  let y = 20;
-
-  // Texte multi-lignes depuis les textarea
-  const textareas = document.querySelectorAll('textarea');
-  textareas.forEach(ta => {
-    const lines = pdf.splitTextToSize(ta.value, 180); // 180 mm de largeur
-    pdf.text(10, y, lines);
-    y += lines.length * 6 + 5;
-  });
-
-  // Ajouter photos (facultatif)
-  function downloadPDF(){
-  if(!pendingDoc) return;
-
   const app = document.getElementById('app');
-  
-  // 1️⃣ Générer le rendu visuel avec html2canvas
-  html2canvas(app, {scale: 2}).then(canvas=>{
+  html2canvas(app, {scale:2}).then(canvas=>{
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jspdf.jsPDF('p','mm','a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-
-    // 2️⃣ Ajouter texte des textarea en texte natif par-dessus si besoin
-    const textareas = app.querySelectorAll('textarea');
-    pdf.setFontSize(12);
-    let y = 10;
-    textareas.forEach(ta => {
-      const lines = pdf.splitTextToSize(ta.value, pdfWidth - 20);
-      pdf.text(10, y, lines);
-      y += lines.length * 6 + 5;
-    });
-
-    pdf.save(`${pendingDoc}.pdf`);
-  });
-}
-  // Ajouter l'image via html2canvas
-  html2canvas(app, {scale:2}).then(canvas=>{
-    const imgData = canvas.toDataURL('image/png');
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
     pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
 
     // Ajouter texte multi-lignes des textarea
@@ -273,7 +232,7 @@ function downloadPDF(){
     textareas.forEach(ta => {
       const lines = pdf.splitTextToSize(ta.value, pdfWidth - 20);
       pdf.text(10, y, lines);
-      y += lines.length * 6 + 5; // ajuster l'espacement
+      y += lines.length * 6 + 5;
     });
 
     pdf.save(`${pendingDoc}.pdf`);
@@ -290,6 +249,43 @@ document.addEventListener('input', function(e){
     autoResizeTextarea(e.target);
   }
 });
+
+// --- Contenu par défaut pour les documents ---
+function generateDocHTML(doc){
+  const sigId = 'sig'+doc;
+  const sigCanvas = `<canvas id="${sigId}" class="signature-area" width="300" height="80"></canvas>
+                     <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
+  
+  let content = '';
+  switch(doc){
+    case 'CV':
+      content = `<div class="field"><label>Nom complet</label><textarea rows="2">John Doe</textarea></div>
+                 <div class="field"><label>Expérience</label><textarea rows="3">Développeur Web depuis 5 ans...</textarea></div>`;
+      break;
+    case 'LettreMotivation':
+      content = `<div class="field"><label>Objet</label><textarea rows="2">Candidature pour le poste...</textarea></div>
+                 <div class="field"><label>Texte</label><textarea rows="4">Je souhaite postuler car...</textarea></div>`;
+      break;
+    case 'CarteVisite':
+      content = `<div class="field"><label>Nom</label><textarea rows="1">John Doe</textarea></div>
+                 <div class="field"><label>Email</label><textarea rows="1">john@example.com</textarea></div>
+                 <div class="field"><label>Téléphone</label><textarea rows="1">+237 6XXXXXXX</textarea></div>`;
+      break;
+    default:
+      content = `<div class="field"><label>Texte</label><textarea rows="3">Votre contenu ici...</textarea></div>`;
+  }
+
+  return `
+<div style="display:flex;align-items:center;gap:12px;">
+  <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
+  <label for="photo${doc}">
+    <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
+  </label>
+</div>
+${content}
+${sigCanvas}
+<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
+}
 </script>
 </body>
 </html>
