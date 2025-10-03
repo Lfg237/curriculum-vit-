@@ -219,12 +219,46 @@ function validatePayment(){
 // --- Télécharger PDF ---
 function downloadPDF(){
   if(!pendingDoc) return;
-  const app = document.getElementById('app');
-
-  // Créer le PDF
   const pdf = new jspdf.jsPDF('p','mm','a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth();
+  pdf.setFontSize(14);
+  
+  let y = 20;
 
+  // Texte multi-lignes depuis les textarea
+  const textareas = document.querySelectorAll('textarea');
+  textareas.forEach(ta => {
+    const lines = pdf.splitTextToSize(ta.value, 180); // 180 mm de largeur
+    pdf.text(10, y, lines);
+    y += lines.length * 6 + 5;
+  });
+
+  // Ajouter photos (facultatif)
+  function downloadPDF(){
+  if(!pendingDoc) return;
+
+  const app = document.getElementById('app');
+  
+  // 1️⃣ Générer le rendu visuel avec html2canvas
+  html2canvas(app, {scale: 2}).then(canvas=>{
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jspdf.jsPDF('p','mm','a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+
+    // 2️⃣ Ajouter texte des textarea en texte natif par-dessus si besoin
+    const textareas = app.querySelectorAll('textarea');
+    pdf.setFontSize(12);
+    let y = 10;
+    textareas.forEach(ta => {
+      const lines = pdf.splitTextToSize(ta.value, pdfWidth - 20);
+      pdf.text(10, y, lines);
+      y += lines.length * 6 + 5;
+    });
+
+    pdf.save(`${pendingDoc}.pdf`);
+  });
+}
   // Ajouter l'image via html2canvas
   html2canvas(app, {scale:2}).then(canvas=>{
     const imgData = canvas.toDataURL('image/png');
@@ -256,20 +290,6 @@ document.addEventListener('input', function(e){
     autoResizeTextarea(e.target);
   }
 });
-function downloadPDF(){
-  if(!pendingDoc) return;
-  const app = document.getElementById('app');
-
-  const opt = {
-    margin:       10,
-    filename:     `${pendingDoc}.pdf`,
-    image:        { type: 'jpeg', quality: 1 },
-    html2canvas:  { scale: 3, letterRendering: true, logging: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'p' }
-  };
-
-  html2pdf().set(opt).from(app).save();
-}
 </script>
 </body>
 </html>
