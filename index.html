@@ -1,42 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mini Secrétariat Bureautique Complet</title>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>Mini Secrétariat Complet - Signatures</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg1:#ffefd5;--bg2:#ffe4f0;--accent:#ff6b6b;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#222;}
-.header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#222;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,0.06);}
 .brand{display:flex;align-items:center;gap:12px;}
-.brand .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(45deg,#ff9a9e,#fad0c4);display:flex;justify-content:center;align-items:center;font-size:28px;}
-.brand h1{font-family:'Dancing Script',cursive;font-size:20px;color:var(--accent);}
-.navbar{overflow:auto;white-space:nowrap;padding:10px;background:rgba(255,255,255,0.4);backdrop-filter:blur(6px);}
+.brand .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(45deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.brand h1{font-family:Dancing Script,cursive;margin:0;font-size:20px;color:var(--accent);}
+.navbar{overflow:auto;white-space:nowrap;padding:10px;}
 .navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;}
 .container{padding:18px;display:grid;grid-template-columns:1fr;gap:18px;}
-.main{background:rgba(255,255,255,0.85);padding:14px;border-radius:14px;min-height:80vh;overflow:auto;}
-.doc-title{font-family:'Dancing Script',cursive;font-size:22px;margin:6px 0;}
+.main{background:rgba(255,255,255,0.85);padding:14px;border-radius:14px;min-height:80vh;}
+.doc-title{font-family:Dancing Script,cursive;font-size:22px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:28px;color:#2c3e50;}
 .doc-photo{width:120px;height:120px;object-fit:cover;border-radius:10px;margin-left:12px;border:3px solid white;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
-.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin:10px 0;}
+.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;}
 .field{margin-bottom:8px;}
 .field label{display:block;font-size:13px;color:#555;margin-bottom:4px;}
 .field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #eee;}
 textarea{resize:vertical;}
 .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
-.btn-ghost{background:transparent;border:1px solid #ddd;}
-#galleryList{display:flex;flex-wrap:wrap;margin-top:8px;}
-.gallery-thumb{width:80px;height:80px;object-fit:cover;border-radius:8px;margin:4px;position:relative;}
-.gallery-comment{font-size:12px;color:#333;}
+.btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;}
 #paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:680px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
-.fiche-columns{display:flex;gap:20px;}
-.fiche-column{flex:1;max-height:400px;overflow:auto;}
-.fiche-column .field{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 </style>
 </head>
 <body>
@@ -44,8 +38,9 @@ textarea{resize:vertical;}
 <header class="header">
   <div class="brand">
     <div class="logo">LF</div>
-    <h1>Mini Secrétariat</h1>
+    <h1>Mini Secrétariat — LesFacilitateurs</h1>
   </div>
+  <div class="small">✨ Moderne • Coloré • Export PDF/Image</div>
 </header>
 
 <nav class="navbar" id="mainNav"></nav>
@@ -65,10 +60,10 @@ textarea{resize:vertical;}
         <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly/>
         <input id="mmBen2" type="text" value="OM 640647072" readonly style="margin-top:4px"/>
         <label>Message de transaction</label>
-        <input id="mmMsg" type="text" placeholder="Ex: #TX123456"/>
+        <input id="mmMsg" type="text" placeholder="Ex: Vous avez recu ..."/>
       </div>
       <div style="margin-top:8px">
-        <h4>Code d'accès VIP</h4>
+        <h4>Accès VIP</h4>
         <input id="vipInput" type="text" placeholder="Entrez votre code VIP"/>
       </div>
       <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="validatePayment()">Valider paiement / VIP</button>
@@ -80,157 +75,145 @@ textarea{resize:vertical;}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-// --- Documents ---
-const documents=['Galerie','Fiche entreprise'];
-const nav=document.getElementById('mainNav');
+// --- Variables ---
+const documents = ['CV','CarteVisite','LettreMotivation','Plan','Fiche','Galerie','Protocole','Contrat','Facture','Devis'];
+const nav = document.getElementById('mainNav');
+let pendingDoc = null;
+let mmHistory = [];
+const VIP_CODE = '233233';
+
+// --- Créer boutons ---
 documents.forEach(doc=>{
-  const btn=document.createElement('button');
-  btn.textContent=doc;
-  btn.onclick=()=>openDoc(doc);
+  const btn = document.createElement('button');
+  btn.textContent = doc.replace(/([A-Z])/g," $1").trim();
+  btn.onclick = ()=>openDoc(doc);
   nav.appendChild(btn);
 });
 
-let pendingDoc=null;
-
 // --- Ouvrir document ---
 function openDoc(doc){
-  const app=document.getElementById('app');
   pendingDoc=doc;
-  let html=`<h2 class="doc-title handwritten">${doc}</h2>`;
-  if(doc==='Galerie') html+=galerieHtml();
-  if(doc==='Fiche entreprise') html+=ficheHtml();
-  app.innerHTML=html;
+  const app=document.getElementById('app');
+  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>` + generateDocHTML(doc);
   initSignatures();
 }
 
-// --- Signatures ---
-function initSignatures(){
-  document.querySelectorAll('canvas.signature-area').forEach(c=>enableSignatureCanvas(c.id));
-}
+// --- Générer HTML pour documents ---
+function generateDocHTML(doc){
+  const sigId = 'sig'+doc;
+  const sigCanvas = `<canvas id="${sigId}" class="signature-area" width="300" height="80"></canvas>
+                     <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
 
-function enableSignatureCanvas(id){
-  const canvas = document.getElementById(id);
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#000";
-
-  let drawing = false;
-
-  // Bloquer le scroll sur mobile
-  canvas.addEventListener('touchstart', e => e.preventDefault());
-  canvas.addEventListener('touchmove', e => e.preventDefault());
-
-  const startDraw = (x, y) => { drawing = true; ctx.beginPath(); ctx.moveTo(x, y); };
-  const draw = (x, y) => { if(drawing){ ctx.lineTo(x, y); ctx.stroke(); } };
-  const stopDraw = () => { drawing = false; };
-
-  canvas.addEventListener('mousedown', e => startDraw(e.offsetX, e.offsetY));
-  canvas.addEventListener('mousemove', e => draw(e.offsetX, e.offsetY));
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('mouseleave', stopDraw);
-
-  // Mobile support
-  canvas.addEventListener('touchstart', e => {
-    const rect = canvas.getBoundingClientRect();
-    startDraw(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-  });
-  canvas.addEventListener('touchmove', e => {
-    const rect = canvas.getBoundingClientRect();
-    draw(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-  });
-  canvas.addEventListener('touchend', stopDraw);
-}
-
-// --- Galerie ---
-function galerieHtml(){ return `
-<input type="file" id="galPhoto" accept="image/*" multiple onchange="importGallery(this)">
-<div id="galleryList"></div>
-<canvas id="sigGalerie" width="300" height="80" class="signature-area"></canvas>
-<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
-`;}
-function importGallery(input){
-  const list=document.getElementById('galleryList');
-  Array.from(input.files).forEach(file=>{
-    const url=URL.createObjectURL(file);
-    const div=document.createElement('div');
-    div.className='gallery-thumb';
-    div.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;"><textarea placeholder="Commentaire" class="gallery-comment"></textarea>`;
-    list.appendChild(div);
-  });
-}
-
-// --- Fiche entreprise ---
-let maxNames=35;
-let col1=[],col2=[];
-for(let i=0;i<maxNames;i++){col1.push('');col2.push('');}
-function ficheHtml(){ return `
-<div class="field"><label>Nom de l'entreprise</label><input type="text" id="nomEntreprise"></div>
-<div class="field"><label>Nom du signataire</label><input type="text" id="nomSignataire"></div>
-<div class="fiche-columns">
-  <div class="fiche-column" id="col1"></div>
-  <div class="fiche-column" id="col2"></div>
+  return `
+<div style="display:flex;align-items:center;gap:12px;">
+  <button class="btn btn-primary" onclick="importPhoto('photo${doc}','img${doc}')">📸 Importer photo pour ${doc}</button>
+  <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
+  <img id="img${doc}" class="doc-photo"/>
 </div>
-<button class="btn btn-primary" onclick="addName(1)">Ajouter nom Col1</button>
-<button class="btn btn-primary" onclick="addName(2)">Ajouter nom Col2</button>
-<canvas id="sigFiche" width="300" height="80" class="signature-area"></canvas>
-<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
-`;}
-function renderColumns(){
-  const c1=document.getElementById('col1'); const c2=document.getElementById('col2');
-  if(!c1 || !c2) return;
-  c1.innerHTML=''; c2.innerHTML='';
-  col1.forEach((n,i)=>{c1.innerHTML+=`<div class="field"><input type="text" value="${n}" onchange="col1[${i}]=this.value"><button onclick="removeName(1,${i})">Supprimer</button></div>`;});
-  col2.forEach((n,i)=>{c2.innerHTML+=`<div class="field"><input type="text" value="${n}" onchange="col2[${i}]=this.value"><button onclick="removeName(2,${i})">Supprimer</button></div>`;});
+<div class="field"><label>Texte</label><textarea rows="3"></textarea></div>
+${sigCanvas}
+<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
 }
-function addName(col){ if(col===1 && col1.length<maxNames) col1.push(''); if(col===2 && col2.length<maxNames) col2.push(''); renderColumns(); }
-function removeName(col,i){ if(col===1) col1.splice(i,1); else col2.splice(i,1); renderColumns(); }
-renderColumns();
 
-// --- Popup paiement ---
+// --- Importer photo depuis le téléphone ---
+function displayPhoto(inputId, imgId){
+  const file = document.getElementById(inputId).files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = e => document.getElementById(imgId).src = e.target.result;
+    reader.readAsDataURL(file);
+  }
+}
+
+function importPhoto(inputId, imgId){
+  document.getElementById(inputId).click();
+}
+
+// --- Effacer canvas ---
+function clearCanvas(id){
+  const canvas=document.getElementById(id);
+  if(canvas){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);}
+}
+
+// --- Initialiser signatures ---
+function initSignatures(){
+  document.querySelectorAll('canvas.signature-area').forEach(c=>{
+    const ctx = c.getContext('2d'); 
+    ctx.strokeStyle = '#000'; 
+    ctx.lineWidth = 2;
+
+    // Signature par défaut
+    ctx.font = "italic 20px 'Dancing Script', cursive"; 
+    ctx.fillStyle = "#2c3e50";
+    ctx.fillText("Créé par Lesfacilitateurs Middleman", 10, 50);
+
+    // Dessin manuel possible par-dessus
+    let drawing=false;
+    c.onmousedown = e => { drawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY); }
+    c.onmousemove = e => { if(drawing){ ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); } }
+    c.onmouseup = () => drawing=false;
+    c.onmouseleave = () => drawing=false;
+  });
+}
+
+// --- Paiement ---
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
+function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
 
-function closePaymentModal(){document.getElementById('paymentModal').style.display='none';document.getElementById('pmMsg').textContent='';}
-
+// --- Validation paiement / VIP ---
 function validatePayment(){
-  const msg=document.getElementById('mmMsg').value.trim();
-  const vip=document.getElementById('vipInput').value.trim();
+  const msg = document.getElementById('mmMsg').value.trim();
+  const vip = document.getElementById('vipInput').value.trim();
+  let valid=false;
 
-  if(vip==='233233'){downloadPDF();return;}
-  if(!msg){alert("Message requis");return;}
+  if(vip === VIP_CODE) valid = true;
 
-  const regex=/Vous avez recu (\d+) XAF de ([A-Z\s]+) ([0-9]+).*Financial Transaction Id: (\d+)/i;
-  const match=msg.match(regex);
-  if(!match){alert("Message invalide !");return;}
-  const montant=parseInt(match[1]);
-  const nom=match[2].trim();
-  const numero=match[3];
-  const txID=match[4];
+  if(msg){
+    const re = /MICHEL KONO\s*(\w*)\s*(\d+).*?Id:\s*(\d+).*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i;
+    const m = msg.match(re);
+    if(m){
+      const [_,name,number,id,dt] = m;
+      const dateTx = new Date(dt);
+      const now = new Date();
+      const diffMin = (now - dateTx)/60000;
+      if(!mmHistory.includes(id) && diffMin <= 10){
+        mmHistory.push(id);
+        valid = true;
+      } else {
+        document.getElementById('pmMsg').innerText = "Transaction invalide ou doublon/délai dépassé.";
+        return;
+      }
+    } else {
+      document.getElementById('pmMsg').innerText = "Format message incorrect.";
+      return;
+    }
+  }
 
-  // Date & heure pas implémentée pour simplifier, à ajouter si nécessaire
-  if(transactionsValides.has(txID)){alert("Transaction déjà utilisée !");return;}
-  transactionsValides.add(txID);
-  multiplicateur=Math.floor(montant/100);
-  compteur=Date.now()+multiplicateur*tempsPar100XAF;
-  alert(`Paiement validé pour ${nom} (${numero}) - ${montant} XAF`);
-  downloadPDF();
+  if(valid){
+    document.getElementById('pmMsg').innerText = "Paiement / VIP validé !";
+    closePaymentModal();
+    downloadPDF();
+  } else {
+    document.getElementById('pmMsg').innerText = "Paiement non validé.";
+  }
 }
 
 // --- Télécharger PDF ---
 function downloadPDF(){
-  const app=document.getElementById('app');
-  html2canvas(app).then(canvas=>{
-    const imgData=canvas.toDataURL('image/png');
-    const pdf=new jspdf.jsPDF();
-    const width=pdf.internal.pageSize.getWidth();
-    const height=pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData,'PNG',0,0,width,height);
-    pdf.save(pendingDoc+'.pdf');
-    closePaymentModal();
+  if(!pendingDoc) return;
+  const app = document.getElementById('app');
+  html2canvas(app, {scale:2}).then(canvas=>{
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jspdf.jsPDF('p','mm','a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.save(`${pendingDoc}.pdf`);
   });
 }
 </script>
-
 </body>
 </html>
