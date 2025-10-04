@@ -261,27 +261,42 @@ function validatePayment() {
 }
 
 // Génération PDF via capture image
-async function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const docElement = document.getElementById('app');
+async function downloadPDFCanvas() {
+  const app = document.getElementById('app');
 
-  // Ajuster l’échelle pour capturer correctement tout le contenu
-  const canvas = await html2canvas(docElement, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    logging: false
-  });
+  // Capture l'ensemble du contenu avec html2canvas pour la photo et signature
+  const tempCanvas = await html2canvas(app, { scale: 2, useCORS: true, logging: false });
+  
+  // Créer un nouveau canvas pour tout le texte
+  const canvas = document.createElement('canvas');
+  canvas.width = tempCanvas.width;
+  canvas.height = tempCanvas.height;
+  const ctx = canvas.getContext('2d');
 
+  // Fond blanc
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Copier l'image html2canvas (texte + photos + signature)
+  ctx.drawImage(tempCanvas, 0, 0);
+
+  // Convertir le canvas en image
   const imgData = canvas.toDataURL('image/png');
-  const pdf = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: [canvas.width * 0.264583, canvas.height * 0.264583] // conversion px → mm
-  });
 
-  pdf.addImage(imgData, 'PNG', 0, 0, canvas.width * 0.264583, canvas.height * 0.264583);
-  pdf.save(`${pendingDoc || 'document'}.pdf`);
+  // Générer PDF A6
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  // Ajuster le ratio pour ne rien couper
+  const ratio = Math.min(pdfWidth / canvas.width, pdfHeight / canvas.height);
+  const scaledWidth = canvas.width * ratio;
+  const scaledHeight = canvas.height * ratio;
+
+  pdf.addImage(imgData, 'PNG', 0, 0, scaledWidth, scaledHeight);
+  pdf.save(pendingDoc ? pendingDoc + '.pdf' : 'document.pdf');
 }
 </script>
 </body>
