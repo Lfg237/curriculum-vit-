@@ -214,15 +214,27 @@ function validatePayment(){
 // Export PDF A6
 async function downloadPDF(){
   const app=document.getElementById('app');
+
+  // Sauvegarder la hauteur originale
+  const originalHeight = app.style.height;
+  app.style.height = 'auto'; // Permet à tout le texte de s'afficher
+  app.style.overflow = 'visible'; // Désactive le scroll temporairement
+
   const { jsPDF } = window.jspdf;
   const pdf=new jsPDF({format:'a6',unit:'mm'});
+
   await html2canvas(app,{scale:2}).then(canvas=>{
     const imgData=canvas.toDataURL('image/png');
     const imgProps=pdf.getImageProperties(imgData);
-    const pdfWidth=105; // A6 width in mm
+    const pdfWidth=105; // A6 width en mm
     const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
     pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
   });
+
+  // Revenir à la taille normale
+  app.style.height = originalHeight;
+  app.style.overflowY = 'auto';
+
   pdf.save(pendingDoc+'.pdf');
 }
 </script>
