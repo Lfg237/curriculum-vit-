@@ -197,101 +197,33 @@ function makeTextareasFlexible(){
   });
 }
 
-// Paiement
-function requestPayment() {
-  // Affiche la modale de paiement
-  document.getElementById('paymentModal').style.display = 'flex';
-}
-
-// Fermer la modale
-function closePaymentModal() {
-  document.getElementById('paymentModal').style.display = 'none';
-}
-
-// Validation du paiement ou code VIP
-function validatePayment() {
+// Paiement et PDF
+function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
+function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
+function validatePayment(){
   const msg = document.getElementById('mmMsg').value.trim();
   const vip = document.getElementById('vipInput').value.trim();
+  const pmMsg = document.getElementById('pmMsg');
   let valid = false;
 
-  if (vip === VIP_CODE) valid = true; // Code VIP correct
-  if (msg) valid = true;              // Message de transaction renseigné
-
-  if (valid) {
-    document.getElementById('pmMsg').innerText = "Paiement / VIP validé !";
-    closePaymentModal();
-    downloadPDF(); // Lance le téléchargement PDF
-  } else {
-    document.getElementById('pmMsg').innerText = "Paiement non validé.";
-  }
-}
-
-// Export PDF via capture d'image pour garder toutes les lignes et la signature
-async function downloadPDF() {
-  const app = document.getElementById('app');
-  // Capture l'élément complet en image
-  const canvas = await html2canvas(app, { scale: 2, useCORS: true, logging: false });
-  const imgData = canvas.toDataURL('image/png');
-
-  // Créer PDF A6
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a6'
-  });
-
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-
-  // Ajuster l'image au PDF
-  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-  pdf.save(pendingDoc ? pendingDoc + '.pdf' : 'document.pdf');
-}
-
-function validatePayment() {
-  const msg = document.getElementById('mmMsg').value.trim();
-  const vip = document.getElementById('vipInput').value.trim();
-  if (vip === VIP_CODE || msg.length > 0) {
-    document.getElementById('paymentModal').style.display = 'none';
-    generatePDF();
-  } else {
-    document.getElementById('pmMsg').textContent = 'Code VIP ou message de transaction requis.';
-  }
-}
-
-// Génération PDF via capture image
-function requestPayment() {
-  document.getElementById('paymentModal').style.display = 'flex';
-}
-
-function closePaymentModal() {
-  document.getElementById('paymentModal').style.display = 'none';
-}
-
-function validatePayment() {
-  const msg = document.getElementById('mmMsg').value.trim();
-  const vip = document.getElementById('vipInput').value.trim();
-  let valid = false;
   if(vip === VIP_CODE) valid = true;
   if(msg) valid = true;
 
-  const pmMsg = document.getElementById('pmMsg');
   if(valid){
     pmMsg.innerText = "Paiement / VIP validé !";
     closePaymentModal();
-    downloadPDFCanvas(); // <-- ici on appelle le PDF
+    downloadPDFCanvas();
   } else {
     pmMsg.innerText = "Paiement non validé.";
   }
 }
 
+// Génération PDF via capture canvas
 async function downloadPDFCanvas() {
   const app = document.getElementById('app');
-  
-  // Capture tout le contenu du document en image
+
+  // Capture tout le contenu en image
   const canvasCapture = await html2canvas(app, { scale: 2, useCORS: true, logging: false });
-  
   const imgData = canvasCapture.toDataURL('image/png');
 
   const { jsPDF } = window.jspdf;
