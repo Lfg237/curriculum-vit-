@@ -16,7 +16,12 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
 .navbar{overflow:auto;white-space:nowrap;padding:10px;}
 .navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;}
 .container{padding:18px;display:grid;grid-template-columns:1fr;gap:18px;}
-.main{background:rgba(255,255,255,0.85);padding:14px;border-radius:14px;min-height:80vh;}
+.main{
+  background:rgba(255,255,255,0.85);
+  padding:14px;
+  border-radius:14px;
+  min-height:80vh;
+}
 .doc-title{font-family:Dancing Script,cursive;font-size:22px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:28px;color:#2c3e50;}
 .doc-photo{
@@ -31,7 +36,7 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
   margin-bottom:12px;
   cursor:pointer;
 }
-.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;}
+.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:50px;}
 .field{margin-bottom:8px;}
 .field label{display:block;font-size:13px;color:#555;margin-bottom:4px;}
 .field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{
@@ -41,9 +46,14 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
   border:1px solid #eee;
 }
 textarea{
-  resize:none;
+  width:100%;
   min-height:60px;
+  resize:none;
   overflow-y:hidden;
+  font-size:14px;
+  line-height:1.5;
+  padding:6px;
+  box-sizing:border-box;
 }
 .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
@@ -51,16 +61,6 @@ textarea{
 #paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:680px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
-  textarea {
-  width: 100%;          /* prendre toute la largeur du conteneur */
-  min-height: 60px;     /* hauteur minimale */
-  resize: none;         /* empêcher le redimensionnement manuel */
-  overflow-y: hidden;   /* cacher la barre de défilement */
-  font-size: 14px;      /* taille lisible */
-  line-height: 1.5;     /* espace entre les lignes */
-  padding: 6px;
-  box-sizing: border-box;
-}
 </style>
 </head>
 <body>
@@ -107,14 +107,13 @@ textarea{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// --- Variables ---
 const documents = ['CV','CarteVisite','LettreMotivation','Plan','Fiche','Galerie','Protocole','Contrat','Facture','Devis'];
 const nav = document.getElementById('mainNav');
 let pendingDoc = null;
 let mmHistory = [];
 const VIP_CODE = '233233';
 
-// --- Créer boutons ---
+// Créer boutons pour tous les documents
 documents.forEach(doc=>{
   const btn = document.createElement('button');
   btn.textContent = doc.replace(/([A-Z])/g," $1").trim();
@@ -122,7 +121,7 @@ documents.forEach(doc=>{
   nav.appendChild(btn);
 });
 
-// --- Ouvrir document ---
+// Ouvrir document
 function openDoc(doc){
   pendingDoc=doc;
   const app=document.getElementById('app');
@@ -130,212 +129,28 @@ function openDoc(doc){
   initSignatures();
 }
 
-// --- Générer HTML pour documents ---
+// Générer HTML pour chaque document
 function generateDocHTML(doc){
   const sigId = 'sig'+doc;
-  const sigCanvas = `<canvas id="${sigId}" class="signature-area" width="300" height="80"></canvas>
+  const sigCanvas = `<canvas id="${sigId}" class="signature-area"></canvas>
                      <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
-
-  return `
-<div style="display:flex;align-items:center;gap:12px;">
-  <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
-  <label for="photo${doc}">
-    <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
-  </label>
-</div>
-<div class="field"><label>Texte</label><textarea rows="3"></textarea></div>
-${sigCanvas}
-<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
-}
-
-// --- Importer photo depuis le téléphone ---
-function displayPhoto(inputId, imgId){
-  const file = document.getElementById(inputId).files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = e => document.getElementById(imgId).src = e.target.result;
-    reader.readAsDataURL(file);
-  }
-}
-
-// --- Effacer canvas ---
-function clearCanvas(id){
-  const canvas=document.getElementById(id);
-  if(canvas){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);}
-}
-
-// --- Initialiser signatures ---
-function initSignatures() {
-  document.querySelectorAll('canvas.signature-area').forEach(c => {
-    const ctx = c.getContext('2d');
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    let drawing = false;
-
-    // Fonction pour obtenir les coordonnées selon l'appareil (souris ou doigt)
-    function getPos(e) {
-      const rect = c.getBoundingClientRect();
-      if (e.touches && e.touches[0]) {
-        return {
-          x: e.touches[0].clientX - rect.left,
-          y: e.touches[0].clientY - rect.top
-        };
-      } else {
-        return {
-          x: e.offsetX ?? e.clientX - rect.left,
-          y: e.offsetY ?? e.clientY - rect.top
-        };
-      }
-    }
-
-    // Démarrer le dessin
-    function startDraw(e) {
-      e.preventDefault();
-      drawing = true;
-      const pos = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-    }
-
-    // Continuer à dessiner
-    function draw(e) {
-      if (!drawing) return;
-      e.preventDefault();
-      const pos = getPos(e);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    }
-
-    // Arrêter le dessin
-    function stopDraw(e) {
-      if (!drawing) return;
-      e.preventDefault();
-      drawing = false;
-    }
-
-    // Support universel : souris + tactile
-    c.addEventListener('mousedown', startDraw);
-    c.addEventListener('mousemove', draw);
-    c.addEventListener('mouseup', stopDraw);
-    c.addEventListener('mouseleave', stopDraw);
-
-    c.addEventListener('touchstart', startDraw);
-    c.addEventListener('touchmove', draw);
-    c.addEventListener('touchend', stopDraw);
-  });
-}
-
-
-
-// --- Paiement ---
-function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
-function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
-
-// --- Validation paiement / VIP ---
-function validatePayment(){
-  const msg = document.getElementById('mmMsg').value.trim();
-  const vip = document.getElementById('vipInput').value.trim();
-  let valid=false;
-
-  if(vip === VIP_CODE) valid = true;
-
-  if(msg){
-    const re = /MICHEL KONO\s*(\w*)\s*(\d+)\s*.*?Id:\s*(\d+).*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i;
-    const m = msg.match(re);
-    if(m){
-      const [_,name,number,id,dt] = m;
-      const dateTx = new Date(dt);
-      const now = new Date();
-      const diffMin = (now - dateTx)/60000;
-      if(!mmHistory.includes(id) && diffMin <= 10){
-        mmHistory.push(id);
-        valid = true;
-      } else {
-        document.getElementById('pmMsg').innerText = "Transaction invalide ou doublon/délai dépassé.";
-        return;
-      }
-    } else {
-      document.getElementById('pmMsg').innerText = "Format message incorrect.";
-      return;
-    }
-  }
-
-  if(valid){
-    document.getElementById('pmMsg').innerText = "Paiement / VIP validé !";
-    closePaymentModal();
-    downloadPDF();
-  } else {
-    document.getElementById('pmMsg').innerText = "Paiement non validé.";
-  }
-}
-
-// --- Télécharger PDF ---
-function downloadPDF() {
-  if (!pendingDoc) return;
-  const app = document.getElementById('app');
-
-  // 1️⃣ Sauvegarder les canvases sous forme d'image avant la capture
-  const canvases = app.querySelectorAll('canvas.signature-area');
-  const tempImages = [];
-  canvases.forEach(c => {
-    const img = document.createElement('img');
-    img.src = c.toDataURL('image/png');
-    img.style.width = c.style.width || c.width + 'px';
-    img.style.height = c.style.height || c.height + 'px';
-    img.style.border = c.style.border;
-    img.className = c.className;
-    c.replaceWith(img);
-    tempImages.push({ canvas: c, image: img });
-  });
-
-  // 2️⃣ Capturer le contenu
-  html2canvas(app, { scale: 2 }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-    // Ajouter les textes des textarea
-    const textareas = app.querySelectorAll('textarea');
-    pdf.setFontSize(12);
-    let y = 10;
-    textareas.forEach(ta => {
-      const lines = pdf.splitTextToSize(ta.value, pdfWidth - 20);
-      pdf.text(10, y, lines);
-      y += lines.length * 6 + 5;
-    });
-
-    // 3️⃣ Restaurer les canvases (pour ne pas perdre les signatures dans la page)
-    tempImages.forEach(({ canvas, image }) => image.replaceWith(canvas));
-
-    pdf.save(`${pendingDoc}.pdf`);
-  });
-}
-
-// --- Contenu par défaut pour les documents ---
-function generateDocHTML(doc){
-  const sigId = 'sig'+doc;
-  const sigCanvas = `<canvas id="${sigId}" class="signature-area" width="300" height="80"></canvas>
-                     <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
-  
-  let content = '';
+  let content='';
   switch(doc){
     case 'CV':
-      content = `<div class="field"><label>Nom complet</label><textarea rows="2">John Doe</textarea></div>
-                 <div class="field"><label>Expérience</label><textarea rows="3">Développeur Web depuis 5 ans...</textarea></div>`;
+      content=`<div class="field"><label>Nom complet</label><textarea>John Doe</textarea></div>
+               <div class="field"><label>Expérience</label><textarea>Développeur Web depuis 5 ans...</textarea></div>`;
       break;
     case 'LettreMotivation':
-      content = `<div class="field"><label>Objet</label><textarea rows="2">Candidature pour le poste...</textarea></div>
-                 <div class="field"><label>Texte</label><textarea rows="4">Je souhaite postuler car...</textarea></div>`;
+      content=`<div class="field"><label>Objet</label><textarea>Candidature pour le poste...</textarea></div>
+               <div class="field"><label>Texte</label><textarea>Je souhaite postuler car...</textarea></div>`;
       break;
     case 'CarteVisite':
-      content = `<div class="field"><label>Nom</label><textarea rows="1">John Doe</textarea></div>
-                 <div class="field"><label>Email</label><textarea rows="1">john@example.com</textarea></div>
-                 <div class="field"><label>Téléphone</label><textarea rows="1">+237 6XXXXXXX</textarea></div>`;
+      content=`<div class="field"><label>Nom</label><textarea>John Doe</textarea></div>
+               <div class="field"><label>Email</label><textarea>john@example.com</textarea></div>
+               <div class="field"><label>Téléphone</label><textarea>+237 6XXXXXXX</textarea></div>`;
       break;
     default:
-      content = `<div class="field"><label>Texte</label><textarea rows="3">Votre contenu ici...</textarea></div>`;
+      content=`<div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div>`;
   }
 
   return `
@@ -349,16 +164,106 @@ ${content}
 ${sigCanvas}
 <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
 }
-function autoResizeTextarea(textarea) {
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
+
+// Initialiser signatures
+function initSignatures(){
+  document.querySelectorAll('canvas.signature-area').forEach(c=>{
+    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=2;
+    let drawing=false;
+    function getPos(e){
+      const rect=c.getBoundingClientRect();
+      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top};
+      return {x:e.offsetX ?? e.clientX-rect.left, y:e.offsetY ?? e.clientY-rect.top};
+    }
+    function startDraw(e){ e.preventDefault(); drawing=true; const pos=getPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);}
+    function draw(e){ if(!drawing) return; e.preventDefault(); const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke();}
+    function stopDraw(e){ if(!drawing) return; e.preventDefault(); drawing=false;}
+    c.addEventListener('mousedown',startDraw); c.addEventListener('mousemove',draw);
+    c.addEventListener('mouseup',stopDraw); c.addEventListener('mouseleave',stopDraw);
+    c.addEventListener('touchstart',startDraw); c.addEventListener('touchmove',draw); c.addEventListener('touchend',stopDraw);
+  });
 }
 
-document.addEventListener('input', function(e) {
-  if(e.target.tagName.toLowerCase() === 'textarea') {
-    autoResizeTextarea(e.target);
+// Effacer canvas
+function clearCanvas(id){ const canvas=document.getElementById(id); if(canvas){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);} }
+
+// Paiement
+function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
+function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
+function validatePayment(){
+  const msg=document.getElementById('mmMsg').value.trim();
+  const vip=document.getElementById('vipInput').value.trim();
+  let valid=false;
+  if(vip===VIP_CODE) valid=true;
+  if(msg){
+    const re=/MICHEL KONO\s*(\w*)\s*(\d+)\s*.*?Id:\s*(\d+).*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i;
+    const m=msg.match(re);
+    if(m){
+      const [_,name,number,id,dt]=m; const dateTx=new Date(dt); const now=new Date();
+      const diffMin=(now-dateTx)/60000;
+      if(!mmHistory.includes(id) && diffMin<=10){mmHistory.push(id); valid=true;} 
+      else { document.getElementById('pmMsg').innerText="Transaction invalide ou doublon/délai dépassé."; return; }
+    } else { document.getElementById('pmMsg').innerText="Format message incorrect."; return; }
   }
-});
+  if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadPDF();} 
+  else {document.getElementById('pmMsg').innerText="Paiement non validé.";}
+}
+
+// Télécharger PDF A5 pour tous les documents
+function downloadPDF(){
+  if(!pendingDoc) return;
+  const app=document.getElementById('app');
+  const tempDiv=app.cloneNode(true);
+  tempDiv.style.width='148mm';
+  tempDiv.style.minHeight='210mm';
+  tempDiv.style.padding='10mm';
+  tempDiv.style.background='white';
+  tempDiv.style.boxSizing='border-box';
+  tempDiv.style.position='absolute';
+  tempDiv.style.top='-9999px';
+  document.body.appendChild(tempDiv);
+
+  // Convertir canvas en image
+  const canvases=tempDiv.querySelectorAll('canvas.signature-area');
+  canvases.forEach(c=>{
+    const img=document.createElement('img');
+    img.src=c.toDataURL('image/png');
+    img.style.width=c.style.width || c.width+'px';
+    img.style.height=c.style.height || c.height+'px';
+    c.replaceWith(img);
+  });
+
+  html2canvas(tempDiv,{scale:2}).then(canvas=>{
+    const imgData=canvas.toDataURL('image/png');
+    const pdf=new jspdf.jsPDF('p','mm','a5');
+    const pdfWidth=pdf.internal.pageSize.getWidth();
+    const pdfHeight=pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+
+    // Ajouter texte des textarea
+    const textareas=tempDiv.querySelectorAll('textarea');
+    pdf.setFontSize(12);
+    let y=10;
+    textareas.forEach(ta=>{
+      const lines=pdf.splitTextToSize(ta.value,pdfWidth-20);
+      pdf.text(10,y,lines);
+      y+=lines.length*6+5;
+    });
+
+    pdf.save(`${pendingDoc}.pdf`);
+    document.body.removeChild(tempDiv);
+  });
+}
+
+// Auto resize textarea
+function autoResizeTextarea(textarea){textarea.style.height='auto'; textarea.style.height=textarea.scrollHeight+'px';}
+document.addEventListener('input',function(e){if(e.target.tagName.toLowerCase()==='textarea'){autoResizeTextarea(e.target);}});
+
+// Importer photo
+function displayPhoto(inputId,imgId){
+  const file=document.getElementById(inputId).files[0];
+  if(file){const reader=new FileReader(); reader.onload=e=>document.getElementById(imgId).src=e.target.result; reader.readAsDataURL(file);}
+}
 </script>
 </body>
 </html>
