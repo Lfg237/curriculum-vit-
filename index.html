@@ -51,6 +51,16 @@ textarea{
 #paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:680px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
+  textarea {
+  width: 100%;          /* prendre toute la largeur du conteneur */
+  min-height: 60px;     /* hauteur minimale */
+  resize: none;         /* empêcher le redimensionnement manuel */
+  overflow-y: hidden;   /* cacher la barre de défilement */
+  font-size: 14px;      /* taille lisible */
+  line-height: 1.5;     /* espace entre les lignes */
+  padding: 6px;
+  box-sizing: border-box;
+}
 </style>
 </head>
 <body>
@@ -339,7 +349,16 @@ ${content}
 ${sigCanvas}
 <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
 }
+function autoResizeTextarea(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
 
+document.addEventListener('input', function(e) {
+  if(e.target.tagName.toLowerCase() === 'textarea') {
+    autoResizeTextarea(e.target);
+  }
+});
 </script>
 </body>
 </html>
