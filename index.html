@@ -260,17 +260,33 @@ function validatePayment(){
 }
 
 // --- Télécharger PDF ---
-function downloadPDF(){
-  if(!pendingDoc) return;
+function downloadPDF() {
+  if (!pendingDoc) return;
   const app = document.getElementById('app');
-  html2canvas(app, {scale:2}).then(canvas=>{
+
+  // 1️⃣ Sauvegarder les canvases sous forme d'image avant la capture
+  const canvases = app.querySelectorAll('canvas.signature-area');
+  const tempImages = [];
+  canvases.forEach(c => {
+    const img = document.createElement('img');
+    img.src = c.toDataURL('image/png');
+    img.style.width = c.style.width || c.width + 'px';
+    img.style.height = c.style.height || c.height + 'px';
+    img.style.border = c.style.border;
+    img.className = c.className;
+    c.replaceWith(img);
+    tempImages.push({ canvas: c, image: img });
+  });
+
+  // 2️⃣ Capturer le contenu
+  html2canvas(app, { scale: 2 }).then(canvas => {
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jspdf.jsPDF('p','mm','a4');
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-    // Ajouter texte multi-lignes des textarea
+    // Ajouter les textes des textarea
     const textareas = app.querySelectorAll('textarea');
     pdf.setFontSize(12);
     let y = 10;
@@ -280,20 +296,12 @@ function downloadPDF(){
       y += lines.length * 6 + 5;
     });
 
+    // 3️⃣ Restaurer les canvases (pour ne pas perdre les signatures dans la page)
+    tempImages.forEach(({ canvas, image }) => image.replaceWith(canvas));
+
     pdf.save(`${pendingDoc}.pdf`);
   });
 }
-
-// --- Auto resize textarea ---
-function autoResizeTextarea(textarea) {
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
-}
-document.addEventListener('input', function(e){
-  if(e.target.tagName.toLowerCase() === 'textarea'){
-    autoResizeTextarea(e.target);
-  }
-});
 
 // --- Contenu par défaut pour les documents ---
 function generateDocHTML(doc){
