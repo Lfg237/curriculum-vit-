@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mini Secrétariat Complet - Signatures</title>
+<title>Mini Secrétariat Complet - LesFacilitateurs</title>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg1:#ffefd5;--bg2:#ffe4f0;--accent:#ff6b6b;}
@@ -16,15 +16,14 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
 .navbar{overflow:auto;white-space:nowrap;padding:10px;}
 .navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;}
 .container{padding:18px;display:grid;grid-template-columns:1fr;gap:18px;}
-.main{background:rgba(255,255,255,0.85);padding:10mm;border-radius:14px;width:148mm;min-height:210mm;margin:auto;box-sizing:border-box;font-size:12px;line-height:1.4;word-wrap: break-word;}
+.main{background:rgba(255,255,255,0.85);padding:10mm;border-radius:14px;width:148mm;min-height:210mm;margin:auto;box-sizing:border-box;font-size:12px;line-height:1.4;word-wrap: break-word;position:relative;}
 .doc-title{font-family:Dancing Script,cursive;font-size:20px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:18px;color:#2c3e50;}
 .doc-photo{width:100px;height:100px;object-fit:cover;border-radius:10px;border:3px solid white;box-shadow:0 6px 18px rgba(0,0,0,0.08);cursor:pointer;float:left;margin-right:12px;margin-bottom:12px;}
-.signature-area{border:2px dashed #000;border-radius:8px;display:block;margin-bottom:6px;width:400px;height:100px; touch-action: none;}
+.signature-area{border:2px dashed #000;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:80px;touch-action:none;}
 .field{margin-bottom:8px;}
 .field label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600;}
-.field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #eee;font-size:12px;word-break: break-word;}
-textarea{width:100%;min-height:60px;resize:none;overflow-y:auto;font-size:12px;line-height:1.4;padding:6px;box-sizing:border-box;word-break: break-word;}
+textarea{width:100%;min-height:60px;resize:none;overflow:auto;font-size:12px;line-height:1.4;padding:6px;box-sizing:border-box;}
 .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;}
@@ -77,7 +76,7 @@ textarea{width:100%;min-height:60px;resize:none;overflow-y:auto;font-size:12px;l
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// Liste des documents
+// Documents
 const documents=['CV','LettreMotivation','CarteVisite','Plan','Fiche','Protocole','Contrat','Facture','Devis','Photocopie','Galerie','CNI','Passeport'];
 const nav=document.getElementById('mainNav');
 let pendingDoc=null, VIP_CODE='233233';
@@ -96,12 +95,13 @@ function openDoc(doc){
   const app=document.getElementById('app');
   app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+generateDocHTML(doc);
   initSignatures();
+  makeTextareasFlexible();
 }
 
-// Générer HTML pour chaque document
+// HTML documents
 function generateDocHTML(doc){
   const sigId='sig'+doc;
-  const sigCanvas=`<canvas id="${sigId}" class="signature-area" width="400" height="100"></canvas>
+  const sigCanvas=`<canvas id="${sigId}" class="signature-area"></canvas>
                    <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
   const photoHTML=(id,title)=>`
     <input type="file" id="${id}" accept="image/*" style="display:none" onchange="displayPhoto('${id}','img${id}')"/>
@@ -114,14 +114,29 @@ function generateDocHTML(doc){
                  </div>
                </div>`;
 
-  return `<div style="display:flex; flex-direction:column; gap:12px;">
-            ${content}
-            ${sigCanvas}
-            <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
-          </div>`;
+  return `<div style="display:flex; flex-direction:column; gap:12px;">${content}${sigCanvas}<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button></div>`;
 }
 
-// Importer photo
+// Signatures
+function initSignatures(){
+  document.querySelectorAll('canvas.signature-area').forEach(c=>{
+    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=2;
+    let drawing=false;
+    function getPos(e){
+      const rect=c.getBoundingClientRect();
+      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
+      return {x:e.offsetX ?? e.clientX-rect.left,y:e.offsetY ?? e.clientY-rect.top};
+    }
+    function startDraw(e){e.preventDefault();drawing=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
+    function draw(e){if(!drawing) return;e.preventDefault();const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();}
+    function stopDraw(e){drawing=false;}
+    c.addEventListener('mousedown',startDraw);c.addEventListener('mousemove',draw);c.addEventListener('mouseup',stopDraw);c.addEventListener('mouseleave',stopDraw);
+    c.addEventListener('touchstart',startDraw);c.addEventListener('touchmove',draw);c.addEventListener('touchend',stopDraw);
+  });
+}
+function clearCanvas(id){const c=document.getElementById(id);c.getContext('2d').clearRect(0,0,c.width,c.height);}
+
+// Photos
 function displayPhoto(inputId,imgId){
   const input=document.getElementById(inputId);
   const img=document.getElementById(imgId);
@@ -132,44 +147,27 @@ function displayPhoto(inputId,imgId){
   }
 }
 
-// Signature stabilisée
-function initSignatures(){
-  document.querySelectorAll('canvas.signature-area').forEach(c=>{
-    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=2;
-    let drawing=false;
-    function getPos(e){
-      const rect=c.getBoundingClientRect();
-      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top};
-      return {x:e.offsetX ?? e.clientX-rect.left, y:e.offsetY ?? e.clientY-rect.top};
-    }
-    function startDraw(e){e.preventDefault();drawing=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
-    function draw(e){if(!drawing) return;e.preventDefault();const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();}
-    function stopDraw(e){if(!drawing) return;e.preventDefault();drawing=false;}
-    c.addEventListener('mousedown',startDraw);c.addEventListener('mousemove',draw);
-    c.addEventListener('mouseup',stopDraw);c.addEventListener('mouseleave',stopDraw);
-    c.addEventListener('touchstart',startDraw);c.addEventListener('touchmove',draw);c.addEventListener('touchend',stopDraw);
+// Textareas auto-expand
+function makeTextareasFlexible(){
+  document.querySelectorAll('textarea').forEach(el=>{
+    el.addEventListener('input',()=>{
+      el.style.height='auto';
+      el.style.height=el.scrollHeight+'px';
+    });
   });
 }
-
-// Effacer canvas
-function clearCanvas(id){const canvas=document.getElementById(id);if(canvas){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);}}
 
 // Paiement
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
 function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
-
-// Validation paiement
 function validatePayment(){
   const msg=document.getElementById('mmMsg').value.trim();
   const vip=document.getElementById('vipInput').value.trim();
-  let valid=false;
-  if(vip===VIP_CODE) valid=true;
-  if(msg) valid=true;
-  if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadPDF();}
-  else{document.getElementById('pmMsg').innerText="Paiement non validé.";}
+  if(vip===VIP_CODE || msg){closePaymentModal(); downloadPDF(); return;}
+  document.getElementById('pmMsg').textContent='Transaction invalide ou code VIP incorrect.';
 }
 
-// Télécharger PDF
+// Export PDF A5
 async function downloadPDF(){
   if(!pendingDoc) return;
   const app=document.getElementById('app');
