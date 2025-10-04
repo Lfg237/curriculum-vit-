@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -6,46 +7,58 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg1:#ffefd5;--bg2:#ffe4f0;--accent:#ff6b6b;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#222;display:flex;justify-content:center;}
-.container{width:360px;padding:12px;}
-.header{display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(255,255,255,0.8);border-radius:12px;}
-.brand{display:flex;align-items:center;gap:8px;}
-.brand .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(45deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;font-size:20px;}
-.brand h1{font-family:'Dancing Script',cursive;font-size:16px;color:var(--accent);}
-.navbar{display:flex;overflow-x:auto;padding:8px 0;gap:6px;}
-.navbar button{flex-shrink:0;padding:8px 12px;border-radius:20px;border:none;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));cursor:pointer;}
-.main{background:rgba(255,255,255,0.85);border-radius:12px;padding:10px;margin-top:12px;min-height:500px;}
-.doc-title{font-family:'Dancing Script',cursive;font-size:18px;margin-bottom:6px;}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#222;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(45deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.brand h1{font-family:Dancing Script,cursive;margin:0;font-size:20px;color:var(--accent);}
+.navbar{overflow:auto;white-space:nowrap;padding:10px;}
+.navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;}
+.container{padding:18px;display:grid;grid-template-columns:1fr;gap:18px;}
+.main{background:rgba(255,255,255,0.85);padding:10mm;border-radius:14px;width:105mm;min-height:148mm;margin:auto;box-sizing:border-box;font-size:12px;line-height:1.4;word-wrap: break-word;position:relative;}
+.doc-title{font-family:Dancing Script,cursive;font-size:20px;margin:6px 0;}
+.handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:18px;color:#2c3e50;}
+.doc-photo{width:100px;height:100px;object-fit:cover;border-radius:10px;border:3px solid white;box-shadow:0 6px 18px rgba(0,0,0,0.08);cursor:pointer;float:left;margin-right:12px;margin-bottom:12px;}
+.signature-area{border:2px dashed #000;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:80px;}
 .field{margin-bottom:8px;}
 .field label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600;}
-textarea{width:100%;min-height:60px;resize:none;padding:6px;border-radius:6px;border:1px solid #eee;font-size:12px;}
-.doc-photo{width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;float:left;margin-right:8px;margin-bottom:8px;}
-.signature-area{width:100%;height:60px;border:2px dashed #000;border-radius:8px;margin-bottom:6px;}
-.btn{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;font-size:12px;}
+.field textarea{width:100%;min-height:120px;max-height:300px;padding:6px;border:1px solid #eee;border-radius:6px;font-size:12px;line-height:1.4;resize:vertical;overflow-y:auto;}
+.btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;}
-#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:12px;z-index:1000;}
-#paymentModal > div{background:white;border-radius:12px;padding:12px;width:320px;}
-#pmMsg{margin-top:6px;color:crimson;}
+#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
+#paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:500px;width:100%;}
+#pmMsg{margin-top:8px;color:crimson;}
 </style>
 </head>
 <body>
+
+<header class="header">
+  <div class="brand">
+    <div class="logo">LF</div>
+    <h1>Mini Secrétariat — LesFacilitateurs</h1>
+  </div>
+  <div class="small">✨ Moderne • Coloré • Export PDF/Image</div>
+</header>
+
+<nav class="navbar" id="mainNav"></nav>
+
 <div class="container">
-  <header class="header">
-    <div class="brand"><div class="logo">LF</div><h1>Mini Secrétariat</h1></div>
-  </header>
-  <nav class="navbar" id="mainNav"></nav>
   <main class="main" id="app">
-    <p>Bienvenue dans le Mini Secrétariat. Choisissez un document ✨</p>
+    <p>Bienvenue dans le Mini Secrétariat. Choisissez un document pour commencer ✨</p>
   </main>
+
+  <footer class="footer">© LesFacilitateurs — Mini Secrétariat</footer>
+
+  <!-- Modal paiement -->
   <div id="paymentModal">
     <div>
       <h3>Paiement requis avant téléchargement</h3>
       <div style="display:flex; flex-direction:column; gap:6px;">
         <h4>Mobile Money / OM</h4>
-        <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly style="font-weight:600;font-size:14px;"/>
-        <input id="mmBen2" type="text" value="OM 640647072" readonly style="margin-top:4px;font-weight:600;font-size:14px;"/>
+        <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly style="font-weight:600; font-size:14px;"/>
+        <input id="mmBen2" type="text" value="OM 640647072" readonly style="margin-top:4px;font-weight:600; font-size:14px;"/>
         <label>Message de transaction</label>
         <input id="mmMsg" type="text" placeholder="Ex: Vous avez recu ..." style="font-size:13px;"/>
       </div>
@@ -59,47 +72,162 @@ textarea{width:100%;min-height:60px;resize:none;padding:6px;border-radius:6px;bo
     </div>
   </div>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-const documents=['CV','LettreMotivation','CarteVisite','Plan','Fiche','Protocole','Contrat','Facture','Devis','Photocopie','CNI','Passeport'];
+// Documents
+const documents=['CV','LettreMotivation','CNI','Photocopie','CarteVisite','Plan','Fiche','Contrat','Devis','Facture','Galerie'];
 const nav=document.getElementById('mainNav');
 let pendingDoc=null, VIP_CODE='233233';
+
+// Boutons documents
 documents.forEach(doc=>{
   const btn=document.createElement('button');
-  btn.textContent=doc.replace(/([A-Z])/g,' $1').trim();
+  btn.textContent=doc.replace(/([A-Z])/g," $1").trim();
   btn.onclick=()=>openDoc(doc);
   nav.appendChild(btn);
 });
+
+// Ouvrir document
 function openDoc(doc){
   pendingDoc=doc;
   const app=document.getElementById('app');
-  app.innerHTML=`<h2 class="doc-title">${doc.replace(/([A-Z])/g,' $1').trim()}</h2>`+generateDocHTML(doc);
+  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+generateDocHTML(doc);
   initSignatures();
+  makeTextareasFlexible();
 }
+
+// HTML documents
 function generateDocHTML(doc){
   const sigId='sig'+doc;
   const sigCanvas=`<canvas id="${sigId}" class="signature-area"></canvas>
                    <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
-  const photoHTML=(id,title)=>`<input type="file" id="${id}" accept="image/*" style="display:none" onchange="displayPhoto('${id}','img${id}')"/>
-<label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
+  const photoHTML=(id,title)=>`
+    <input type="file" id="${id}" accept="image/*" style="display:none" onchange="displayPhoto('${id}','img${id}')"/>
+    <label for="${id}">
+      <img id="img${id}" class="doc-photo" title="${title}"/>
+    </label>`;
+  
   let content='';
-  if(doc==='Photocopie' || doc==='CNI'){
-    content=`<div style="display:flex; gap:8px; margin-bottom:8px;">${photoHTML(doc+'1','Recto')}<textarea>Texte Recto...</textarea></div>
-             <div style="display:flex; gap:8px;">${photoHTML(doc+'2','Verso')}<textarea>Texte Verso...</textarea></div>`;
-  } else {
-    content=`<div style="display:flex; gap:8px;">${photoHTML(doc+'Photo','Photo '+doc)}<textarea>Votre texte ici...</textarea></div>`;
+  switch(doc){
+    case 'CV': case 'LettreMotivation': case 'CarteVisite': case 'Plan': case 'Fiche': case 'Contrat': case 'Devis': case 'Facture':
+      content=`<div style="display:flex; gap:12px;">
+                 ${photoHTML(doc+'Photo','Photo '+doc)}
+                 <div style="flex:1;">
+                   <div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div>
+                 </div>
+               </div>`; break;
+    case 'CNI': case 'Photocopie':
+      content=`<div style="display:flex; gap:12px; margin-bottom:12px;">
+                 ${photoHTML(doc+'Recto','Photo Recto')}
+                 <div style="flex:1;">
+                   <div class="field"><label>Texte Recto</label><textarea>Votre texte pour le recto...</textarea></div>
+                 </div>
+               </div>
+               <div style="display:flex; gap:12px;">
+                 ${photoHTML(doc+'Verso','Photo Verso')}
+                 <div style="flex:1;">
+                   <div class="field"><label>Texte Verso</label><textarea>Votre texte pour le verso...</textarea></div>
+                 </div>
+               </div>`; break;
+    case 'Galerie':
+      content=`<div id="galleryContainer"></div>
+               <button class="btn btn-ghost" onclick="addGalleryPhoto()">➕ Ajouter photo</button>`; break;
+    default:
+      content=`<div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div>`;
   }
-  return `<div style="display:flex; flex-direction:column; gap:8px;">${content}${sigCanvas}<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button></div>`;
+
+  return `<div style="display:flex; flex-direction:column; gap:12px;">
+            ${content}
+            ${sigCanvas}
+            <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
+          </div>`;
 }
-function addGalleryPhoto(){/* similaire si besoin */}
-function displayPhoto(inputId,imgId){const input=document.getElementById(inputId);const img=document.getElementById(imgId);if(input.files && input.files[0]){const reader=new FileReader();reader.onload=e=>{img.src=e.target.result;};reader.readAsDataURL(input.files[0]);}}
-function initSignatures(){document.querySelectorAll('canvas.signature-area').forEach(c=>{const ctx=c.getContext('2d');ctx.strokeStyle='#000';ctx.lineWidth=2;let drawing=false;function getPos(e){const rect=c.getBoundingClientRect();if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};return {x:e.offsetX ?? e.clientX-rect.left,y:e.offsetY ?? e.clientY-rect.top};}function startDraw(e){e.preventDefault();drawing=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}function draw(e){if(!drawing) return;e.preventDefault();const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();}function stopDraw(e){if(!drawing) return;e.preventDefault();drawing=false;}c.addEventListener('mousedown',startDraw);c.addEventListener('mousemove',draw);c.addEventListener('mouseup',stopDraw);c.addEventListener('mouseleave',stopDraw);c.addEventListener('touchstart',startDraw);c.addEventListener('touchmove',draw);c.addEventListener('touchend',stopDraw);});}
-function clearCanvas(id){const c=document.getElementById(id);if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);}
+
+// Galerie photos
+function addGalleryPhoto(){
+  const container=document.getElementById('galleryContainer');
+  const index=container.children.length+1;
+  const id='galleryPhoto'+index;
+  const html=`<div style="display:flex; gap:12px; margin-bottom:12px;">
+                <input type="file" id="${id}" accept="image/*" style="display:none" onchange="displayPhoto('${id}','img${id}')"/>
+                <label for="${id}"><img id="img${id}" class="doc-photo" title="Photo ${index}"/></label>
+                <div style="flex:1;">
+                  <div class="field"><label>Commentaire</label><textarea>Votre commentaire...</textarea></div>
+                </div>
+              </div>`;
+  container.insertAdjacentHTML('beforeend',html);
+}
+
+// Affichage photo
+function displayPhoto(inputId,imgId){
+  const input=document.getElementById(inputId);
+  const img=document.getElementById(imgId);
+  if(input.files && input.files[0]){
+    const reader=new FileReader();
+    reader.onload=e=>{document.getElementById(imgId).src=e.target.result;};
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Signature stable
+function initSignatures(){
+  document.querySelectorAll('canvas.signature-area').forEach(c=>{
+    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=3;
+    let drawing=false;
+    function getPos(e){
+      const rect=c.getBoundingClientRect();
+      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
+      return {x:e.offsetX ?? e.clientX-rect.left,y:e.offsetY ?? e.offsetY-rect.top};
+    }
+    function startDraw(e){drawing=true; const pos=getPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);}
+    function draw(e){if(!drawing) return; const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke();}
+    function stopDraw(e){drawing=false;}
+    c.addEventListener('mousedown',startDraw); c.addEventListener('mousemove',draw); c.addEventListener('mouseup',stopDraw); c.addEventListener('mouseleave',stopDraw);
+    c.addEventListener('touchstart',startDraw); c.addEventListener('touchmove',draw); c.addEventListener('touchend',stopDraw);
+  });
+}
+
+// Effacer signature
+function clearCanvas(id){const c=document.getElementById(id);if(c){c.getContext('2d').clearRect(0,0,c.width,c.height);}}
+
+// Zones texte auto-expand
+function makeTextareasFlexible(){
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>{
+      t.style.height='auto';
+      t.style.height=(t.scrollHeight)+'px';
+    });
+  });
+}
+
+// Paiement
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
 function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
-function validatePayment(){const msg=document.getElementById('mmMsg').value.trim();const vip=document.getElementById('vipInput').value.trim();let valid=false;if(vip===VIP_CODE) valid=true;if(msg) valid=true;if(valid){document.getElementById('pmMsg').innerText='Paiement / VIP validé !'; closePaymentModal(); downloadPDF();}else{document.getElementById('pmMsg').innerText='Paiement non validé.';}}
-async function downloadPDF(){if(!pendingDoc) return;const app=document.getElementById('app');const canvas=await html2canvas(app,{scale:2});const imgData=canvas.toDataURL('image/png');const { jsPDF }=window.jspdf;const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});pdf.addImage(imgData,'PNG',0,0,148,210);pdf.save(pendingDoc+'.pdf');}
+function validatePayment(){
+  const msg=document.getElementById('mmMsg').value.trim();
+  const vip=document.getElementById('vipInput').value.trim();
+  let valid=false;
+  if(vip===VIP_CODE) valid=true;
+  if(msg) valid=true;
+  if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadPDF();}
+  else{document.getElementById('pmMsg').innerText="Paiement non validé.";}
+}
+
+// Export PDF A5
+async function downloadPDF(){
+  if(!pendingDoc) return;
+  const app=document.getElementById('app');
+  const canvas=await html2canvas(app,{scale:2});
+  const imgData=canvas.toDataURL('image/png');
+  const { jsPDF }=window.jspdf;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});
+  pdf.addImage(imgData,'PNG',0,0,148,210);
+  pdf.save(pendingDoc+'.pdf');
+}
 </script>
+
 </body>
 </html>
