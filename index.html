@@ -155,22 +155,67 @@ function clearCanvas(id){
 }
 
 // --- Initialiser signatures ---
-function initSignatures(){
-  document.querySelectorAll('canvas.signature-area').forEach(c=>{
-    const ctx = c.getContext('2d'); 
-    ctx.strokeStyle = '#000'; 
+function initSignatures() {
+  document.querySelectorAll('canvas.signature-area').forEach(c => {
+    const ctx = c.getContext('2d');
+    ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
-    ctx.font = "italic 20px 'Dancing Script', cursive"; 
-    ctx.fillStyle = "#2c3e50";
-    ctx.fillText("Créé par Lesfacilitateurs Middleman", 10, 50);
+    let drawing = false;
 
-    let drawing=false;
-    c.onmousedown = e => { drawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY); }
-    c.onmousemove = e => { if(drawing){ ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke(); } }
-    c.onmouseup = () => drawing=false;
-    c.onmouseleave = () => drawing=false;
+    // Fonction pour obtenir les coordonnées selon l'appareil (souris ou doigt)
+    function getPos(e) {
+      const rect = c.getBoundingClientRect();
+      if (e.touches && e.touches[0]) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      } else {
+        return {
+          x: e.offsetX ?? e.clientX - rect.left,
+          y: e.offsetY ?? e.clientY - rect.top
+        };
+      }
+    }
+
+    // Démarrer le dessin
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    // Continuer à dessiner
+    function draw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    // Arrêter le dessin
+    function stopDraw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      drawing = false;
+    }
+
+    // Support universel : souris + tactile
+    c.addEventListener('mousedown', startDraw);
+    c.addEventListener('mousemove', draw);
+    c.addEventListener('mouseup', stopDraw);
+    c.addEventListener('mouseleave', stopDraw);
+
+    c.addEventListener('touchstart', startDraw);
+    c.addEventListener('touchmove', draw);
+    c.addEventListener('touchend', stopDraw);
   });
 }
+
+
 
 // --- Paiement ---
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
