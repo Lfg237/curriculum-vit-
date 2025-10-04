@@ -18,15 +18,20 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
 .container{padding:18px;display:grid;grid-template-columns:1fr;gap:18px;}
 .main{
   background:rgba(255,255,255,0.85);
-  padding:14px;
+  padding:10mm;
   border-radius:14px;
-  min-height:80vh;
+  width:148mm;      /* largeur A5 */
+  min-height:210mm; /* hauteur A5 */
+  margin:auto;
+  box-sizing:border-box;
+  font-size:12px;
+  line-height:1.4;
 }
-.doc-title{font-family:Dancing Script,cursive;font-size:22px;margin:6px 0;}
-.handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:28px;color:#2c3e50;}
+.doc-title{font-family:Dancing Script,cursive;font-size:20px;margin:6px 0;}
+.handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:20px;color:#2c3e50;}
 .doc-photo{
-  width:120px;
-  height:120px;
+  width:100px;
+  height:100px;
   object-fit:cover;
   border-radius:10px;
   border:3px solid white;
@@ -36,30 +41,42 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
   margin-bottom:12px;
   cursor:pointer;
 }
-.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:50px;}
-.field{margin-bottom:8px;}
+.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:70px;}
+.field{margin-bottom:10px;}
 .field label{display:block;font-size:13px;color:#555;margin-bottom:4px;}
 .field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{
   width:100%;
   padding:6px;
   border-radius:6px;
-  border:1px solid #eee;
+  border:1px solid #ccc;
+  font-size:14px;
+  line-height:1.4;
 }
 textarea{
   width:100%;
-  min-height:60px;
+  min-height:50px;
+  max-height:500px; /* éviter que ça explose */
   resize:none;
-  overflow-y:hidden;
+  overflow:hidden;
   font-size:14px;
-  line-height:1.5;
+  line-height:1.4;
   padding:6px;
   box-sizing:border-box;
 }
-.btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
+.btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;}
-#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
-#paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:680px;width:100%;}
+#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
+#paymentModal > div{
+  background:white;
+  border-radius:12px;
+  padding:18px;
+  max-width:500px;
+  width:100%;
+  font-size:16px;
+  color:#000;
+}
+#paymentModal input{font-size:16px;padding:8px;width:100%;margin-top:4px;border-radius:6px;border:1px solid #aaa;background:#fff;color:#000;}
 #pmMsg{margin-top:8px;color:crimson;}
 </style>
 </head>
@@ -88,7 +105,7 @@ textarea{
       <div>
         <h4>Mobile Money / OM</h4>
         <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly/>
-        <input id="mmBen2" type="text" value="OM 640647072" readonly style="margin-top:4px"/>
+        <input id="mmBen2" type="text" value="OM 640647072" readonly/>
         <label>Message de transaction</label>
         <input id="mmMsg" type="text" placeholder="Ex: Vous avez recu ..."/>
       </div>
@@ -107,17 +124,16 @@ textarea{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-const documents = ['CV','CarteVisite','LettreMotivation','Plan','Fiche','Galerie','Protocole','Contrat','Facture','Devis'];
-const nav = document.getElementById('mainNav');
-let pendingDoc = null;
-let mmHistory = [];
-const VIP_CODE = '233233';
+// Variables
+const documents=['CV','CarteVisite','LettreMotivation','Plan','Fiche','Galerie','Protocole','Contrat','Facture','Devis'];
+const nav=document.getElementById('mainNav');
+let pendingDoc=null, mmHistory=[], VIP_CODE='233233';
 
-// Créer boutons pour tous les documents
+// Créer boutons
 documents.forEach(doc=>{
-  const btn = document.createElement('button');
-  btn.textContent = doc.replace(/([A-Z])/g," $1").trim();
-  btn.onclick = ()=>openDoc(doc);
+  const btn=document.createElement('button');
+  btn.textContent=doc.replace(/([A-Z])/g," $1").trim();
+  btn.onclick=()=>openDoc(doc);
   nav.appendChild(btn);
 });
 
@@ -125,15 +141,15 @@ documents.forEach(doc=>{
 function openDoc(doc){
   pendingDoc=doc;
   const app=document.getElementById('app');
-  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>` + generateDocHTML(doc);
+  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+generateDocHTML(doc);
   initSignatures();
 }
 
-// Générer HTML pour chaque document
+// Générer HTML documents
 function generateDocHTML(doc){
-  const sigId = 'sig'+doc;
-  const sigCanvas = `<canvas id="${sigId}" class="signature-area"></canvas>
-                     <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
+  const sigId='sig'+doc;
+  const sigCanvas=`<canvas id="${sigId}" class="signature-area"></canvas>
+                   <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
   let content='';
   switch(doc){
     case 'CV':
@@ -152,40 +168,38 @@ function generateDocHTML(doc){
     default:
       content=`<div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div>`;
   }
-
-  return `
-<div style="display:flex;align-items:center;gap:12px;">
-  <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
-  <label for="photo${doc}">
-    <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
-  </label>
-</div>
-${content}
-${sigCanvas}
-<button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
+  return `<div style="display:flex;align-items:center;gap:12px;">
+            <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
+            <label for="photo${doc}">
+              <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
+            </label>
+          </div>
+          ${content}
+          ${sigCanvas}
+          <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
 }
 
-// Initialiser signatures
+// Signatures
 function initSignatures(){
   document.querySelectorAll('canvas.signature-area').forEach(c=>{
-    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=2;
+    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=3;
     let drawing=false;
     function getPos(e){
       const rect=c.getBoundingClientRect();
-      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top};
-      return {x:e.offsetX ?? e.clientX-rect.left, y:e.offsetY ?? e.clientY-rect.top};
+      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
+      return {x:e.offsetX ?? e.clientX-rect.left,y:e.offsetY ?? e.clientY-rect.top};
     }
-    function startDraw(e){ e.preventDefault(); drawing=true; const pos=getPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);}
-    function draw(e){ if(!drawing) return; e.preventDefault(); const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke();}
-    function stopDraw(e){ if(!drawing) return; e.preventDefault(); drawing=false;}
-    c.addEventListener('mousedown',startDraw); c.addEventListener('mousemove',draw);
-    c.addEventListener('mouseup',stopDraw); c.addEventListener('mouseleave',stopDraw);
-    c.addEventListener('touchstart',startDraw); c.addEventListener('touchmove',draw); c.addEventListener('touchend',stopDraw);
+    function startDraw(e){e.preventDefault();drawing=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
+    function draw(e){if(!drawing) return;e.preventDefault();const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();}
+    function stopDraw(e){if(!drawing) return;e.preventDefault();drawing=false;}
+    c.addEventListener('mousedown',startDraw);c.addEventListener('mousemove',draw);
+    c.addEventListener('mouseup',stopDraw);c.addEventListener('mouseleave',stopDraw);
+    c.addEventListener('touchstart',startDraw);c.addEventListener('touchmove',draw);c.addEventListener('touchend',stopDraw);
   });
 }
 
 // Effacer canvas
-function clearCanvas(id){ const canvas=document.getElementById(id); if(canvas){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);} }
+function clearCanvas(id){const canvas=document.getElementById(id);if(canvas){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);}}
 
 // Paiement
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
@@ -201,68 +215,60 @@ function validatePayment(){
     if(m){
       const [_,name,number,id,dt]=m; const dateTx=new Date(dt); const now=new Date();
       const diffMin=(now-dateTx)/60000;
-      if(!mmHistory.includes(id) && diffMin<=10){mmHistory.push(id); valid=true;} 
-      else { document.getElementById('pmMsg').innerText="Transaction invalide ou doublon/délai dépassé."; return; }
-    } else { document.getElementById('pmMsg').innerText="Format message incorrect."; return; }
+      if(!mmHistory.includes(id) && diffMin<=10){mmHistory.push(id); valid=true;}
+      else{document.getElementById('pmMsg').innerText="Transaction invalide ou doublon/délai dépassé."; return;}
+    } else{document.getElementById('pmMsg').innerText="Format message incorrect."; return;}
   }
-  if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadPDF();} 
-  else {document.getElementById('pmMsg').innerText="Paiement non validé.";}
+  if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadPDF();}
+  else{document.getElementById('pmMsg').innerText="Paiement non validé.";}
 }
-
-// Télécharger PDF A5 pour tous les documents
-function downloadPDF(){
-  if(!pendingDoc) return;
-  const app=document.getElementById('app');
-  const tempDiv=app.cloneNode(true);
-  tempDiv.style.width='148mm';
-  tempDiv.style.minHeight='210mm';
-  tempDiv.style.padding='10mm';
-  tempDiv.style.background='white';
-  tempDiv.style.boxSizing='border-box';
-  tempDiv.style.position='absolute';
-  tempDiv.style.top='-9999px';
-  document.body.appendChild(tempDiv);
-
-  // Convertir canvas en image
-  const canvases=tempDiv.querySelectorAll('canvas.signature-area');
-  canvases.forEach(c=>{
-    const img=document.createElement('img');
-    img.src=c.toDataURL('image/png');
-    img.style.width=c.style.width || c.width+'px';
-    img.style.height=c.style.height || c.height+'px';
-    c.replaceWith(img);
-  });
-
-  html2canvas(tempDiv,{scale:2}).then(canvas=>{
-    const imgData=canvas.toDataURL('image/png');
-    const pdf=new jspdf.jsPDF('p','mm','a5');
-    const pdfWidth=pdf.internal.pageSize.getWidth();
-    const pdfHeight=pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-
-    // Ajouter texte des textarea
-    const textareas=tempDiv.querySelectorAll('textarea');
-    pdf.setFontSize(12);
-    let y=10;
-    textareas.forEach(ta=>{
-      const lines=pdf.splitTextToSize(ta.value,pdfWidth-20);
-      pdf.text(10,y,lines);
-      y+=lines.length*6+5;
-    });
-
-    pdf.save(`${pendingDoc}.pdf`);
-    document.body.removeChild(tempDiv);
-  });
-}
-
-// Auto resize textarea
-function autoResizeTextarea(textarea){textarea.style.height='auto'; textarea.style.height=textarea.scrollHeight+'px';}
-document.addEventListener('input',function(e){if(e.target.tagName.toLowerCase()==='textarea'){autoResizeTextarea(e.target);}});
 
 // Importer photo
 function displayPhoto(inputId,imgId){
-  const file=document.getElementById(inputId).files[0];
-  if(file){const reader=new FileReader(); reader.onload=e=>document.getElementById(imgId).src=e.target.result; reader.readAsDataURL(file);}
+  const input=document.getElementById(inputId);
+  const img=document.getElementById(imgId);
+  if(input.files && input.files[0]){
+    const reader=new FileReader();
+    reader.onload=e=>img.src=e.target.result;
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Télécharger PDF A5
+async function downloadPDF(){
+  if(!pendingDoc) return;
+  const app=document.getElementById('app');
+  const canvas=await html2canvas(app,{scale:3,useCORS:true});
+  const imgData=canvas.toDataURL('image/png');
+  const { jsPDF } = window.jspdf;
+  const pdf=new jsPDF('p','mm',[210,148]); // A5 portrait
+  pdf.addImage(imgData,'PNG',0,0,148,210);
+  pdf.save(`${pendingDoc}.pdf`);
+}
+  // Auto-expand textarea
+function autoExpandTextarea(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// Appliquer à tous les textarea actuels et futurs
+document.addEventListener('input', function(e){
+  if(e.target.tagName.toLowerCase() === 'textarea'){
+    autoExpandTextarea(e.target);
+  }
+});
+  async function downloadPDF(){
+  if(!pendingDoc) return;
+  const app=document.getElementById('app');
+  const canvas = await html2canvas(app, {scale:3, useCORS:true});
+  const imgData = canvas.toDataURL('image/png');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', [210, 148]); // A5 portrait
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = 148; 
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+  pdf.save(`${pendingDoc}.pdf`);
 }
 </script>
 </body>
