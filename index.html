@@ -261,41 +261,50 @@ function validatePayment() {
 }
 
 // Génération PDF via capture image
+function requestPayment() {
+  document.getElementById('paymentModal').style.display = 'flex';
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').style.display = 'none';
+}
+
+function validatePayment() {
+  const msg = document.getElementById('mmMsg').value.trim();
+  const vip = document.getElementById('vipInput').value.trim();
+  let valid = false;
+  if(vip === VIP_CODE) valid = true;
+  if(msg) valid = true;
+
+  const pmMsg = document.getElementById('pmMsg');
+  if(valid){
+    pmMsg.innerText = "Paiement / VIP validé !";
+    closePaymentModal();
+    downloadPDFCanvas(); // <-- ici on appelle le PDF
+  } else {
+    pmMsg.innerText = "Paiement non validé.";
+  }
+}
+
 async function downloadPDFCanvas() {
   const app = document.getElementById('app');
-
-  // Capture l'ensemble du contenu avec html2canvas pour la photo et signature
-  const tempCanvas = await html2canvas(app, { scale: 2, useCORS: true, logging: false });
   
-  // Créer un nouveau canvas pour tout le texte
-  const canvas = document.createElement('canvas');
-  canvas.width = tempCanvas.width;
-  canvas.height = tempCanvas.height;
-  const ctx = canvas.getContext('2d');
+  // Capture tout le contenu du document en image
+  const canvasCapture = await html2canvas(app, { scale: 2, useCORS: true, logging: false });
+  
+  const imgData = canvasCapture.toDataURL('image/png');
 
-  // Fond blanc
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Copier l'image html2canvas (texte + photos + signature)
-  ctx.drawImage(tempCanvas, 0, 0);
-
-  // Convertir le canvas en image
-  const imgData = canvas.toDataURL('image/png');
-
-  // Générer PDF A6
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
 
   const pdfWidth = pdf.internal.pageSize.getWidth();
   const pdfHeight = pdf.internal.pageSize.getHeight();
 
-  // Ajuster le ratio pour ne rien couper
-  const ratio = Math.min(pdfWidth / canvas.width, pdfHeight / canvas.height);
-  const scaledWidth = canvas.width * ratio;
-  const scaledHeight = canvas.height * ratio;
+  const ratio = Math.min(pdfWidth / canvasCapture.width, pdfHeight / canvasCapture.height);
+  const width = canvasCapture.width * ratio;
+  const height = canvasCapture.height * ratio;
 
-  pdf.addImage(imgData, 'PNG', 0, 0, scaledWidth, scaledHeight);
+  pdf.addImage(imgData, 'PNG', 0, 0, width, height);
   pdf.save(pendingDoc ? pendingDoc + '.pdf' : 'document.pdf');
 }
 </script>
