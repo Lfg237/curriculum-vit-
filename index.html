@@ -213,27 +213,42 @@ function validatePayment(){
 
 // Export PDF A6
 async function downloadPDF(){
+  if(!pendingDoc) return;
+
   const app=document.getElementById('app');
 
-  // Sauvegarder la hauteur originale
-  const originalHeight = app.style.height;
-  app.style.height = 'auto'; // Permet à tout le texte de s'afficher
-  app.style.overflow = 'visible'; // Désactive le scroll temporairement
+  // Créer une copie temporaire avec tout le texte visible
+  const tempDiv = app.cloneNode(true);
+  tempDiv.style.height='auto';
+  tempDiv.style.overflow='visible';
+  tempDiv.style.position='absolute';
+  tempDiv.style.left='-9999px';
+  document.body.appendChild(tempDiv);
 
+  // Copier le texte des textarea dans des div
+  tempDiv.querySelectorAll('textarea').forEach(t=>{
+    const d = document.createElement('div');
+    d.style.whiteSpace = 'pre-wrap';
+    d.style.fontSize = window.getComputedStyle(t).fontSize;
+    d.style.fontFamily = window.getComputedStyle(t).fontFamily;
+    d.innerText = t.value;
+    t.parentNode.replaceChild(d,t);
+  });
+
+  // Générer PDF
   const { jsPDF } = window.jspdf;
-  const pdf=new jsPDF({format:'a6',unit:'mm'});
+  const pdf = new jsPDF({format:'a6', unit:'mm'});
 
-  await html2canvas(app,{scale:2}).then(canvas=>{
-    const imgData=canvas.toDataURL('image/png');
-    const imgProps=pdf.getImageProperties(imgData);
-    const pdfWidth=105; // A6 width en mm
-    const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+  await html2canvas(tempDiv,{scale:2}).then(canvas=>{
+    const imgData = canvas.toDataURL('image/png');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = 105; // A6
+    const pdfHeight = (imgProps.height*pdfWidth)/imgProps.width;
     pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
   });
 
-  // Revenir à la taille normale
-  app.style.height = originalHeight;
-  app.style.overflowY = 'auto';
+  // Supprimer la copie temporaire
+  document.body.removeChild(tempDiv);
 
   pdf.save(pendingDoc+'.pdf');
 }
