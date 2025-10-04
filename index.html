@@ -16,67 +16,20 @@ body{margin:0;font-family:Inter,sans-serif;background:linear-gradient(120deg,var
 .navbar{overflow:auto;white-space:nowrap;padding:10px;}
 .navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;}
 .container{padding:18px;display:grid;grid-template-columns:1fr;gap:18px;}
-.main{
-  background:rgba(255,255,255,0.85);
-  padding:10mm;
-  border-radius:14px;
-  width:148mm;      /* largeur A5 */
-  min-height:210mm; /* hauteur A5 */
-  margin:auto;
-  box-sizing:border-box;
-  font-size:12px;
-  line-height:1.4;
-}
+.main{background:rgba(255,255,255,0.85);padding:10mm;border-radius:14px;width:148mm;min-height:210mm;margin:auto;box-sizing:border-box;font-size:12px;line-height:1.4;word-wrap: break-word;}
 .doc-title{font-family:Dancing Script,cursive;font-size:20px;margin:6px 0;}
-.handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:20px;color:#2c3e50;}
-.doc-photo{
-  width:100px;
-  height:100px;
-  object-fit:cover;
-  border-radius:10px;
-  border:3px solid white;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
-  float:left; 
-  margin-right:12px;
-  margin-bottom:12px;
-  cursor:pointer;
-}
-.signature-area{border:1px dashed #ccc;padding:6px;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:70px;}
-.field{margin-bottom:10px;}
-.field label{display:block;font-size:13px;color:#555;margin-bottom:4px;}
-.field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{
-  width:100%;
-  padding:6px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:14px;
-  line-height:1.4;
-}
-textarea{
-  width:100%;
-  min-height:50px;
-  max-height:500px; /* éviter que ça explose */
-  resize:none;
-  overflow:hidden;
-  font-size:14px;
-  line-height:1.4;
-  padding:6px;
-  box-sizing:border-box;
-}
+.handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:18px;color:#2c3e50;}
+.doc-photo{width:100px;height:100px;object-fit:cover;border-radius:10px;border:3px solid white;box-shadow:0 6px 18px rgba(0,0,0,0.08);cursor:pointer;float:left;margin-right:12px;margin-bottom:12px;}
+.signature-area{border:2px dashed #000;border-radius:8px;display:block;margin-bottom:6px;width:400px;height:100px; touch-action: none;}
+.field{margin-bottom:8px;}
+.field label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600;}
+.field input[type=text], .field input[type=email], .field input[type=tel], .field textarea{width:100%;padding:6px;border-radius:6px;border:1px solid #eee;font-size:12px;word-break: break-word;}
+textarea{width:100%;min-height:60px;resize:none;overflow-y:auto;font-size:12px;line-height:1.4;padding:6px;box-sizing:border-box;word-break: break-word;}
 .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;}
-#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
-#paymentModal > div{
-  background:white;
-  border-radius:12px;
-  padding:18px;
-  max-width:500px;
-  width:100%;
-  font-size:16px;
-  color:#000;
-}
-#paymentModal input{font-size:16px;padding:8px;width:100%;margin-top:4px;border-radius:6px;border:1px solid #aaa;background:#fff;color:#000;}
+#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
+#paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:500px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
 </style>
 </head>
@@ -102,16 +55,16 @@ textarea{
   <div id="paymentModal">
     <div>
       <h3>Paiement requis avant téléchargement</h3>
-      <div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
         <h4>Mobile Money / OM</h4>
-        <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly/>
-        <input id="mmBen2" type="text" value="OM 640647072" readonly/>
+        <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly style="font-weight:600; font-size:14px;"/>
+        <input id="mmBen2" type="text" value="OM 640647072" readonly style="margin-top:4px;font-weight:600; font-size:14px;"/>
         <label>Message de transaction</label>
-        <input id="mmMsg" type="text" placeholder="Ex: Vous avez recu ..."/>
+        <input id="mmMsg" type="text" placeholder="Ex: Vous avez recu ..." style="font-size:13px;"/>
       </div>
       <div style="margin-top:8px">
         <h4>Accès VIP</h4>
-        <input id="vipInput" type="text" placeholder="Entrez votre code VIP"/>
+        <input id="vipInput" type="text" placeholder="Entrez votre code VIP" style="font-size:13px;"/>
       </div>
       <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="validatePayment()">Valider paiement / VIP</button>
       <button class="btn btn-ghost" onclick="closePaymentModal()">Annuler</button>
@@ -124,10 +77,10 @@ textarea{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// Variables
-const documents=['CV','CarteVisite','LettreMotivation','Plan','Fiche','Galerie','Protocole','Contrat','Facture','Devis'];
+// Liste des documents
+const documents=['CV','LettreMotivation','CarteVisite','Plan','Fiche','Protocole','Contrat','Facture','Devis','Photocopie','Galerie','CNI','Passeport'];
 const nav=document.getElementById('mainNav');
-let pendingDoc=null, mmHistory=[], VIP_CODE='233233';
+let pendingDoc=null, VIP_CODE='233233';
 
 // Créer boutons
 documents.forEach(doc=>{
@@ -145,49 +98,49 @@ function openDoc(doc){
   initSignatures();
 }
 
-// Générer HTML documents
+// Générer HTML pour chaque document
 function generateDocHTML(doc){
   const sigId='sig'+doc;
-  const sigCanvas=`<canvas id="${sigId}" class="signature-area"></canvas>
+  const sigCanvas=`<canvas id="${sigId}" class="signature-area" width="400" height="100"></canvas>
                    <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
-  let content='';
-  switch(doc){
-    case 'CV':
-      content=`<div class="field"><label>Nom complet</label><textarea>John Doe</textarea></div>
-               <div class="field"><label>Expérience</label><textarea>Développeur Web depuis 5 ans...</textarea></div>`;
-      break;
-    case 'LettreMotivation':
-      content=`<div class="field"><label>Objet</label><textarea>Candidature pour le poste...</textarea></div>
-               <div class="field"><label>Texte</label><textarea>Je souhaite postuler car...</textarea></div>`;
-      break;
-    case 'CarteVisite':
-      content=`<div class="field"><label>Nom</label><textarea>John Doe</textarea></div>
-               <div class="field"><label>Email</label><textarea>john@example.com</textarea></div>
-               <div class="field"><label>Téléphone</label><textarea>+237 6XXXXXXX</textarea></div>`;
-      break;
-    default:
-      content=`<div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div>`;
-  }
-  return `<div style="display:flex;align-items:center;gap:12px;">
-            <input type="file" id="photo${doc}" accept="image/*" style="display:none" onchange="displayPhoto('photo${doc}','img${doc}')"/>
-            <label for="photo${doc}">
-              <img id="img${doc}" class="doc-photo" title="Cliquez pour importer la photo"/>
-            </label>
-          </div>
-          ${content}
-          ${sigCanvas}
-          <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>`;
+  const photoHTML=(id,title)=>`
+    <input type="file" id="${id}" accept="image/*" style="display:none" onchange="displayPhoto('${id}','img${id}')"/>
+    <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
+
+  let content=`<div style="display:flex; gap:12px;">
+                 ${photoHTML(doc+'Photo','Photo '+doc)}
+                 <div style="flex:1;">
+                   <div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div>
+                 </div>
+               </div>`;
+
+  return `<div style="display:flex; flex-direction:column; gap:12px;">
+            ${content}
+            ${sigCanvas}
+            <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
+          </div>`;
 }
 
-// Signatures
+// Importer photo
+function displayPhoto(inputId,imgId){
+  const input=document.getElementById(inputId);
+  const img=document.getElementById(imgId);
+  if(input.files && input.files[0]){
+    const reader=new FileReader();
+    reader.onload=e=>{img.src=e.target.result;};
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Signature stabilisée
 function initSignatures(){
   document.querySelectorAll('canvas.signature-area').forEach(c=>{
-    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=3;
+    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=2;
     let drawing=false;
     function getPos(e){
       const rect=c.getBoundingClientRect();
-      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
-      return {x:e.offsetX ?? e.clientX-rect.left,y:e.offsetY ?? e.clientY-rect.top};
+      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left, y:e.touches[0].clientY-rect.top};
+      return {x:e.offsetX ?? e.clientX-rect.left, y:e.offsetY ?? e.clientY-rect.top};
     }
     function startDraw(e){e.preventDefault();drawing=true;const pos=getPos(e);ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
     function draw(e){if(!drawing) return;e.preventDefault();const pos=getPos(e);ctx.lineTo(pos.x,pos.y);ctx.stroke();}
@@ -204,72 +157,30 @@ function clearCanvas(id){const canvas=document.getElementById(id);if(canvas){can
 // Paiement
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
 function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
+
+// Validation paiement
 function validatePayment(){
   const msg=document.getElementById('mmMsg').value.trim();
   const vip=document.getElementById('vipInput').value.trim();
   let valid=false;
   if(vip===VIP_CODE) valid=true;
-  if(msg){
-    const re=/MICHEL KONO\s*(\w*)\s*(\d+)\s*.*?Id:\s*(\d+).*?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i;
-    const m=msg.match(re);
-    if(m){
-      const [_,name,number,id,dt]=m; const dateTx=new Date(dt); const now=new Date();
-      const diffMin=(now-dateTx)/60000;
-      if(!mmHistory.includes(id) && diffMin<=10){mmHistory.push(id); valid=true;}
-      else{document.getElementById('pmMsg').innerText="Transaction invalide ou doublon/délai dépassé."; return;}
-    } else{document.getElementById('pmMsg').innerText="Format message incorrect."; return;}
-  }
+  if(msg) valid=true;
   if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadPDF();}
   else{document.getElementById('pmMsg').innerText="Paiement non validé.";}
 }
 
-// Importer photo
-function displayPhoto(inputId,imgId){
-  const input=document.getElementById(inputId);
-  const img=document.getElementById(imgId);
-  if(input.files && input.files[0]){
-    const reader=new FileReader();
-    reader.onload=e=>img.src=e.target.result;
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-// Télécharger PDF A5
+// Télécharger PDF
 async function downloadPDF(){
   if(!pendingDoc) return;
   const app=document.getElementById('app');
-  const canvas=await html2canvas(app,{scale:3,useCORS:true});
+  const canvas=await html2canvas(app,{scale:2});
   const imgData=canvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-  const pdf=new jsPDF('p','mm',[210,148]); // A5 portrait
+  const { jsPDF }=window.jspdf;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});
   pdf.addImage(imgData,'PNG',0,0,148,210);
-  pdf.save(`${pendingDoc}.pdf`);
-}
-  // Auto-expand textarea
-function autoExpandTextarea(el){
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
-}
-
-// Appliquer à tous les textarea actuels et futurs
-document.addEventListener('input', function(e){
-  if(e.target.tagName.toLowerCase() === 'textarea'){
-    autoExpandTextarea(e.target);
-  }
-});
-  async function downloadPDF(){
-  if(!pendingDoc) return;
-  const app=document.getElementById('app');
-  const canvas = await html2canvas(app, {scale:3, useCORS:true});
-  const imgData = canvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'mm', [210, 148]); // A5 portrait
-  const imgProps = pdf.getImageProperties(imgData);
-  const pdfWidth = 148; 
-  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-  pdf.save(`${pendingDoc}.pdf`);
+  pdf.save(pendingDoc+'.pdf');
 }
 </script>
+
 </body>
 </html>
