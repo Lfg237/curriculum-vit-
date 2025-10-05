@@ -16,14 +16,13 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 .navbar{overflow-x:auto;white-space:nowrap;padding:10px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);}
 .navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;font-size:11px;}
 .container{padding:8px;display:flex;justify-content:center;}
-.main{background:rgba(255,255,255,0.9);padding:8mm;border-radius:12px;width:95%;max-width:400px;min-height:105mm;overflow:auto;-webkit-overflow-scrolling:touch;position:relative;font-size:11px;line-height:1.4;word-wrap: break-word;}
+.main{background:rgba(255,255,255,0.9);padding:8mm;border-radius:12px;width:95%;max-width:400px;min-height:105mm;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;font-size:11px;line-height:1.4;word-wrap:break-word;}
 .doc-title{font-family:Dancing Script,cursive;font-size:18px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:16px;color:#2c3e50;}
 .doc-photo{width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;float:left;margin-right:8px;margin-bottom:8px;}
-.signature-area{border:2px dashed #000;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:60px;touch-action:none;}
 .field{margin-bottom:6px;}
 .field label{display:block;font-size:11px;color:#555;margin-bottom:4px;font-weight:600;}
-.field textarea{width:100%;min-height:100px;max-height:500px;padding:5px;border:1px solid #eee;border-radius:6px;font-size:11px;line-height:1.3;resize:none;overflow:auto;}
+.field textarea{width:100%;min-height:100px;max-height:200px;padding:5px;border:1px solid #eee;border-radius:6px;font-size:11px;line-height:1.3;resize:vertical;overflow-y:auto;}
 .btn{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;font-size:11px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;font-size:11px;}
@@ -39,7 +38,7 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
     <div class="logo">LF</div>
     <h1>Mini Secrétariat — LesFacilitateurs</h1>
   </div>
-  <div class="small">✨ Moderne • Coloré • Export PDF/Image</div>
+  <div class="small">✨ Moderne • Coloré • Export Word</div>
 </header>
 
 <nav class="navbar" id="mainNav"></nav>
@@ -70,15 +69,15 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.min.js"></script>
+
 <script>
-// Documents
+// Liste des documents
 const documents=['CV','LettreMotivation','CNI','Photocopie','CarteVisite','Plan','Fiche','Contrat','Devis','Facture','Galerie'];
 const nav=document.getElementById('mainNav');
 let pendingDoc=null, VIP_CODE='233233';
 
-// Boutons documents
+// Génération des boutons
 documents.forEach(doc=>{
   const btn=document.createElement('button');
   btn.textContent=doc.replace(/([A-Z])/g," $1").trim();
@@ -86,20 +85,16 @@ documents.forEach(doc=>{
   nav.appendChild(btn);
 });
 
-// Ouvrir document
+// Ouvrir un document
 function openDoc(doc){
   pendingDoc=doc;
   const app=document.getElementById('app');
   app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+generateDocHTML(doc);
-  initSignatures();
   makeTextareasFlexible();
 }
 
-// HTML documents
+// Génération du contenu selon le document
 function generateDocHTML(doc){
-  const sigId='sig'+doc;
-  const sigCanvas=`<canvas id="${sigId}" class="signature-area"></canvas>
-                   <button class="btn btn-ghost" onclick="clearCanvas('${sigId}')">🗑 Effacer signature</button>`;
   const photoHTML=(id,title)=>`
     <input type="file" id="${id}" accept="image/*" style="display:none" onchange="displayPhoto('${id}','img${id}')"/>
     <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
@@ -135,12 +130,11 @@ function generateDocHTML(doc){
 
   return `<div style="display:flex; flex-direction:column; gap:8px;">
             ${content}
-            ${sigCanvas}
-            <button class="btn btn-primary" onclick="requestPayment()">Télécharger PDF</button>
+            <button class="btn btn-primary" onclick="requestPayment()">Télécharger Word</button>
           </div>`;
 }
 
-// Galerie photos
+// Ajouter photo galerie
 function addGalleryPhoto(){
   const container=document.getElementById('galleryContainer');
   const index=container.children.length+1;
@@ -161,33 +155,12 @@ function displayPhoto(inputId,imgId){
   const img=document.getElementById(imgId);
   if(input.files && input.files[0]){
     const reader=new FileReader();
-    reader.onload=e=>{document.getElementById(imgId).src=e.target.result;};
+    reader.onload=e=>{img.src=e.target.result;};
     reader.readAsDataURL(input.files[0]);
   }
 }
 
-// Signature stable
-function initSignatures(){
-  document.querySelectorAll('canvas.signature-area').forEach(c=>{
-    const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=3;
-    let drawing=false;
-    function getPos(e){
-      const rect=c.getBoundingClientRect();
-      if(e.touches && e.touches[0]) return {x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
-      return {x:e.offsetX ?? e.clientX-rect.left,y:e.offsetY ?? e.offsetY-rect.top};
-    }
-    function startDraw(e){drawing=true; const pos=getPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);}
-    function draw(e){if(!drawing) return; const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke();}
-    function stopDraw(e){drawing=false;}
-    c.addEventListener('mousedown',startDraw); c.addEventListener('mousemove',draw); c.addEventListener('mouseup',stopDraw); c.addEventListener('mouseleave',stopDraw);
-    c.addEventListener('touchstart',startDraw); c.addEventListener('touchmove',draw); c.addEventListener('touchend',stopDraw);
-  });
-}
-
-// Effacer signature
-function clearCanvas(id){const c=document.getElementById(id);if(c){c.getContext('2d').clearRect(0,0,c.width,c.height);}}
-
-// Zones texte auto-expand
+// Zones texte flexibles
 function makeTextareasFlexible(){
   document.querySelectorAll('textarea').forEach(t=>{
     t.addEventListener('input',()=>{
@@ -197,48 +170,46 @@ function makeTextareasFlexible(){
   });
 }
 
-// Paiement et PDF
+// Paiement
 function requestPayment(){document.getElementById('paymentModal').style.display='flex';}
 function closePaymentModal(){document.getElementById('paymentModal').style.display='none';}
 function validatePayment(){
-  const msg = document.getElementById('mmMsg').value.trim();
-  const vip = document.getElementById('vipInput').value.trim();
-  const pmMsg = document.getElementById('pmMsg');
-  let valid = false;
-
-  if(vip === VIP_CODE) valid = true;
-  if(msg) valid = true;
-
-  if(valid){
-    pmMsg.innerText = "Paiement / VIP validé !";
-    closePaymentModal();
-    downloadPDFCanvas();
-  } else {
-    pmMsg.innerText = "Paiement non validé.";
-  }
+  const msg=document.getElementById('mmMsg').value.trim();
+  const vip=document.getElementById('vipInput').value.trim();
+  let valid=false;
+  if(vip===VIP_CODE) valid=true;
+  if(msg) valid=true;
+  if(valid){document.getElementById('pmMsg').innerText="Paiement / VIP validé !"; closePaymentModal(); downloadWord();}
+  else{document.getElementById('pmMsg').innerText="Paiement non validé.";}
 }
 
-// Génération PDF via capture canvas
-async function downloadPDFCanvas() {
-  const app = document.getElementById('app');
+// Télécharger en Word
+function downloadWord(){
+  if(!pendingDoc) return;
+  const app=document.getElementById('app').cloneNode(true);
 
-  // Capture tout le contenu en image
-  const canvasCapture = await html2canvas(app, { scale: 2, useCORS: true, logging: false });
-  const imgData = canvasCapture.toDataURL('image/png');
+  // Remplacer les textarea par texte brut
+  app.querySelectorAll('textarea').forEach(t=>{
+    const div=document.createElement('div');
+    div.innerText=t.value;
+    div.style.whiteSpace='pre-wrap';
+    t.parentNode.replaceChild(div,t);
+  });
 
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+  const html=`
+    <html xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:w="urn:schemas-microsoft-com:office:word"
+          xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><title>${pendingDoc}</title></head>
+    <body>${app.innerHTML}</body></html>`;
 
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-
-  const ratio = Math.min(pdfWidth / canvasCapture.width, pdfHeight / canvasCapture.height);
-  const width = canvasCapture.width * ratio;
-  const height = canvasCapture.height * ratio;
-
-  pdf.addImage(imgData, 'PNG', 0, 0, width, height);
-  pdf.save(pendingDoc ? pendingDoc + '.pdf' : 'document.pdf');
+  const blob=htmlDocx.asBlob(html);
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=pendingDoc+'.docx';
+  link.click();
 }
 </script>
+
 </body>
 </html>
