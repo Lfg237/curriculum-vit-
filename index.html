@@ -183,23 +183,46 @@ function verifierPaiementStrict(){
 
 async function exportPDF(docName){
   if(!paiementValide){ouvrirPopup();return;}
+
   const app=document.getElementById('app');
+
+  // Sauvegarder les textareas et les remplacer par du texte simple
+  const textareas = app.querySelectorAll('textarea');
+  const backups = [];
+  textareas.forEach(t=>{
+    const div=document.createElement('div');
+    div.style.whiteSpace='pre-wrap';
+    div.style.fontSize='12px';
+    div.style.lineHeight='1.4';
+    div.style.border='1px solid #eee';
+    div.style.background='#fff8dc';
+    div.style.padding='6px';
+    div.style.marginBottom='8px';
+    div.textContent=t.value;
+    backups.push({t,div});
+    t.parentNode.replaceChild(div,t);
+  });
+
+  // Ajouter la signature
   const signCanvas=document.getElementById('signaturePad');
-  if(window.signaturePad && !window.signaturePad.isEmpty()){
-    const ctx=signCanvas.getContext('2d');
-    ctx.drawImage(signCanvas,0,0);
-  }
   const signText=document.createElement('div');
   signText.textContent='Signataire: '+nomSignataire;
+  signText.style.fontSize='12px';
+  signText.style.marginTop='4px';
   app.appendChild(signText);
-  const canvas=await html2canvas(app);
+
+  // Générer l’image du document complet
+  const canvas=await html2canvas(app,{scale:2});
   const imgData=canvas.toDataURL('image/png');
-  const pdf=new jspdf.jsPDF();
-  const imgProps=pdf.getImageProperties(imgData);
+
+  const pdf=new jspdf.jsPDF('p','mm','a4');
   const pdfWidth=pdf.internal.pageSize.getWidth();
-  const pdfHeight=(imgProps.height * pdfWidth)/imgProps.width;
+  const pdfHeight=(canvas.height * pdfWidth)/canvas.width;
   pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
   pdf.save(`${docName}.pdf`);
+
+  // Restaure les textareas après la capture
+  backups.forEach(({t,div})=>div.parentNode.replaceChild(t,div));
   app.removeChild(signText);
 }
 </script>
