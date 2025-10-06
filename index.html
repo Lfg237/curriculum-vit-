@@ -19,10 +19,10 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 .main{background:rgba(255,255,255,0.9);padding:8mm;border-radius:12px;width:95%;max-width:600px;min-height:105mm;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;font-size:12px;line-height:1.4;word-wrap: break-word;}
 .doc-title{font-family:Dancing Script,cursive;font-size:18px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:16px;color:#2c3e50;}
-.doc-photo{width:60px;height:60px;object-fit:cover;border-radius:50%;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;margin-bottom:8px;}
+.doc-photo{width:60px;height:60px;object-fit:cover;border-radius:50%;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;margin:4px;float:left;}
 .field{margin-bottom:12px;}
 .field label{display:block;font-size:11px;color:#555;margin-bottom:4px;font-weight:600;}
-.field textarea{width:100%;min-height:50px;padding:4px;border:1px solid #eee;border-radius:6px;font-size:12px;line-height:1.4;resize:none;background-color:#fff8dc;}
+.field textarea{width:100%;min-height:250px;max-height:600px;padding:8px;border:1px solid #eee;border-radius:6px;font-size:12px;line-height:1.4;resize:vertical;overflow-y:auto;background-color:#fff8dc;}
 .btn{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;font-size:12px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;font-size:12px;}
@@ -32,12 +32,17 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 #paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:400px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
-.signature-pad{border:1px solid #ccc;border-radius:8px;width:100%;height:100px;background:#fff;}
+.signature-pad{border:1px solid #ccc;border-radius:8px;width:100%;height:50px;background:#fff;margin-top:8px;}
 input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8px;}
+.photo-flottante{float:left;margin:4px;padding:4px;border:1px solid #aaa;border-radius:6px;background:#fff;max-width:200px;display:inline-block;}
+.photo-flottante img{max-width:100%;display:block;margin-bottom:4px;}
+.photo-flottante div{word-wrap:break-word;}
+.fiche70{display:flex; flex-wrap:wrap; gap:12px;}
+.colonne{flex:1; min-width:45%;}
+textarea, input{font-family:Inter,sans-serif;}
 </style>
 </head>
 <body>
-
 <header class="header">
   <div class="brand">
     <div class="logo">LF</div>
@@ -45,9 +50,7 @@ input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8
   </div>
   <div class="small">✨ Tous les documents • Photos flottantes • Fiche 70 noms éditable • Paiement strict</div>
 </header>
-
 <nav class="navbar" id="mainNav"></nav>
-
 <div class="container">
   <main class="main" id="app">
     <p>Bienvenue dans le Mini Secrétariat. Choisissez un document pour commencer ✨</p>
@@ -55,7 +58,6 @@ input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8
   <div id="previewContainer"></div>
 </div>
 
-<!-- Popup paiement -->
 <div id="paymentModal">
   <div>
     <h3>Paiement requis</h3>
@@ -82,116 +84,90 @@ input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8
 <script>
 const documents=['CV','CarteVisite','LettreMotivation','CNI','ProtocoleAccord','ContratTravail','PlanLocalisation','Fiche70Noms','Rapport','GaleriePhotos'];
 const VIP_CODE='233233';
-const noms=Array.from({length:70},(_,i)=>'Nom '+(i+1));
 let paiementValide=false;
 let nomSignataire='Nom Signataire';
-const nav=document.getElementById('mainNav');
+const noms=Array.from({length:70},(_,i)=>'Nom '+(i+1));
 
-// ================== NAV ==================
+const nav=document.getElementById('mainNav');
 documents.forEach(doc=>{
   const btn=document.createElement('button');
   btn.textContent=doc.replace(/([A-Z])/g," $1").trim();
-  if(doc==='Fiche70Noms') btn.onclick=ouvrirFiche70Noms;
-  else if(doc==='CNI') btn.onclick=ouvrirCNI;
-  else if(doc==='GaleriePhotos') btn.onclick=ouvrirGalerie;
-  else btn.onclick=()=>ouvrirDocumentIndividuel(doc);
+  btn.onclick=()=>ouvrirDoc(doc);
   nav.appendChild(btn);
 });
 
-// ================== DOCUMENTS SIMPLES ==================
-function photoHTML(id,title){
-  return `<input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
-          <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
-}
-
-function ouvrirDocumentIndividuel(doc){
+function ouvrirDoc(doc){
   const app=document.getElementById('app');
-  let content=`${photoHTML(doc+'Photo',doc)}<textarea>Contenu pour ${doc}...</textarea>
-  <canvas id="signaturePad" class="signature-pad"></canvas>
-  <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
-  <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
-  <button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button>
-  <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
-  app.innerHTML=`<h2 class="doc-title handwritten">${doc}</h2>`+content;
-  initSignature();
+  const photoHTML=(id,title)=>`
+    <input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
+    <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
+  let content='';
+  if(doc==='CNI'){
+    content=`${photoHTML('CNIrecto','CNI Recto')}<textarea>Texte recto...</textarea>
+             ${photoHTML('CNIverso','CNI Verso')}<textarea>Texte verso...</textarea>`;
+  } else if(doc==='Fiche70Noms'){
+    content='<div class="fiche70">';
+    content+='<div class="colonne">'+noms.slice(0,35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
+    content+='<div class="colonne">'+noms.slice(35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
+    content+='</div>';
+  } else if(doc==='GaleriePhotos'){
+    content=`<div id="galleryContainer"></div>
+             <button class="btn btn-ghost" onclick="ajouterPhotoFlottante()">➕ Ajouter photo</button>`;
+  } else {
+    content=`${photoHTML(doc+'Photo',doc)}<textarea>Votre contenu...</textarea>`;
+  }
+  content+=`<canvas id="signaturePad" class="signature-pad"></canvas>
+            <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
+            <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
+            <button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button>
+            <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
+  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
+
+  const canvas=document.getElementById('signaturePad');
+  window.signaturePad=new SignaturePad(canvas);
+
+  const signInput=document.getElementById('signataireInput');
+  signInput.value=nomSignataire;
+  signInput.addEventListener('input',()=>{nomSignataire=signInput.value;});
+
+  document.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input',()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px';});
+  });
 }
 
-// ================== CNI ==================
-function ouvrirCNI(){
-  const app=document.getElementById('app');
-  let content=`${photoHTML('CNIrecto','CNI Recto')}<textarea>Texte recto...</textarea>
-               ${photoHTML('CNIverso','CNI Verso')}<textarea>Texte verso...</textarea>
-  <canvas id="signaturePad" class="signature-pad"></canvas>
-  <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
-  <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
-  <button class="btn btn-primary" onclick="exportPDF('CNI')">📄 Télécharger PDF</button>
-  <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
-  app.innerHTML=`<h2 class="doc-title handwritten">CNI</h2>`+content;
-  initSignature();
-}
-
-// ================== FICHE 70 NOMS EDITABLE ==================
-function ouvrirFiche70Noms(){
-  const app=document.getElementById('app');
-  let content=`<div style="display:flex; gap:12px;">`;
-  content+=`<div style="flex:1;">`;
-  noms.slice(0,35).forEach(n=>{ content+=`<textarea>${n}</textarea>`; });
-  content+=`</div><div style="flex:1;">`;
-  noms.slice(35,70).forEach(n=>{ content+=`<textarea>${n}</textarea>`; });
-  content+=`</div></div>
-  <canvas id="signaturePad" class="signature-pad"></canvas>
-  <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
-  <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
-  <button class="btn btn-primary" onclick="exportPDF('Fiche70Noms')">📄 Télécharger PDF</button>
-  <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
-  app.innerHTML=`<h2 class="doc-title handwritten">Fiche 70 Noms</h2>`+content;
-  initSignature();
-  document.querySelectorAll('textarea').forEach(t=>{ t.addEventListener('input',()=>{ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }); });
-}
-
-// ================== GALERIE PHOTOS ==================
-function ouvrirGalerie(){
-  const app=document.getElementById('app');
-  app.innerHTML=`<h2 class="doc-title handwritten">Galerie Photos</h2>
-  <div id="galleryContainer"></div>
-  <button class="btn btn-ghost" onclick="ajouterPhotoGalerie()">➕ Ajouter photo</button>
-  <canvas id="signaturePad" class="signature-pad"></canvas>
-  <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
-  <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
-  <button class="btn btn-primary" onclick="exportPDF('GaleriePhotos')">📄 Télécharger PDF</button>
-  <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
-  initSignature();
-}
-function ajouterPhotoGalerie(){
-  const container=document.getElementById('galleryContainer');
-  const index=container.children.length+1;
-  const html=`<div style="display:flex;flex-direction:column;margin-bottom:8px;">
-                <input type="file" id="galleryPhoto${index}" accept="image/*" style="display:none" onchange="afficherPhoto('galleryPhoto${index}','imgGallery${index}')"/>
-                <label for="galleryPhoto${index}"><img id="imgGallery${index}" class="doc-photo"/></label>
-                <textarea>Commentaire...</textarea>
-              </div>`;
-  container.insertAdjacentHTML('beforeend',html);
-}
-
-// ================== PHOTOS & SIGNATURE ==================
 function afficherPhoto(inputId,imgId){
   const input=document.getElementById(inputId);
   const img=document.getElementById(imgId);
   if(input.files && input.files[0]){
     const reader=new FileReader();
-    reader.onload=e=>{document.getElementById(imgId).src=e.target.result;};
+    reader.onload=e=>{img.src=e.target.result;};
     reader.readAsDataURL(input.files[0]);
   }
 }
-function initSignature(){
-  const canvas=document.getElementById('signaturePad');
-  window.signaturePad=new SignaturePad(canvas);
-  const signInput=document.getElementById('signataireInput');
-  signInput.value=nomSignataire;
-  signInput.addEventListener('input',()=>{ nomSignataire=signInput.value; });
+
+function ajouterPhotoFlottante(){
+  const container=document.getElementById('galleryContainer');
+  const id='photo'+Date.now();
+  const div=document.createElement('div');
+  div.className='photo-flottante';
+  div.innerHTML=`
+    <input type="file" accept="image/*" onchange="chargerImageFlottante(event,'${id}')">
+    <img id="img${id}" src=""/>
+    <div contenteditable="true">Commentaire...</div>`;
+  container.appendChild(div);
 }
 
-// ================== PAIEMENT ==================
+function chargerImageFlottante(e,id){
+  const img=document.getElementById('img'+id);
+  const file=e.target.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=ev=>img.src=ev.target.result;
+    reader.readAsDataURL(file);
+  }
+}
+
+function clearSignature(){window.signaturePad.clear();}
 function ouvrirPopup(){document.getElementById('paymentModal').style.display='flex'; document.getElementById('pmMsg').textContent='';}
 function fermerPopup(){document.getElementById('paymentModal').style.display='none';}
 function verifierPaiementStrict(){
@@ -199,32 +175,32 @@ function verifierPaiementStrict(){
   const vip=document.getElementById('vipInput').value.trim();
   const pmMsg=document.getElementById('pmMsg');
   let valide=false;
-  if(vip===VIP_CODE){valide=true;}
-  else if(msg.length>10){valide=true;}
-  if(valide){paiementValide=true; fermerPopup(); alert('Paiement validé ✅');}
+  if(vip===VIP_CODE) valide=true;
+  else if(msg.length>10) valide=true;
+  if(valide){paiementValide=true;fermerPopup();alert('Paiement validé ✅');}
   else{paiementValide=false; pmMsg.textContent='Message ou code invalide ❌';}
 }
 
-// ================== EXPORT PDF ==================
 async function exportPDF(docName){
-  if(!paiementValide){ouvrirPopup(); return;}
-  const main=document.getElementById('app');
+  if(!paiementValide){ouvrirPopup();return;}
+  const app=document.getElementById('app');
+  const signCanvas=document.getElementById('signaturePad');
   if(window.signaturePad && !window.signaturePad.isEmpty()){
-    const sigData=window.signaturePad.toDataURL('image/png');
-    const sigImg=document.createElement('img');
-    sigImg.src=sigData;
-    sigImg.style.width='200px';
-    main.appendChild(sigImg);
+    const ctx=signCanvas.getContext('2d');
+    ctx.drawImage(signCanvas,0,0);
   }
-  const canvas=await html2canvas(main,{scale:2});
+  const signText=document.createElement('div');
+  signText.textContent='Signataire: '+nomSignataire;
+  app.appendChild(signText);
+  const canvas=await html2canvas(app);
   const imgData=canvas.toDataURL('image/png');
-  const pdf=new jspdf.jsPDF('p','mm','a4');
-  const pdfWidth=210; const pdfHeight=canvas.height*(210/canvas.width);
+  const pdf=new jspdf.jsPDF();
+  const imgProps=pdf.getImageProperties(imgData);
+  const pdfWidth=pdf.internal.pageSize.getWidth();
+  const pdfHeight=(imgProps.height * pdfWidth)/imgProps.width;
   pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-  pdf.setFontSize(9);
-  pdf.text('Lesfacilitateurs Middleman 651475255',10,pdfHeight-5);
   pdf.save(`${docName}.pdf`);
-  if(window.signaturePad) window.signaturePad.clear();
+  app.removeChild(signText);
 }
 </script>
 </body>
