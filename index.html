@@ -33,6 +33,7 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:400px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
 .signature-pad{border:1px solid #ccc;border-radius:8px;width:100%;height:100px;background:#fff;}
+input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -80,7 +81,6 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.4/dist/signature_pad.umd.min.js"></script>
 <script>
-// ================== CONFIG ==================
 const documents=['CV','CarteVisite','LettreMotivation','CNI','ProtocoleAccord','ContratTravail','PlanLocalisation','Fiche70Noms','Rapport','GaleriePhotos'];
 const VIP_CODE = '233233';
 const BENEFICIAIRE = 'Loveline Wirnkar';
@@ -90,6 +90,9 @@ const nav=document.getElementById('mainNav');
 const noms = Array.from({length:70},(_,i)=>'Nom '+(i+1));
 let currentPage = 0;
 const nomsPerPage = 14;
+let paiementValide = false;
+let nomSociete = 'Nom Société';
+let nomSignataire = 'Nom Signataire';
 
 // ================== NAV ==================
 documents.forEach(doc=>{
@@ -119,6 +122,7 @@ function ouvrirDoc(doc){
   }
 
   content+=`<canvas id="signaturePad" class="signature-pad"></canvas>
+            <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
             <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
             <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
 
@@ -126,6 +130,10 @@ function ouvrirDoc(doc){
 
   const canvas=document.getElementById('signaturePad');
   window.signaturePad=new SignaturePad(canvas);
+
+  const signInput = document.getElementById('signataireInput');
+  signInput.value = nomSignataire;
+  signInput.addEventListener('input',()=>{ nomSignataire = signInput.value; });
 
   document.querySelectorAll('textarea').forEach(t=>{
     t.addEventListener('input',()=>{ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; });
@@ -162,58 +170,50 @@ function ouvrirFiche(){
   const app=document.getElementById('app');
   app.innerHTML = `
     <h2 class="doc-title handwritten">Fiche 70 Noms</h2>
-    <div id="ficheContainer" style="display:flex;gap:12px;"></div>
+    <input class="editable" id="societeInput" placeholder="Nom société"/>
+    <div id="ficheContainer" style="display:flex; flex-wrap:wrap; gap:12px;"></div>
     <div style="margin-top:8px;">
       <button class="btn btn-ghost" onclick="prevPage()">⬅ Page précédente</button>
       <button class="btn btn-ghost" onclick="nextPage()">Page suivante ➡</button>
-      <button class="btn btn-ghost" onclick="ajouterNomFiche()">➕ Ajouter Nom</button>
-      <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>
+      <button class="btn btn-ghost" onclick="ajouterNomFiche()">➕ Ajouter nom</button>
     </div>
-    <canvas id="signaturePad" class="signature-pad"></canvas>
-    <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
   `;
-  afficherPage(currentPage);
-  const canvas=document.getElementById('signaturePad');
-  window.signaturePad=new SignaturePad(canvas);
+
+  const socInput = document.getElementById('societeInput');
+  socInput.value = nomSociete;
+  socInput.addEventListener('input',()=>{ nomSociete = socInput.value; });
+
+  currentPage = 0;
+  afficherFichePage();
 }
 
-function afficherPage(page){
+function afficherFichePage(){
   const container=document.getElementById('ficheContainer');
   container.innerHTML='';
-  const start = page * nomsPerPage;
-  const end = Math.min(start + nomsPerPage, noms.length);
-  const pageNoms = noms.slice(start, end);
-
-  const col1=document.createElement('div');
-  const col2=document.createElement('div');
-  col1.style.flex='1'; col2.style.flex='1';
-  col1.style.display='flex'; col1.style.flexDirection='column'; col1.style.gap='4px';
-  col2.style.display='flex'; col2.style.flexDirection='column'; col2.style.gap='4px';
-
-  pageNoms.forEach((nom,i)=>{
-    const input=document.createElement('input');
-    input.value=nom;
-    input.style.fontSize='12px'; input.style.padding='4px'; input.style.border='1px solid #ddd'; input.style.borderRadius='4px';
-    input.oninput = e => { noms[start+i] = e.target.value; };
-    (i < Math.ceil(pageNoms.length/2) ? col1 : col2).appendChild(input);
+  const start = currentPage * nomsPerPage;
+  const pageNoms = noms.slice(start,start+nomsPerPage);
+  pageNoms.forEach((n,i)=>{
+    const input = document.createElement('input');
+    input.value = n;
+    input.className = 'editable';
+    input.style.width='120px';
+    input.addEventListener('input',()=>{ noms[start+i] = input.value; });
+    container.appendChild(input);
   });
-
-  container.appendChild(col1);
-  container.appendChild(col2);
 }
 
-function nextPage(){ if((currentPage+1)*nomsPerPage<noms.length){ currentPage++; afficherPage(currentPage); } }
-function prevPage(){ if(currentPage>0){ currentPage--; afficherPage(currentPage); } }
-function ajouterNomFiche(){ noms.push('Nouveau Nom'); afficherPage(currentPage); }
+function nextPage(){ if((currentPage+1)*nomsPerPage < noms.length){ currentPage++; afficherFichePage(); } }
+function prevPage(){ if(currentPage>0){ currentPage--; afficherFichePage(); } }
+function ajouterNomFiche(){ noms.push('Nom '+(noms.length+1)); afficherFichePage(); }
 
-// ================== PAIEMENT ==================
+// ================== PAIEMENT STRICT ==================
 let countdownInterval;
 function ouvrirPopup(){
   document.getElementById('paymentModal').style.display='flex';
   document.getElementById('pmMsg').textContent='';
   document.getElementById('mmMsg').value='';
   document.getElementById('vipInput').value='';
-  startCountdown(10); // 10 min
+  startCountdown(10);
 }
 function fermerPopup(){
   document.getElementById('paymentModal').style.display='none';
@@ -233,98 +233,56 @@ function startCountdown(minutes){
       clearInterval(countdownInterval);
       pmMsg.style.color='crimson';
       pmMsg.textContent='Le message est expiré ⏰';
+      paiementValide = false;
     }
   },1000);
 }
 
+// === UTILITAIRES EXTRACTION ===
+function normalizeText(s){return s? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim():'';}
+function nameMatches(expected, actual){return normalizeText(expected)===normalizeText(actual);}
+function extractPhone(text){const m=text.match(/(\+?\d[\d\s\-]{6,}\d)/); return m? m[1].replace(/\D/g,'') : null;}
+function extractTransactionId(text){const m=text.match(/(transaction\s*id|txid|ref|trn|trx)[\s:\-]*([A-Za-z0-9\-]+)/i); return m? m[2]: null;}
+function extractName(text){const m=text.match(/(beneficiary|receiver|to|nom|payee)[:\s\-]+([A-Za-zÀ-ÖØ-öø-ÿ'\s]+)/i); return m? m[2].trim():null;}
+function extractDateTime(text){const m=text.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\s+(\d{1,2}:\d{2})/); if(m){const d=m[1].split('/'); const iso=`20${d[2]}-${d[1].padStart(2,'0')}-${d[0].padStart(2,'0')}T${m[2]}:00Z`; return new Date(iso);}return null;}
+
+// ================== VERIFICATION PAIEMENT ==================
 function verifierPaiementStrict(){
   const msg=document.getElementById('mmMsg').value.trim();
   const vip=document.getElementById('vipInput').value.trim();
-  const pmMsg=document.getElementById('pmMsg');
+  const pmMsg = document.getElementById('pmMsg');
+  let valide = false;
 
-  // VIP
+  // Méthode 2 : code VIP
   if(vip===VIP_CODE){
-    clearInterval(countdownInterval);
-    pmMsg.style.color='green';
-    pmMsg.textContent='Accès VIP valide ✔';
-    setTimeout(()=>{ fermerPopup(); exporterPDF(); }, 500);
-    return}
-
-  if(!msg){
-    pmMsg.style.color='crimson';
-    pmMsg.textContent='Veuillez coller le message reçu.';
-    return;
-  }
-
-  const msgLower = msg.toLowerCase();
-  const nomOK = msgLower.includes(BENEFICIAIRE.toLowerCase());
-  const omOK = msg.includes(NUM_OM);
-  const momoOK = msg.includes(NUM_MOMO);
-
-  // Vérification stricte : nom + OM ou MOMO + temps < 10 min
-  if(nomOK && (omOK || momoOK)){
-    clearInterval(countdownInterval);
-    pmMsg.style.color='green';
-    pmMsg.textContent='Paiement Mobile Money validé ✔';
-    setTimeout(()=>{
-      fermerPopup();
-      exporterPDF();
-    },500);
-  } else {
-    pmMsg.style.color='crimson';
-    pmMsg.textContent='Le message ne correspond pas au bénéficiaire ou aux numéros.';
-  }
-}
-
-// ================== EXPORT PDF ==================
-function exporterPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'mm', format:'a4'});
-  const content = document.getElementById('app');
-
-  // Ajouter le texte principal
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(12);
-
-  const lines = content.innerText.split('\n');
-  let y = 20;
-  lines.forEach(line=>{
-    doc.text(line, 20, y);
-    y += 6;
-  });
-
-  // Ajouter les images flottantes
-  const imgs = content.querySelectorAll('img');
-  let x = 20, imgY = y;
-  imgs.forEach(img=>{
-    if(img.src){
-      doc.addImage(img.src, 'JPEG', x, imgY, 30, 30);
-      x += 35;
-      if(x>150){ x=20; imgY +=35; }
+    valide = true;
+  } else if(msg.length>10){
+    // Méthode 1 : message Mobile Money
+    const name = extractName(msg) || '';
+    const phone = extractPhone(msg) || '';
+    const txid = extractTransactionId(msg) || '';
+    const dt = extractDateTime(msg);
+    const now = new Date();
+    const nameOk = nameMatches(BENEFICIAIRE,name);
+    const phoneOk = [NUM_OM,NUM_MOMO].some(n=>phone.endsWith(n));
+    let timeOk=false;
+    if(dt && !isNaN(dt.getTime())){
+      const diffMin=Math.abs((now.getTime()-dt.getTime())/60000);
+      timeOk = diffMin <=10;
     }
-  });
-
-  // Ajouter la signature si présente
-  if(window.signaturePad && !window.signaturePad.isEmpty()){
-    const sigData = window.signaturePad.toDataURL('image/png');
-    doc.addImage(sigData, 'PNG', 20, imgY+10, 60, 30);
+    valide = nameOk && phoneOk && timeOk && !!txid;
+    if(!valide) pmMsg.textContent='Message Mobile Money invalide ❌';
   }
 
-  doc.save('Document_Mini_Secrétariat.pdf');
-}
-
-// ================== APERCU ==================
-function genererApercu(){
-  const container = document.getElementById('previewContainer');
-  container.innerHTML='';
-  documents.forEach(doc=>{
-    const div = document.createElement('div');
-    div.className='preview-doc';
-    div.textContent=doc.replace(/([A-Z])/g," $1").trim();
-    container.appendChild(div);
-  });
+  if(valide){
+    paiementValide = true;
+    fermerPopup();
+    alert('Paiement validé ✅');
+  }else{
+    paiementValide = false;
+    if(vip!==VIP_CODE && msg.length<=10) pmMsg.textContent='Code ou message incorrect ❌';
+  }
 }
 </script>
-
 </body>
 </html>
