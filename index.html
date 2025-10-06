@@ -182,48 +182,97 @@ function verifierPaiementStrict(){
 }
 
 async function exportPDF(docName){
-  if(!paiementValide){ouvrirPopup();return;}
+  if(!paiementValide){ ouvrirPopup(); return; }
 
-  const app=document.getElementById('app');
+  const app = document.getElementById('app');
 
-  // Sauvegarder les textareas et les remplacer par du texte simple
-  const textareas = app.querySelectorAll('textarea');
+  // 1) Remplacer temporairement les textarea par des <div> (pour capturer tout le texte)
+  const textareas = Array.from(app.querySelectorAll('textarea'));
   const backups = [];
-  textareas.forEach(t=>{
-    const div=document.createElement('div');
-    div.style.whiteSpace='pre-wrap';
-    div.style.fontSize='12px';
-    div.style.lineHeight='1.4';
-    div.style.border='1px solid #eee';
-    div.style.background='#fff8dc';
-    div.style.padding='6px';
-    div.style.marginBottom='8px';
-    div.textContent=t.value;
-    backups.push({t,div});
-    t.parentNode.replaceChild(div,t);
+  textareas.forEach(t => {
+    const div = document.createElement('div');
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.fontSize = window.getComputedStyle(t).fontSize || '12px';
+    div.style.lineHeight = window.getComputedStyle(t).lineHeight || '1.4';
+    div.style.background = window.getComputedStyle(t).backgroundColor || '#fff8dc';
+    div.style.padding = window.getComputedStyle(t).padding || '6px';
+    div.style.marginBottom = '8px';
+    div.textContent = t.value;
+    backups.push({ t, div });
+    t.parentNode.replaceChild(div, t);
   });
 
-  // Ajouter la signature
-  const signCanvas=document.getElementById('signaturePad');
-  const signText=document.createElement('div');
-  signText.textContent='Signataire: '+nomSignataire;
-  signText.style.fontSize='12px';
-  signText.style.marginTop='4px';
+  // 2) Si signature présente, ajouter une image de la signature dans le DOM (temporaire)
+  let sigImgEl = null;
+  if(window.signaturePad && !window.signaturePad.isEmpty()){
+    sigImgEl = document.createElement('img');
+    sigImgEl.src = window.signaturePad.toDataURL();
+    sigImgEl.style.width = '120px';
+    sigImgEl.style.display = 'block';
+    sigImgEl.style.marginTop = '8px';
+    app.appendChild(sigImgEl);
+  }
+
+  // 3) Ajouter le nom du signataire visible (temporaire)
+  const signText = document.createElement('div');
+  signText.textContent = 'Signataire : ' + (typeof nomSignataire !== 'undefined' ? nomSignataire : '');
+  signText.style.fontSize = '11px';
+  signText.style.marginTop = '6px';
   app.appendChild(signText);
 
-  // Générer l’image du document complet
-  const canvas=await html2canvas(app,{scale:2});
-  const imgData=canvas.toDataURL('image/png');
+  // 4) Capturer le DOM en canvas
+  // scale élevé améliore la netteté (mais augmente la mémoire)
+  const canvas = await html2canvas(app, { scale: 2, useCORS: true, allowTaint: true });
+  const imgWidthPx = canvas.width;
+  const imgHeightPx = canvas.height;
 
-  const pdf=new jspdf.jsPDF('p','mm','a4');
-  const pdfWidth=pdf.internal.pageSize.getWidth();
-  const pdfHeight=(canvas.height * pdfWidth)/canvas.width;
-  pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+  // 5) Créer PDF A6 et découper le canvas en tranches si nécessaire
+  const pdf = new jspdf.jsPDF('p', 'mm', 'a6'); // <-- A6
+  const pageWidthMm = pdf.internal.pageSize.getWidth();   // en mm
+  const pageHeightMm = pdf.internal.pageSize.getHeight(); // en mm
+
+  // Calculer pixels par millimètre pour correspondance
+  const pxPerMm = imgWidthPx / pageWidthMm;
+  const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
+
+  let y = 0;
+  let pageIndex = 0;
+  while (y < imgHeightPx) {
+    const sliceHeight = Math.min(pageHeightPx, imgHeightPx - y);
+
+    // créer un canvas temporaire pour la tranche
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = imgWidthPx;
+    tmpCanvas.height = sliceHeight;
+    const tmpCtx = tmpCanvas.getContext('2d');
+    tmpCtx.drawImage(canvas, 0, y, imgWidthPx, sliceHeight, 0, 0, imgWidthPx, sliceHeight);
+
+    const imgData = tmpCanvas.toDataURL('image/png');
+    const sliceHeightMm = sliceHeight / pxPerMm; // conversion en mm
+
+    if(pageIndex > 0) pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMm, sliceHeightMm);
+
+    // Pied de page en bas (sur chaque page)
+    pdf.setFontSize(8);
+    pdf.text("© LesFacilitateurs Middleman 651475255", 5, pageHeightMm - 5);
+
+    y += sliceHeight;
+    pageIndex++;
+  }
+
+  // 6) Sauvegarder le fichier
   pdf.save(`${docName}.pdf`);
 
-  // Restaure les textareas après la capture
-  backups.forEach(({t,div})=>div.parentNode.replaceChild(t,div));
-  app.removeChild(signText);
+  // 7) Nettoyage : restaurer les textarea et enlever éléments temporaires
+  backups.forEach(({ t, div }) => {
+    if (div.parentNode) div.parentNode.replaceChild(t, div);
+  });
+  if (sigImgEl && sigImgEl.parentNode) sigImgEl.parentNode.removeChild(sigImgEl);
+  if (signText && signText.parentNode) signText.parentNode.removeChild(signText);
+
+  // 8) (optionnel) vider la signature si tu veux
+  // if(window.signaturePad) window.signaturePad.clear();
 }
 </script>
 </body>
