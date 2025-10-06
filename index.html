@@ -3,33 +3,36 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mini Secrétariat Complet - LesFacilitateurs</title>
+<title>Mini Secrétariat Complet</title>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg1:#ffefd5;--bg2:#ffe4f0;--accent:#ff6b6b;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#222;overflow:hidden;}
+body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),var(--bg2));color:#222;overflow-x:hidden;}
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,0.06);position:sticky;top:0;z-index:10;}
 .brand{display:flex;align-items:center;gap:12px;}
 .brand .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(45deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;font-size:28px;}
 .brand h1{font-family:Dancing Script,cursive;margin:0;font-size:20px;color:var(--accent);}
 .navbar{overflow-x:auto;white-space:nowrap;padding:10px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);}
 .navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;font-size:11px;}
-.container{padding:8px;display:flex;justify-content:center;}
-.main{background:rgba(255,255,255,0.9);padding:8mm;border-radius:12px;width:95%;max-width:400px;min-height:105mm;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;font-size:11px;line-height:1.4;word-wrap: break-word;}
+.container{padding:8px;display:flex;justify-content:center;flex-direction:column;align-items:center;}
+.main{background:rgba(255,255,255,0.9);padding:8mm;border-radius:12px;width:95%;max-width:600px;min-height:105mm;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;font-size:12px;line-height:1.4;word-wrap: break-word;}
 .doc-title{font-family:Dancing Script,cursive;font-size:18px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:16px;color:#2c3e50;}
-.doc-photo{width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;float:left;margin-right:8px;margin-bottom:8px;}
-.field{margin-bottom:6px;}
+.doc-photo{width:60px;height:60px;object-fit:cover;border-radius:50%;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;margin-bottom:8px;}
+.field{margin-bottom:12px;}
 .field label{display:block;font-size:11px;color:#555;margin-bottom:4px;font-weight:600;}
-.field textarea{width:100%;min-height:100px;max-height:200px;padding:5px;border:1px solid #eee;border-radius:6px;font-size:11px;line-height:1.3;resize:vertical;overflow-y:auto;}
-.signature-area{border:2px dashed #000;border-radius:8px;display:block;margin-bottom:6px;width:100%;height:60px;touch-action:none;}
-.btn{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;font-size:11px;}
+.field textarea{width:100%;min-height:150px;max-height:400px;padding:8px;border:1px solid #eee;border-radius:6px;font-size:12px;line-height:1.4;resize:vertical;overflow-y:auto;background-color:#fff8dc;}
+.btn{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;font-size:12px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
-.btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;font-size:11px;}
+.btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;font-size:12px;}
+#previewContainer{width:95%;max-width:600px;margin-top:12px;}
+.preview-doc{border:1px solid #ccc;padding:10px;margin-bottom:12px;border-radius:8px;background:#fffbe6;}
+.preview-doc img{width:60px;height:60px;border-radius:50%;margin-right:4px;float:left;}
 #paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:400px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
+.signature-pad{border:1px solid #ccc;border-radius:8px;width:100%;height:100px;background:#fff;}
 </style>
 </head>
 <body>
@@ -37,9 +40,9 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 <header class="header">
   <div class="brand">
     <div class="logo">LF</div>
-    <h1>Mini Secrétariat — LesFacilitateurs</h1>
+    <h1>Mini Secrétariat</h1>
   </div>
-  <div class="small">✨ Moderne • Coloré • Export Word</div>
+  <div class="small">✨ Tous les documents • Photos flottantes • Fiche 70 noms éditable • Paiement strict</div>
 </header>
 
 <nav class="navbar" id="mainNav"></nav>
@@ -48,84 +51,88 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
   <main class="main" id="app">
     <p>Bienvenue dans le Mini Secrétariat. Choisissez un document pour commencer ✨</p>
   </main>
+  <button class="btn btn-primary" onclick="genererApercu()">Voir tous les documents</button>
+  <button class="btn btn-primary" onclick="ouvrirPopup()">Exporter PDF</button>
+  <div id="previewContainer"></div>
 </div>
 
+<!-- Popup paiement -->
 <div id="paymentModal">
   <div>
-    <h3>Paiement requis avant téléchargement</h3>
-    <div style="display:flex; flex-direction:column; gap:6px;">
-      <h4>Mobile Money / OM</h4>
-      <input id="mmBen1" type="text" value="loveline wirnkar momo: 676353859" readonly style="font-weight:600; font-size:14px;"/>
-      <input id="mmBen2" type="text" value="OM 640647072" readonly style="margin-top:4px;font-weight:600; font-size:14px;"/>
-      <label>Message de transaction</label>
-      <input id="mmMsg" type="text" placeholder="Ex: Vous avez recu ..." style="font-size:13px;"/>
+    <h3>Paiement requis</h3>
+    <div><strong>Bénéficiaire :</strong> LOVELINE WIRNKAR</div>
+    <div><strong>OM :</strong> 640647072</div>
+    <div><strong>MOMO :</strong> 676353859</div>
+    <div style="margin-top:8px">
+      <label>Message Mobile Money</label>
+      <input id="mmMsg" type="text" placeholder="Copiez le message reçu" style="font-size:13px"/>
     </div>
     <div style="margin-top:8px">
-      <h4>Accès VIP</h4>
-      <input id="vipInput" type="text" placeholder="Entrez votre code VIP" style="font-size:13px;"/>
+      <label>Code Admin / VIP</label>
+      <input id="vipInput" type="text" placeholder="Entrez votre code" style="font-size:13px"/>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="verifierPaiement()">Valider paiement / VIP</button>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="verifierPaiementStrict()">Valider</button>
     <button class="btn btn-ghost" onclick="fermerPopup()">Annuler</button>
     <p id="pmMsg"></p>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.4/dist/signature_pad.umd.min.js"></script>
 <script>
-const documents=['CV','LettreMotivation','CNI','Photocopie','CarteVisite','Plan','Fiche','Contrat','Devis','Facture','Galerie'];
+// ================== CONFIG ==================
+const documents=['CV','CarteVisite','LettreMotivation','CNI','ProtocoleAccord','ContratTravail','PlanLocalisation','Fiche70Noms','Rapport','GaleriePhotos'];
+const VIP_CODE = '233233';
+const BENEFICIAIRE = 'Loveline Wirnkar';
+const NUM_OM = '640647072';
+const NUM_MOMO = '676353859';
 const nav=document.getElementById('mainNav');
-let pendingDoc=null;
-let paiementValide=false;
-const VIP_CODE='233233'; // code caché
+const noms = Array.from({length:70},(_,i)=>'Nom '+(i+1));
+let currentPage = 0;
+const nomsPerPage = 14;
 
-// Création des boutons
+// ================== NAV ==================
 documents.forEach(doc=>{
   const btn=document.createElement('button');
   btn.textContent=doc.replace(/([A-Z])/g," $1").trim();
-  btn.onclick=()=>ouvrirDoc(doc);
+  btn.onclick=()=>{ doc==='Fiche70Noms' ? ouvrirFiche() : ouvrirDoc(doc); };
   nav.appendChild(btn);
 });
 
+// ================== DOCUMENTS ==================
 function ouvrirDoc(doc){
-  pendingDoc=doc;
   const app=document.getElementById('app');
-
   const photoHTML=(id,title)=>`
     <input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
     <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
-
-  const sigHTML=`<canvas id="sigCanvas" class="signature-area"></canvas>`;
-
+  
   let content='';
   switch(doc){
-    case 'CNI': case 'Photocopie':
-      content=`<div style="display:flex; gap:8px; margin-bottom:8px;">
-                 ${photoHTML(doc+'Recto','Photo Recto')}
-                 <div style="flex:1;"><div class="field"><label>Texte Recto</label><textarea>Votre texte pour le recto...</textarea></div></div>
-               </div>
-               <div style="display:flex; gap:8px; margin-bottom:8px;">
-                 ${photoHTML(doc+'Verso','Photo Verso')}
-                 <div style="flex:1;"><div class="field"><label>Texte Verso</label><textarea>Votre texte pour le verso...</textarea></div></div>
-               </div>`; break;
-    case 'Galerie':
-      content=`<div id="galleryContainer"></div><button class="btn btn-ghost" onclick="ajouterPhotoGalerie()">➕ Ajouter photo</button>`; break;
+    case 'CNI':
+      content=`${photoHTML('CNIrecto','CNI Recto')}<textarea>Texte recto...</textarea>
+               ${photoHTML('CNIverso','CNI Verso')}<textarea>Texte verso...</textarea>`; break;
+    case 'GaleriePhotos':
+      content=`<div id="galleryContainer"></div>
+               <button class="btn btn-ghost" onclick="ajouterPhotoGalerie()">➕ Ajouter photo</button>`; break;
     default:
-      content=`<div style="display:flex; gap:8px; margin-bottom:8px;">
-                 ${photoHTML(doc+'Photo','Photo '+doc)}
-                 <div style="flex:1;"><div class="field"><label>Texte</label><textarea>Votre contenu ici...</textarea></div></div>
-               </div>`;
+      content=`${photoHTML(doc+'Photo',doc)}<textarea>Votre contenu...</textarea>`;
   }
 
-  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+
-                content+sigHTML+`<button class="btn btn-primary" onclick="demandeTelechargement()">Télécharger Word</button>`;
+  content+=`<canvas id="signaturePad" class="signature-pad"></canvas>
+            <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
+            <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
 
-  initSignature();
-  // Textareas flexibles
+  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
+
+  const canvas=document.getElementById('signaturePad');
+  window.signaturePad=new SignaturePad(canvas);
+
   document.querySelectorAll('textarea').forEach(t=>{
     t.addEventListener('input',()=>{ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; });
   });
 }
 
-// Afficher photo
+// ================== PHOTOS ==================
 function afficherPhoto(inputId,imgId){
   const input=document.getElementById(inputId);
   const img=document.getElementById(imgId);
@@ -135,91 +142,189 @@ function afficherPhoto(inputId,imgId){
     reader.readAsDataURL(input.files[0]);
   }
 }
-
-// Galerie
 function ajouterPhotoGalerie(){
   const container=document.getElementById('galleryContainer');
   const index=container.children.length+1;
   const id='galleryPhoto'+index;
-  const html=`<div style="display:flex; gap:8px; margin-bottom:8px;">
+  const html=`<div style="display:flex; flex-direction:column; margin-bottom:8px;">
                 <input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
-                <label for="${id}"><img id="img${id}" class="doc-photo" title="Photo ${index}"/></label>
-                <div style="flex:1;"><div class="field"><label>Commentaire</label><textarea>Votre commentaire...</textarea></div></div>
+                <label for="${id}"><img id="img${id}" class="doc-photo"/></label>
+                <textarea>Commentaire...</textarea>
               </div>`;
   container.insertAdjacentHTML('beforeend',html);
 }
 
-// Signature
-function initSignature(){
-  const c=document.getElementById('sigCanvas');
-  const ctx=c.getContext('2d'); ctx.strokeStyle='#000'; ctx.lineWidth=2;
-  let drawing=false;
-  function getPos(e){const rect=c.getBoundingClientRect(); return {x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left, y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top};}
-  function start(e){drawing=true; ctx.beginPath(); const pos=getPos(e); ctx.moveTo(pos.x,pos.y);}
-  function draw(e){if(!drawing) return; const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke();}
-  function stop(){drawing=false;}
-  ['mousedown','touchstart'].forEach(ev=>c.addEventListener(ev,start));
-  ['mousemove','touchmove'].forEach(ev=>c.addEventListener(ev,draw));
-  ['mouseup','mouseleave','touchend'].forEach(ev=>c.addEventListener(ev,stop));
+// ================== SIGNATURE ==================
+function clearSignature(){ window.signaturePad.clear(); }
+
+// ================== FICHE 70 NOMS ==================
+function ouvrirFiche(){
+  const app=document.getElementById('app');
+  app.innerHTML = `
+    <h2 class="doc-title handwritten">Fiche 70 Noms</h2>
+    <div id="ficheContainer" style="display:flex;gap:12px;"></div>
+    <div style="margin-top:8px;">
+      <button class="btn btn-ghost" onclick="prevPage()">⬅ Page précédente</button>
+      <button class="btn btn-ghost" onclick="nextPage()">Page suivante ➡</button>
+      <button class="btn btn-ghost" onclick="ajouterNomFiche()">➕ Ajouter Nom</button>
+      <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>
+    </div>
+    <canvas id="signaturePad" class="signature-pad"></canvas>
+    <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
+  `;
+  afficherPage(currentPage);
+  const canvas=document.getElementById('signaturePad');
+  window.signaturePad=new SignaturePad(canvas);
 }
 
-// Popup
-function ouvrirPopup(){ document.getElementById('paymentModal').style.display='flex'; }
-function fermerPopup(){ document.getElementById('paymentModal').style.display='none'; }
+function afficherPage(page){
+  const container=document.getElementById('ficheContainer');
+  container.innerHTML='';
+  const start = page * nomsPerPage;
+  const end = Math.min(start + nomsPerPage, noms.length);
+  const pageNoms = noms.slice(start, end);
 
-// Vérifier paiement / code VIP
-function verifierPaiement(){
+  const col1=document.createElement('div');
+  const col2=document.createElement('div');
+  col1.style.flex='1'; col2.style.flex='1';
+  col1.style.display='flex'; col1.style.flexDirection='column'; col1.style.gap='4px';
+  col2.style.display='flex'; col2.style.flexDirection='column'; col2.style.gap='4px';
+
+  pageNoms.forEach((nom,i)=>{
+    const input=document.createElement('input');
+    input.value=nom;
+    input.style.fontSize='12px'; input.style.padding='4px'; input.style.border='1px solid #ddd'; input.style.borderRadius='4px';
+    input.oninput = e => { noms[start+i] = e.target.value; };
+    (i < Math.ceil(pageNoms.length/2) ? col1 : col2).appendChild(input);
+  });
+
+  container.appendChild(col1);
+  container.appendChild(col2);
+}
+
+function nextPage(){ if((currentPage+1)*nomsPerPage<noms.length){ currentPage++; afficherPage(currentPage); } }
+function prevPage(){ if(currentPage>0){ currentPage--; afficherPage(currentPage); } }
+function ajouterNomFiche(){ noms.push('Nouveau Nom'); afficherPage(currentPage); }
+
+// ================== PAIEMENT ==================
+let countdownInterval;
+function ouvrirPopup(){
+  document.getElementById('paymentModal').style.display='flex';
+  document.getElementById('pmMsg').textContent='';
+  document.getElementById('mmMsg').value='';
+  document.getElementById('vipInput').value='';
+  startCountdown(10); // 10 min
+}
+function fermerPopup(){
+  document.getElementById('paymentModal').style.display='none';
+  clearInterval(countdownInterval);
+  document.getElementById('pmMsg').textContent='';
+}
+function startCountdown(minutes){
+  let remaining = minutes*60;
+  const pmMsg = document.getElementById('pmMsg');
+  countdownInterval = setInterval(()=>{
+    const min = Math.floor(remaining/60);
+    const sec = remaining % 60;
+    pmMsg.style.color='blue';
+    pmMsg.textContent=`Temps restant pour validation : ${min}m ${sec}s`;
+    remaining--;
+    if(remaining<0){
+      clearInterval(countdownInterval);
+      pmMsg.style.color='crimson';
+      pmMsg.textContent='Le message est expiré ⏰';
+    }
+  },1000);
+}
+
+function verifierPaiementStrict(){
   const msg=document.getElementById('mmMsg').value.trim();
   const vip=document.getElementById('vipInput').value.trim();
   const pmMsg=document.getElementById('pmMsg');
-  if(vip===VIP_CODE || msg.length>0){
-    pmMsg.innerText='Paiement / VIP validé !';
-    paiementValide=true;
-    fermerPopup();
-    telechargerWord();
-  }else{
-    pmMsg.innerText='Code VIP ou message de transaction requis.';
+
+  // VIP
+  if(vip===VIP_CODE){
+    clearInterval(countdownInterval);
+    pmMsg.style.color='green';
+    pmMsg.textContent='Accès VIP valide ✔';
+    setTimeout(()=>{ fermerPopup(); exporterPDF(); }, 500);
+    return}
+
+  if(!msg){
+    pmMsg.style.color='crimson';
+    pmMsg.textContent='Veuillez coller le message reçu.';
+    return;
+  }
+
+  const msgLower = msg.toLowerCase();
+  const nomOK = msgLower.includes(BENEFICIAIRE.toLowerCase());
+  const omOK = msg.includes(NUM_OM);
+  const momoOK = msg.includes(NUM_MOMO);
+
+  // Vérification stricte : nom + OM ou MOMO + temps < 10 min
+  if(nomOK && (omOK || momoOK)){
+    clearInterval(countdownInterval);
+    pmMsg.style.color='green';
+    pmMsg.textContent='Paiement Mobile Money validé ✔';
+    setTimeout(()=>{
+      fermerPopup();
+      exporterPDF();
+    },500);
+  } else {
+    pmMsg.style.color='crimson';
+    pmMsg.textContent='Le message ne correspond pas au bénéficiaire ou aux numéros.';
   }
 }
 
-// Téléchargement Word
-function demandeTelechargement(){
-  if(paiementValide){
-    telechargerWord();
-  }else{
-    ouvrirPopup();
+// ================== EXPORT PDF ==================
+function exporterPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const content = document.getElementById('app');
+
+  // Ajouter le texte principal
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+
+  const lines = content.innerText.split('\n');
+  let y = 20;
+  lines.forEach(line=>{
+    doc.text(line, 20, y);
+    y += 6;
+  });
+
+  // Ajouter les images flottantes
+  const imgs = content.querySelectorAll('img');
+  let x = 20, imgY = y;
+  imgs.forEach(img=>{
+    if(img.src){
+      doc.addImage(img.src, 'JPEG', x, imgY, 30, 30);
+      x += 35;
+      if(x>150){ x=20; imgY +=35; }
+    }
+  });
+
+  // Ajouter la signature si présente
+  if(window.signaturePad && !window.signaturePad.isEmpty()){
+    const sigData = window.signaturePad.toDataURL('image/png');
+    doc.addImage(sigData, 'PNG', 20, imgY+10, 60, 30);
   }
+
+  doc.save('Document_Mini_Secrétariat.pdf');
 }
 
-function telechargerWord(){
-  if(!pendingDoc) return;
-  const app=document.getElementById('app').cloneNode(true);
-  // remplacer textarea par div
-  app.querySelectorAll('textarea').forEach(t=>{
-    const div=document.createElement('div');
-    div.innerText=t.value;
-    t.parentNode.replaceChild(div,t);
+// ================== APERCU ==================
+function genererApercu(){
+  const container = document.getElementById('previewContainer');
+  container.innerHTML='';
+  documents.forEach(doc=>{
+    const div = document.createElement('div');
+    div.className='preview-doc';
+    div.textContent=doc.replace(/([A-Z])/g," $1").trim();
+    container.appendChild(div);
   });
-  // images flottantes
-  app.querySelectorAll('img.doc-photo').forEach(img=>{
-    img.style.cssText='max-width:100%; display:block; float:left; margin:0 6px 6px 0;';
-  });
-  // signature incluse
-  const canvas=document.getElementById('sigCanvas');
-  if(canvas){
-    const imgSig=document.createElement('img');
-    imgSig.src=canvas.toDataURL();
-    imgSig.style.width='100px';
-    imgSig.style.height='50px';
-    app.appendChild(imgSig);
-  }
-
-  const htmlContent='<html><head><meta charset="utf-8"></head><body>'+app.innerHTML+'</body></html>';
-  const link=document.createElement('a');
-  link.href='data:application/vnd.ms-word;charset=utf-8,'+encodeURIComponent(htmlContent);
-  link.download=pendingDoc+'.doc';
-  link.click();
 }
 </script>
+
 </body>
 </html>
