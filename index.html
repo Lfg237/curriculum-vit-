@@ -171,14 +171,40 @@ function clearSignature(){window.signaturePad.clear();}
 function ouvrirPopup(){document.getElementById('paymentModal').style.display='flex'; document.getElementById('pmMsg').textContent='';}
 function fermerPopup(){document.getElementById('paymentModal').style.display='none';}
 function verifierPaiementStrict(){
-  const msg=document.getElementById('mmMsg').value.trim();
-  const vip=document.getElementById('vipInput').value.trim();
-  const pmMsg=document.getElementById('pmMsg');
-  let valide=false;
-  if(vip===VIP_CODE) valide=true;
-  else if(msg.length>10) valide=true;
-  if(valide){paiementValide=true;fermerPopup();alert('Paiement validé ✅');}
-  else{paiementValide=false; pmMsg.textContent='Message ou code invalide ❌';}
+  const msg = document.getElementById('mmMsg').value.trim();
+  const vip = document.getElementById('vipInput').value.trim();
+  const pmMsg = document.getElementById('pmMsg');
+  pmMsg.textContent = '';
+  let valide = false;
+
+  // Vérification du code VIP
+  if (vip === VIP_CODE) {
+    valide = true;
+  } else {
+    // Vérification stricte du message Mobile Money
+    const regex = /Loveline\s+Wirnkar|676353859|640647072/i;
+    const regexMontant = /\b\d{3,}\s?(F|FCFA|XAF)\b/i;
+    const regexId = /(ID|TID)\s?[:\-]?\s?\w+/i;
+    const regexDate = /\d{2}\/\d{2}\/\d{4}|\d{2}:\d{2}/;
+
+    if (
+      regex.test(msg) &&           // contient nom ou numéro bénéficiaire
+      regexMontant.test(msg) &&    // contient montant
+      regexId.test(msg) &&         // contient un identifiant de transaction
+      regexDate.test(msg)          // contient une date ou heure
+    ) {
+      valide = true;
+    }
+  }
+
+  if (valide) {
+    paiementValide = true;
+    fermerPopup();
+    alert('Paiement validé ✅');
+  } else {
+    paiementValide = false;
+    pmMsg.textContent = 'Message ou code invalide ❌. Vérifiez le nom, le numéro, le montant, l’ID et la date.';
+  }
 }
 
 async function exportPDF(docName){
