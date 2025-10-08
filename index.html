@@ -100,11 +100,26 @@ function ouvrirDoc(doc){
   const app=document.getElementById('app');
   const photoHTML=(id,title)=>`
     <input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
-    <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}"/></label>`;
+    <label for="${id}"><img id="${id}" class="doc-photo" title="${title}"/></label>`;
+  
   let content='';
+
   if(doc==='CNI'){
-    content=`${photoHTML('CNIrecto','CNI Recto')}<textarea>Texte recto...</textarea>
-             ${photoHTML('CNIverso','CNI Verso')}<textarea>Texte verso...</textarea>`;
+    content=`
+      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
+        <input type="file" id="CNIrecto" accept="image/*" style="display:none" onchange="afficherPhoto('CNIrecto','imgCNIrecto')"/>
+        <label for="CNIrecto">
+          <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;"/>
+        </label>
+      
+      </div>
+      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
+        <input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/>
+        <label for="CNIverso">
+          <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;"/>
+        </label>
+      
+      </div>`;
   } else if(doc==='Fiche70Noms'){
     content='<div class="fiche70">';
     content+='<div class="colonne">'+noms.slice(0,35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
@@ -116,23 +131,23 @@ function ouvrirDoc(doc){
   } else {
     content=`${photoHTML(doc+'Photo',doc)}<textarea>Votre contenu...</textarea>`;
   }
-  content+=`<canvas id="signaturePad" class="signature-pad"></canvas>
-            <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
-            <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
-            <button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button>
-            <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
-  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
 
-  const canvas=document.getElementById('signaturePad');
-  window.signaturePad=new SignaturePad(canvas);
+  content+=`<canvas id="signaturePad" class="signature-pad"></canvas><input class="editable" id="signataireInput" placeholder="Nom signataire"/>
+<button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
+<button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button>
+<button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
+app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
 
-  const signInput=document.getElementById('signataireInput');
-  signInput.value=nomSignataire;
-  signInput.addEventListener('input',()=>{nomSignataire=signInput.value;});
+const canvas=document.getElementById('signaturePad');
+window.signaturePad=new SignaturePad(canvas);
 
-  document.querySelectorAll('textarea').forEach(t=>{
-    t.addEventListener('input',()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px';});
-  });
+const signInput=document.getElementById('signataireInput');
+signInput.value=nomSignataire;
+signInput.addEventListener('input',()=>{nomSignataire=signInput.value;});
+
+document.querySelectorAll('textarea').forEach(t=>{
+  t.addEventListener('input',()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px';});
+});
 }
 
 function afficherPhoto(inputId,imgId){
@@ -212,7 +227,7 @@ async function exportPDF(docName){
 
   const app = document.getElementById('app');
 
-  // 1) Remplacer temporairement les textarea par des <div> (pour capturer tout le texte)
+  // Remplacer temporairement les textarea par des div (pour capturer tout le texte)
   const textareas = Array.from(app.querySelectorAll('textarea'));
   const backups = [];
   textareas.forEach(t => {
@@ -228,7 +243,7 @@ async function exportPDF(docName){
     t.parentNode.replaceChild(div, t);
   });
 
-  // 2) Si signature présente, ajouter une image de la signature dans le DOM (temporaire)
+  // Ajouter la signature si présente
   let sigImgEl = null;
   if(window.signaturePad && !window.signaturePad.isEmpty()){
     sigImgEl = document.createElement('img');
@@ -239,25 +254,22 @@ async function exportPDF(docName){
     app.appendChild(sigImgEl);
   }
 
-  // 3) Ajouter le nom du signataire visible (temporaire)
+  // Ajouter le nom du signataire
   const signText = document.createElement('div');
   signText.textContent = 'Signataire : ' + (typeof nomSignataire !== 'undefined' ? nomSignataire : '');
   signText.style.fontSize = '11px';
   signText.style.marginTop = '6px';
   app.appendChild(signText);
 
-  // 4) Capturer le DOM en canvas
-  // scale élevé améliore la netteté (mais augmente la mémoire)
+  // Capturer le DOM en canvas
   const canvas = await html2canvas(app, { scale: 2, useCORS: true, allowTaint: true });
   const imgWidthPx = canvas.width;
   const imgHeightPx = canvas.height;
 
-  // 5) Créer PDF A6 et découper le canvas en tranches si nécessaire
-  const pdf = new jspdf.jsPDF('p', 'mm', 'a6'); // <-- A6
-  const pageWidthMm = pdf.internal.pageSize.getWidth();   // en mm
-  const pageHeightMm = pdf.internal.pageSize.getHeight(); // en mm
+  const pdf = new jspdf.jsPDF('p', 'mm', 'a6');
+  const pageWidthMm = pdf.internal.pageSize.getWidth();
+  const pageHeightMm = pdf.internal.pageSize.getHeight();
 
-  // Calculer pixels par millimètre pour correspondance
   const pxPerMm = imgWidthPx / pageWidthMm;
   const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
 
@@ -266,7 +278,6 @@ async function exportPDF(docName){
   while (y < imgHeightPx) {
     const sliceHeight = Math.min(pageHeightPx, imgHeightPx - y);
 
-    // créer un canvas temporaire pour la tranche
     const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = imgWidthPx;
     tmpCanvas.height = sliceHeight;
@@ -274,12 +285,11 @@ async function exportPDF(docName){
     tmpCtx.drawImage(canvas, 0, y, imgWidthPx, sliceHeight, 0, 0, imgWidthPx, sliceHeight);
 
     const imgData = tmpCanvas.toDataURL('image/png');
-    const sliceHeightMm = sliceHeight / pxPerMm; // conversion en mm
+    const sliceHeightMm = sliceHeight / pxPerMm;
 
     if(pageIndex > 0) pdf.addPage();
     pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMm, sliceHeightMm);
 
-    // Pied de page en bas (sur chaque page)
     pdf.setFontSize(8);
     pdf.text("© LesFacilitateurs Middleman 651475255", 5, pageHeightMm - 5);
 
@@ -287,19 +297,12 @@ async function exportPDF(docName){
     pageIndex++;
   }
 
-  // 6) Sauvegarder le fichier
   pdf.save(`${docName}.pdf`);
 
-  // 7) Nettoyage : restaurer les textarea et enlever éléments temporaires
-  backups.forEach(({ t, div }) => {
-    if (div.parentNode) div.parentNode.replaceChild(t, div);
-  });
+  backups.forEach(({ t, div }) => { if (div.parentNode) div.parentNode.replaceChild(t, div); });
   if (sigImgEl && sigImgEl.parentNode) sigImgEl.parentNode.removeChild(sigImgEl);
   if (signText && signText.parentNode) signText.parentNode.removeChild(signText);
-
-  // 8) (optionnel) vider la signature si tu veux
-  // if(window.signaturePad) window.signaturePad.clear();
 }
-</script>
+  </script>
 </body>
 </html>
