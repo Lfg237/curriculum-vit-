@@ -100,7 +100,7 @@ function ouvrirDoc(doc){
   const app=document.getElementById('app');
   const photoHTML=(id,title)=>`
     <input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
-    <label for="${id}"><img id="${id}" class="doc-photo" title="${title}"/></label>`;
+    <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}" src=""/></label>`;
   
   let content='';
 
@@ -109,13 +109,13 @@ function ouvrirDoc(doc){
       <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIrecto" accept="image/*" style="display:none" onchange="afficherPhoto('CNIrecto','imgCNIrecto')"/>
         <label for="CNIrecto">
-          <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;"/>
+          <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
         </label>
       </div>
       <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/>
         <label for="CNIverso">
-          <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;"/>
+          <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
         </label>
       </div>`;
   } else if(doc==='Fiche70Noms'){
@@ -171,9 +171,8 @@ function afficherPhoto(inputId,imgId){
   const input=document.getElementById(inputId);
   const img=document.getElementById(imgId);
   if(input.files && input.files[0]){
-    const reader=new FileReader();
-    reader.onload=e=>{img.src=e.target.result;};
-    reader.readAsDataURL(input.files[0]);
+    img.src = URL.createObjectURL(input.files[0]);
+    img.onload = () => URL.revokeObjectURL(img.src);
   }
 }
 
@@ -193,9 +192,8 @@ function chargerImageFlottante(e,id){
   const img=document.getElementById('img'+id);
   const file=e.target.files[0];
   if(file){
-    const reader=new FileReader();
-    reader.onload=ev=>img.src=ev.target.result;
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file);
+    img.onload = () => URL.revokeObjectURL(img.src);
   }
 }
 
@@ -256,7 +254,6 @@ async function exportPDF(docName){
     t.parentNode.replaceChild(div, t);
   });
 
-  // Ajouter la signature si présente
   let sigImgEl = null;
   if(window.signaturePad && !window.signaturePad.isEmpty()){
     sigImgEl = document.createElement('img');
@@ -267,14 +264,12 @@ async function exportPDF(docName){
     app.appendChild(sigImgEl);
   }
 
-  // Ajouter le nom du signataire
   const signText = document.createElement('div');
   signText.textContent = 'Signataire : ' + (typeof nomSignataire !== 'undefined' ? nomSignataire : '');
   signText.style.fontSize = '11px';
   signText.style.marginTop = '6px';
   app.appendChild(signText);
 
-  // Ajouter les signataires pour le Protocole d'Accord
   if(docName==='ProtocoleAccord'){
     const signataires = Array.from(document.querySelectorAll('#signatairesContainer input'))
                               .map(input=>input.value)
@@ -303,7 +298,7 @@ async function exportPDF(docName){
   while (y < imgHeightPx) {
     const sliceHeight = Math.min(pageHeightPx, imgHeightPx - y);
 
-const tmpCanvas = document.createElement('canvas');
+    const tmpCanvas = document.createElement('canvas');
 tmpCanvas.width = imgWidthPx;
 tmpCanvas.height = sliceHeight;
 const tmpCtx = tmpCanvas.getContext('2d');
