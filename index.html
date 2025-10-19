@@ -28,6 +28,7 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;font-size:12px;}
 #previewContainer{width:95%;max-width:600px;margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;}
 .preview-doc{border:1px solid #ccc;padding:10px;margin-bottom:12px;border-radius:8px;background:#fffbe6;}
+.preview-doc img{width:60px;height:60px;border-radius:50%;margin-right:4px;float:left;}
 #paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
 #paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:400px;width:100%;}
 #pmMsg{margin-top:8px;color:crimson;}
@@ -35,7 +36,7 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8px;}
 .photo-flottante{float:left;margin:4px;padding:4px;border:1px solid #aaa;border-radius:6px;background:#fff;max-width:200px;display:inline-block;}
 .photo-flottante img{max-width:100%;display:block;margin-bottom:4px;}
-.photo-flottante div{word-wrap:break-word;min-height:20px;}
+.photo-flottante div{word-wrap:break-word;}
 .fiche70{display:flex; flex-wrap:wrap; gap:12px;}
 .colonne{flex:1; min-width:45%;}
 textarea, input{font-family:Inter,sans-serif;}
@@ -60,9 +61,9 @@ textarea, input{font-family:Inter,sans-serif;}
 <div id="paymentModal">
   <div>
     <h3>Paiement requis</h3>
-    <div><strong>Bénéficiaire :</strong> Kono Emini Michel Momo</div>
-    <div><strong>OM :</strong> 651475255</div>
-    <div><strong>MOMO :</strong> 656050097</div>
+    <div><strong>Bénéficiaire :</strong> LOVELINE WIRNKAR</div>
+    <div><strong>OM :</strong> 640647072</div>
+    <div><strong>MOMO :</strong> 676353859</div>
     <div style="margin-top:8px">
       <label>Message Mobile Money</label>
       <input id="mmMsg" type="text" placeholder="Copiez le message reçu" style="font-size:13px"/>
@@ -102,6 +103,7 @@ function ouvrirDoc(doc){
     <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}" src=""/></label>`;
   
   let content='';
+
   if(doc==='CNI'){
     content=`
       <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
@@ -127,6 +129,7 @@ function ouvrirDoc(doc){
   } else if(doc==='ProtocoleAccord'){
     content=`
       <textarea style="width:100%; min-height:150px;">Contenu du protocole...</textarea>
+
       <div id="signatairesContainer" style="margin-top:12px;">
         <h4>Signataires :</h4>
         <div><input placeholder="Nom signataire 1" style="width:100%; margin-bottom:4px;"/></div>
@@ -197,7 +200,6 @@ function chargerImageFlottante(e,id){
 function clearSignature(){window.signaturePad.clear();}
 function ouvrirPopup(){document.getElementById('paymentModal').style.display='flex'; document.getElementById('pmMsg').textContent='';}
 function fermerPopup(){document.getElementById('paymentModal').style.display='none';}
-
 function verifierPaiementStrict(){
   const msg = document.getElementById('mmMsg').value.trim();
   const vip = document.getElementById('vipInput').value.trim();
@@ -208,8 +210,8 @@ function verifierPaiementStrict(){
   if (vip === VIP_CODE) {
     valide = true;
   } else {
-    const regex = /Kono\s+Emini\s+Michel\s+Momo|651475255|656050097/i;
-    const regexMontant = /\b100\s?(F|FCFA|XAF)\b/i;
+    const regex = /Loveline\s+Wirnkar|676353859|640647072/i;
+    const regexMontant = /\b\d{3,}\s?(F|FCFA|XAF)\b/i;
     const regexId = /(ID|TID)\s?[:\-]?\s?\w+/i;
     const regexDate = /\d{2}\/\d{2}\/\d{4}|\d{2}:\d{2}/;
 
@@ -233,56 +235,44 @@ function verifierPaiementStrict(){
   }
 }
 
-async function exportPDF(docName) {
-    if(!paiementValide){ ouvrirPopup(); return; }
+async function exportPDF(docName){
+  if(!paiementValide){ ouvrirPopup(); return; }
+  const app = document.getElementById('app');
 
-    const app = document.getElementById('app');
-
-    // Attendre que toutes les images soient chargées
-    const images = Array.from(app.querySelectorAll('img'));
-    await Promise.all(images.map(img => {
-        if(img.complete) return Promise.resolve();
-        return new Promise(resolve => img.onload = resolve);
-    }));
-
-    // Préparer les textarea
-    const textareas = Array.from(app.querySelectorAll('textarea'));
-    const backups = [];
-    textareas.forEach(t => {
-        const div = document.createElement('div');
-        div.style.whiteSpace = 'pre-wrap';
-        div.style.fontSize = window.getComputedStyle(t).fontSize || '12px';
-        div.style.lineHeight = window.getComputedStyle(t).lineHeight || '1.4';
-        div.style.background = window.getComputedStyle(t).backgroundColor || '#fff8dc';
-        div.style.padding = window.getComputedStyle(t).padding || '6px';
-        div.style.marginBottom = '8px';
-        div.textContent = t.value;
-        backups.push({ t, div });
-        t.parentNode.replaceChild(div, t);
+  // S'assurer que toutes les images sont chargées avant capture
+  const images = Array.from(app.querySelectorAll('img'));
+  await Promise.all(images.map(img=>{
+    return new Promise(resolve=>{
+      if(img.complete) resolve();
+      else img.onload=img.onerror=()=>resolve();
     });
+  }));
 
-    // Ajouter signature si existante
-    let sigImgEl = null;
-    if(window.signaturePad && !window.signaturePad.isEmpty()){
-        sigImgEl = document.createElement('img');
-        sigImgEl.src = window.signaturePad.toDataURL();
-        sigImgEl.style.width = '120px';
-        sigImgEl.style.display = 'block';
-        sigImgEl.style.marginTop = '8px';
-        app.appendChild(sigImgEl);
-    }
+  // Convertir le contenu en canvas
+  const canvas = await html2canvas(app, { scale:2, useCORS:true, allowTaint:true });
+  const pdf = new jspdf.jsPDF('p','mm','a6');
+  const pageWidthMm = pdf.internal.pageSize.getWidth();
+  const pageHeightMm = pdf.internal.pageSize.getHeight();
+  const pxPerMm = canvas.width / pageWidthMm;
+  const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
 
-    // Capture avec html2canvas
-    const canvas = await html2canvas(app, { scale:2, allowTaint:true });
-    const imgData = canvas.toDataURL('image/png');
+  let y = 0, pageIndex = 0;
+  while(y < canvas.height){
+    const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = canvas.width;
+    tmpCanvas.height = sliceHeight;
+    tmpCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
+    const imgData = tmpCanvas.toDataURL('image/png');
+    const sliceHeightMm = sliceHeight / pxPerMm;
+    if(pageIndex>0) pdf.addPage();
+    pdf.addImage(imgData,'PNG',0,0,pageWidthMm,sliceHeightMm);
+    pdf.setFontSize(8);
+    pdf.text("© LesFacilitateurs Middleman 651475255",5,pageHeightMm-5);
+    y+=sliceHeight; pageIndex++;
+  }
 
-    const pdf = new jspdf.jsPDF('p','mm','a4');
-    pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
-    pdf.save(`${docName}.pdf`);
-
-    // Restaurer les textarea et supprimer signature temporaire
-    backups.forEach(({ t, div }) => div.parentNode.replaceChild(t, div));
-    if(sigImgEl && sigImgEl.parentNode) sigImgEl.parentNode.remove();
+  pdf.save(`${docName}.pdf`);
 }
 </script>
 </body>
