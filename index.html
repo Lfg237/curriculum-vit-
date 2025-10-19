@@ -81,6 +81,7 @@ textarea, input{font-family:Inter,sans-serif;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.4/dist/signature_pad.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <script>
 const documents=['CV','CarteVisite','LettreMotivation','CNI','ProtocoleAccord','ContratTravail','PlanLocalisation','Fiche70Noms','Rapport','GaleriePhotos'];
 const VIP_CODE='233233';
@@ -106,17 +107,24 @@ function ouvrirDoc(doc){
 
   if(doc==='CNI'){
     content=`
-      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
+      <div style="overflow:hidden; margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIrecto" accept="image/*" style="display:none" onchange="afficherPhoto('CNIrecto','imgCNIrecto')"/>
         <label for="CNIrecto">
-          <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
+          <img id="imgCNIrecto" style="float:left; width:45%; margin-right:8px; object-fit:cover;" src=""/>
         </label>
+        <div contenteditable="true" style="display:inline-block; width:50%; vertical-align:top;">
+          Texte recto ici...
+        </div>
       </div>
-      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
+
+      <div style="overflow:hidden; margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/>
         <label for="CNIverso">
-          <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
+          <img id="imgCNIverso" style="float:left; width:45%; margin-right:8px; object-fit:cover;" src=""/>
         </label>
+        <div contenteditable="true" style="display:inline-block; width:50%; vertical-align:top;">
+          Texte verso ici...
+        </div>
       </div>`;
   } else if(doc==='Fiche70Noms'){
     content='<div class="fiche70">';
@@ -124,12 +132,11 @@ function ouvrirDoc(doc){
     content+='<div class="colonne">'+noms.slice(35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
     content+='</div>';
   } else if(doc==='GaleriePhotos'){
-    content=`<div id="galleryContainer"></div>
+    content=`<div id="galleryContainer" style="overflow:hidden;"></div>
              <button class="btn btn-ghost" onclick="ajouterPhotoFlottante()">➕ Ajouter photo</button>`;
   } else if(doc==='ProtocoleAccord'){
     content=`
       <textarea style="width:100%; min-height:150px;">Contenu du protocole...</textarea>
-
       <div id="signatairesContainer" style="margin-top:12px;">
         <h4>Signataires :</h4>
         <div><input placeholder="Nom signataire 1" style="width:100%; margin-bottom:4px;"/></div>
@@ -183,8 +190,10 @@ function ajouterPhotoFlottante(){
   div.className='photo-flottante';
   div.innerHTML=`
     <input type="file" accept="image/*" onchange="chargerImageFlottante(event,'${id}')">
-    <img id="img${id}" src=""/>
-    <div contenteditable="true">Commentaire...</div>`;
+    <img id="img${id}" style="float:left; width:100px; margin-right:8px; object-fit:cover;" src=""/>
+    <div contenteditable="true" style="display:inline-block; max-width:calc(100% - 108px); vertical-align:top;">
+      Commentaire ou texte ici...
+    </div>`;
   container.appendChild(div);
 }
 
@@ -239,7 +248,6 @@ async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
   const app = document.getElementById('app');
 
-  // S'assurer que toutes les images sont chargées avant capture
   const images = Array.from(app.querySelectorAll('img'));
   await Promise.all(images.map(img=>{
     return new Promise(resolve=>{
@@ -248,7 +256,6 @@ async function exportPDF(docName){
     });
   }));
 
-  // Convertir le contenu en canvas
   const canvas = await html2canvas(app, { scale:2, useCORS:true, allowTaint:true });
   const pdf = new jspdf.jsPDF('p','mm','a6');
   const pageWidthMm = pdf.internal.pageSize.getWidth();
