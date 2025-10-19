@@ -81,7 +81,6 @@ textarea, input{font-family:Inter,sans-serif;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.4/dist/signature_pad.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
 <script>
 const documents=['CV','CarteVisite','LettreMotivation','CNI','ProtocoleAccord','ContratTravail','PlanLocalisation','Fiche70Noms','Rapport','GaleriePhotos'];
 const VIP_CODE='233233';
@@ -107,24 +106,17 @@ function ouvrirDoc(doc){
 
   if(doc==='CNI'){
     content=`
-      <div style="overflow:hidden; margin-bottom:12px; border:1px solid #000; padding:4px;">
+      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIrecto" accept="image/*" style="display:none" onchange="afficherPhoto('CNIrecto','imgCNIrecto')"/>
         <label for="CNIrecto">
-          <img id="imgCNIrecto" style="float:left; width:45%; margin-right:8px; object-fit:cover;" src=""/>
+          <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
         </label>
-        <div contenteditable="true" style="display:inline-block; width:50%; vertical-align:top;">
-          Texte recto ici...
-        </div>
       </div>
-
-      <div style="overflow:hidden; margin-bottom:12px; border:1px solid #000; padding:4px;">
+      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/>
         <label for="CNIverso">
-          <img id="imgCNIverso" style="float:left; width:45%; margin-right:8px; object-fit:cover;" src=""/>
+          <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
         </label>
-        <div contenteditable="true" style="display:inline-block; width:50%; vertical-align:top;">
-          Texte verso ici...
-        </div>
       </div>`;
   } else if(doc==='Fiche70Noms'){
     content='<div class="fiche70">';
@@ -132,7 +124,7 @@ function ouvrirDoc(doc){
     content+='<div class="colonne">'+noms.slice(35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
     content+='</div>';
   } else if(doc==='GaleriePhotos'){
-    content=`<div id="galleryContainer" style="overflow:hidden;"></div>
+    content=`<div id="galleryContainer"></div>
              <button class="btn btn-ghost" onclick="ajouterPhotoFlottante()">➕ Ajouter photo</button>`;
   } else if(doc==='ProtocoleAccord'){
     content=`
@@ -178,8 +170,11 @@ function afficherPhoto(inputId,imgId){
   const input=document.getElementById(inputId);
   const img=document.getElementById(imgId);
   if(input.files && input.files[0]){
-    img.src = URL.createObjectURL(input.files[0]);
-    img.onload = () => URL.revokeObjectURL(img.src);
+    const reader = new FileReader();
+    reader.onload = function(e){
+      img.src = e.target.result; // Base64 pour html2canvas
+    }
+    reader.readAsDataURL(input.files[0]);
   }
 }
 
@@ -190,10 +185,8 @@ function ajouterPhotoFlottante(){
   div.className='photo-flottante';
   div.innerHTML=`
     <input type="file" accept="image/*" onchange="chargerImageFlottante(event,'${id}')">
-    <img id="img${id}" style="float:left; width:100px; margin-right:8px; object-fit:cover;" src=""/>
-    <div contenteditable="true" style="display:inline-block; max-width:calc(100% - 108px); vertical-align:top;">
-      Commentaire ou texte ici...
-    </div>`;
+    <img id="img${id}" src=""/>
+    <div contenteditable="true">Commentaire...</div>`;
   container.appendChild(div);
 }
 
@@ -201,8 +194,11 @@ function chargerImageFlottante(e,id){
   const img=document.getElementById('img'+id);
   const file=e.target.files[0];
   if(file){
-    img.src = URL.createObjectURL(file);
-    img.onload = () => URL.revokeObjectURL(img.src);
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      img.src = ev.target.result;
+    }
+    reader.readAsDataURL(file);
   }
 }
 
@@ -248,14 +244,16 @@ async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
   const app = document.getElementById('app');
 
+  // Attendre que toutes les images soient chargées
   const images = Array.from(app.querySelectorAll('img'));
   await Promise.all(images.map(img=>{
     return new Promise(resolve=>{
-      if(img.complete) resolve();
+      if(img.complete && img.naturalHeight !==0) resolve();
       else img.onload=img.onerror=()=>resolve();
     });
   }));
 
+  // Convertir le contenu en canvas
   const canvas = await html2canvas(app, { scale:2, useCORS:true, allowTaint:true });
   const pdf = new jspdf.jsPDF('p','mm','a6');
   const pageWidthMm = pdf.internal.pageSize.getWidth();
