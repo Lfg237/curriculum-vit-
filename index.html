@@ -244,6 +244,23 @@ async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
   const app = document.getElementById('app');
 
+  // Copier le texte des inputs et textareas dans des div temporaires pour html2canvas
+  const inputs = Array.from(app.querySelectorAll('input, textarea'));
+  const tempDivs = [];
+  inputs.forEach(el => {
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.left = el.offsetLeft+'px';
+    div.style.top = el.offsetTop+'px';
+    div.style.width = el.offsetWidth+'px';
+    div.style.height = el.offsetHeight+'px';
+    div.style.font = window.getComputedStyle(el).font;
+    div.style.whiteSpace = 'pre-wrap';
+    div.textContent = el.value;
+    app.appendChild(div);
+    tempDivs.push(div);
+  });
+
   // Attendre que toutes les images soient chargées
   const images = Array.from(app.querySelectorAll('img'));
   await Promise.all(images.map(img=>{
@@ -276,6 +293,9 @@ async function exportPDF(docName){
     pdf.text("© LesFacilitateurs Middleman 651475255",5,pageHeightMm-5);
     y+=sliceHeight; pageIndex++;
   }
+
+  // Supprimer les div temporaires
+  tempDivs.forEach(div => div.remove());
 
   pdf.save(`${docName}.pdf`);
 }
