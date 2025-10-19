@@ -111,12 +111,14 @@ function ouvrirDoc(doc){
         <label for="CNIrecto">
           <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
         </label>
+        <textarea placeholder="Texte éditable recto..." style="margin-top:4px;"></textarea>
       </div>
       <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
         <input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/>
         <label for="CNIverso">
           <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
         </label>
+        <textarea placeholder="Texte éditable verso..." style="margin-top:4px;"></textarea>
       </div>`;
   } else if(doc==='Fiche70Noms'){
     content='<div class="fiche70">';
@@ -129,7 +131,6 @@ function ouvrirDoc(doc){
   } else if(doc==='ProtocoleAccord'){
     content=`
       <textarea style="width:100%; min-height:150px;">Contenu du protocole...</textarea>
-
       <div id="signatairesContainer" style="margin-top:12px;">
         <h4>Signataires :</h4>
         <div><input placeholder="Nom signataire 1" style="width:100%; margin-bottom:4px;"/></div>
@@ -137,14 +138,20 @@ function ouvrirDoc(doc){
       <button class="btn btn-ghost" onclick="ajouterSignataire()">➕ Ajouter signataire</button>
     `;
   } else {
-    content=`${photoHTML(doc+'Photo',doc)}<textarea>Votre contenu...</textarea>`;
+    content=`<div class="photo-flottante">
+               <input type="file" id="${doc}Photo" accept="image/*" onchange="afficherPhoto('${doc}Photo','img${doc}Photo')"/>
+               <img id="img${doc}Photo" src=""/>
+               <div contenteditable="true">Texte éditable...</div>
+             </div>`;
   }
 
-  content+=`<canvas id="signaturePad" class="signature-pad"></canvas>
+  content+=`
+<canvas id="signaturePad" class="signature-pad"></canvas>
 <input class="editable" id="signataireInput" placeholder="Nom signataire"/>
 <button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
 <button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button>
 <button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
+
 app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
 
 const canvas=document.getElementById('signaturePad');
@@ -157,6 +164,7 @@ signInput.addEventListener('input',()=>{nomSignataire=signInput.value;});
 document.querySelectorAll('textarea').forEach(t=>{
   t.addEventListener('input',()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px';});
 });
+
 }
 
 function ajouterSignataire(){
@@ -237,42 +245,81 @@ function verifierPaiementStrict(){
 
 async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
+
   const app = document.getElementById('app');
+  const textareas = Array.from(app.querySelectorAll('textarea'));
+  const backups = [];
+  textareas.forEach(t => {
+    const div = document.createElement('div');
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.fontSize = window.getComputedStyle(t).fontSize || '12px';
+    div.style.lineHeight = window.getComputedStyle(t).lineHeight || '1.4';
+    div.style.background = window.getComputedStyle(t).backgroundColor || '#fff8dc';
+    div.style.padding = window.getComputedStyle(t).padding || '6px';
+    div.style.marginBottom = '8px';
+    div.textContent = t.value;
+    backups.push({ t, div });
+    t.parentNode.replaceChild(div, t);
+  });
 
-  // S'assurer que toutes les images sont chargées avant capture
-  const images = Array.from(app.querySelectorAll('img'));
-  await Promise.all(images.map(img=>{
-    return new Promise(resolve=>{
-      if(img.complete) resolve();
-      else img.onload=img.onerror=()=>resolve();
-    });
-  }));
-
-  // Convertir le contenu en canvas
-  const canvas = await html2canvas(app, { scale:2, useCORS:true, allowTaint:true });
-  const pdf = new jspdf.jsPDF('p','mm','a6');
-  const pageWidthMm = pdf.internal.pageSize.getWidth();
-  const pageHeightMm = pdf.internal.pageSize.getHeight();
-  const pxPerMm = canvas.width / pageWidthMm;
-  const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
-
-  let y = 0, pageIndex = 0;
-  while(y < canvas.height){
-    const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
-    const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = canvas.width;
-    tmpCanvas.height = sliceHeight;
-    tmpCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
-    const imgData = tmpCanvas.toDataURL('image/png');
-    const sliceHeightMm = sliceHeight / pxPerMm;
-    if(pageIndex>0) pdf.addPage();
-    pdf.addImage(imgData,'PNG',0,0,pageWidthMm,sliceHeightMm);
-    pdf.setFontSize(8);
-    pdf.text("© LesFacilitateurs Middleman 651475255",5,pageHeightMm-5);
-    y+=sliceHeight; pageIndex++;
+  let sigImgEl = null;
+  if(window.signaturePad && !window.signaturePad.isEmpty()){
+    sigImgEl = document.createElement('img');
+    sigImgEl.src = window.signaturePad.toDataURL();
+    sigImgEl.style.width = '120px';
+    sigImgEl.style.display = 'block';
+    sigImgEl.style.marginTop = '8px';
+    app.appendChild(sigImgEl);
   }
 
-  pdf.save(`${docName}.pdf`);
+  const signText = document.createElement('div');
+  signText.textContent = 'Signataire : ' + (typeof nomSignataire !== 'undefined' ? nomSignataire : '');
+  signText.style.fontSize = '11px';
+  signText.style.marginTop = '6px';
+  app.appendChild(signText);
+
+  const canvas = await html2canvas(app, { scale: 2, useCORS: true, allowTaint: true });
+  const imgWidthPx = canvas.width;
+  const imgHeightPx = canvas.height;
+
+  const pdf = new jspdf.jsPDF('p', 'mm', 'a6');
+  const pageWidthMm = pdf.internal.pageSize.getWidth();
+  const pageHeightMm = pdf.internal.pageSize.getHeight();
+
+  const pxPerMm = imgWidthPx / pageWidthMm;
+  const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
+
+  let y = 0;
+  let pageIndex = 0;
+  while (y < imgHeightPx) {
+    const sliceHeight = Math.min(pageHeightPx, imgHeightPx - y);
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = imgWidthPx;
+    tmpCanvas.height = sliceHeight;
+    const tmpCtx = tmpCanvas.getContext('2d');
+tmpCtx.drawImage(canvas, 0, y, imgWidthPx, sliceHeight, 0, 0, imgWidthPx, sliceHeight);
+
+const imgData = tmpCanvas.toDataURL('image/png');
+const sliceHeightMm = sliceHeight / pxPerMm;
+
+if(pageIndex > 0) pdf.addPage();
+pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMm, sliceHeightMm);
+
+pdf.setFontSize(8);
+pdf.text("© LesFacilitateurs Middleman 651475255", 5, pageHeightMm - 5);
+
+y += sliceHeight;
+pageIndex++;
+}
+
+// Restaurer les textarea originaux
+backups.forEach(({ t, div }) => { if (div.parentNode) div.parentNode.replaceChild(t, div); });
+
+// Supprimer la signature temporaire et le nom du signataire
+if (sigImgEl && sigImgEl.parentNode) sigImgEl.parentNode.removeChild(sigImgEl);
+if (signText && signText.parentNode) signText.parentNode.removeChild(signText);
+
+pdf.save(`${docName}.pdf`);
 }
 </script>
 </body>
