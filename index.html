@@ -233,87 +233,56 @@ function verifierPaiementStrict(){
   }
 }
 
-async function exportPDF(docName){
-  if(!paiementValide){ ouvrirPopup(); return; }
+async function exportPDF(docName) {
+    if(!paiementValide){ ouvrirPopup(); return; }
 
-  const app = document.getElementById('app');
+    const app = document.getElementById('app');
 
-  // Attendre que toutes les images soient chargées
-  const images = Array.from(app.querySelectorAll('img'));
-  await Promise.all(images.map(img => {
-    if(img.complete) return Promise.resolve();
-    return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
-  }));
+    // Attendre que toutes les images soient chargées
+    const images = Array.from(app.querySelectorAll('img'));
+    await Promise.all(images.map(img => {
+        if(img.complete) return Promise.resolve();
+        return new Promise(resolve => img.onload = resolve);
+    }));
 
-  const textareas = Array.from(app.querySelectorAll('textarea'));
-  const backups = [];
-  textareas.forEach(t => {
-    const div = document.createElement('div');
-    div.style.whiteSpace = 'pre-wrap';
-    div.style.fontSize = window.getComputedStyle(t).fontSize || '12px';
-    div.style.lineHeight = window.getComputedStyle(t).lineHeight || '1.4';
-    div.style.background = window.getComputedStyle(t).backgroundColor || '#fff8dc';
-    div.style.padding = window.getComputedStyle(t).padding || '6px';
-    div.style.marginBottom = '8px';
-    div.textContent = t.value;
-    backups.push({ t, div });
-    t.parentNode.replaceChild(div, t);
-  });
+    // Préparer les textarea
+    const textareas = Array.from(app.querySelectorAll('textarea'));
+    const backups = [];
+    textareas.forEach(t => {
+        const div = document.createElement('div');
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.fontSize = window.getComputedStyle(t).fontSize || '12px';
+        div.style.lineHeight = window.getComputedStyle(t).lineHeight || '1.4';
+        div.style.background = window.getComputedStyle(t).backgroundColor || '#fff8dc';
+        div.style.padding = window.getComputedStyle(t).padding || '6px';
+        div.style.marginBottom = '8px';
+        div.textContent = t.value;
+        backups.push({ t, div });
+        t.parentNode.replaceChild(div, t);
+    });
 
-  let sigImgEl = null;
-  if(window.signaturePad && !window.signaturePad.isEmpty()){
-    sigImgEl = document.createElement('img');
-    sigImgEl.src = window.signaturePad.toDataURL();
-    sigImgEl.style.width='120px';
-    sigImgEl.style.display='block';
-    sigImgEl.style.marginTop='8px';
-    app.appendChild(sigImgEl);
-  }
+    // Ajouter signature si existante
+    let sigImgEl = null;
+    if(window.signaturePad && !window.signaturePad.isEmpty()){
+        sigImgEl = document.createElement('img');
+        sigImgEl.src = window.signaturePad.toDataURL();
+        sigImgEl.style.width = '120px';
+        sigImgEl.style.display = 'block';
+        sigImgEl.style.marginTop = '8px';
+        app.appendChild(sigImgEl);
+    }
 
-  const signText = document.createElement('div');
-  signText.textContent = 'Signataire : ' + (nomSignataire || '');
-  signText.style.fontSize = '11px';
-  signText.style.marginTop = '6px';
-  app.appendChild(signText);
+    // Capture avec html2canvas
+    const canvas = await html2canvas(app, { scale:2, allowTaint:true });
+    const imgData = canvas.toDataURL('image/png');
 
-  const canvas = await html2canvas(app,{scale:2,useCORS:true,allowTaint:true});
+    const pdf = new jspdf.jsPDF('p','mm','a4');
+    pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+    pdf.save(`${docName}.pdf`);
 
-  const pdf = new jspdf.jsPDF('p','mm','a6');
-  const pageWidthMm = pdf.internal.pageSize.getWidth();
-  const pageHeightMm = pdf.internal.pageSize.getHeight();
-  const pxPerMm = canvas.width / pageWidthMm;
-  const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
-
-  let y=0, pageIndex=0;
-  while(y < canvas.height){
-    const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
-    const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = canvas.width;
-    tmpCanvas.height = sliceHeight;
-    const tmpCtx = tmpCanvas.getContext('2d');
-    tmpCtx.drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
-    const imgData = tmpCanvas.toDataURL('image/png');
-    const sliceHeightMm = sliceHeight/pxPerMm;
- if (pageIndex > 0) pdf.addPage();
-pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMm, sliceHeightMm);
-
-pdf.setFontSize(8);
-pdf.text("© LesFacilitateurs Middleman 651475255", 5, pageHeightMm - 5);
-
-y += sliceHeight;
-pageIndex++;
-}
-
-// Restaurer les textarea originaux
-backups.forEach(({ t, div }) => { 
-  if (div.parentNode) div.parentNode.replaceChild(t, div); 
-});
-
-// Supprimer la signature temporaire et le nom du signataire
-if (sigImgEl && sigImgEl.parentNode) sigImgEl.parentNode.removeChild(sigImgEl);
-if (signText && signText.parentNode) signText.parentNode.removeChild(signText);
-
-pdf.save(`${docName}.pdf`);
+    // Restaurer les textarea et supprimer signature temporaire
+    backups.forEach(({ t, div }) => div.parentNode.replaceChild(t, div));
+    if(sigImgEl && sigImgEl.parentNode) sigImgEl.parentNode.remove();
 }
 </script>
 </body>
