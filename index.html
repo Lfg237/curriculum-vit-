@@ -239,19 +239,18 @@ function verifierPaiementStrict(){
     pmMsg.textContent = 'Message ou code invalide ❌. Vérifiez le nom, le numéro, le montant, l’ID et la date.';
   }
 }
-
 async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
 
   const app = document.getElementById('app');
-  const clone = app.cloneNode(true); // Cloner tout le contenu
+  const clone = app.cloneNode(true);
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
-  tempContainer.style.left = '-9999px'; // Hors écran
+  tempContainer.style.left = '-9999px';
   document.body.appendChild(tempContainer);
   tempContainer.appendChild(clone);
 
-  // 🔹 Remplacer les <input> et <textarea> par des <div> avec leur texte
+  // 🔹 Remplacer les champs par leur texte pour capture propre
   const fields = clone.querySelectorAll('input, textarea');
   fields.forEach(field => {
     const div = document.createElement('div');
@@ -273,7 +272,7 @@ async function exportPDF(docName){
     field.replaceWith(div);
   });
 
-  // 🔹 Attendre le chargement complet des images
+  // 🔹 Attendre chargement des images
   const images = clone.querySelectorAll('img');
   await Promise.all(Array.from(images).map(img => {
     return new Promise(resolve => {
@@ -282,9 +281,10 @@ async function exportPDF(docName){
     });
   }));
 
-  // 🔹 Conversion propre avec html2canvas
+  // ✅ Correction ici : utiliser window.jspdf
+  const { jsPDF } = window.jspdf;
   const canvas = await html2canvas(clone, { scale:2, useCORS:true, allowTaint:true });
-  const pdf = new jspdf.jsPDF('p','mm','a6');
+  const pdf = new jsPDF('p','mm','a6');
   const pageWidthMm = pdf.internal.pageSize.getWidth();
   const pageHeightMm = pdf.internal.pageSize.getHeight();
   const pxPerMm = canvas.width / pageWidthMm;
@@ -293,8 +293,8 @@ async function exportPDF(docName){
   let y = 0, pageIndex = 0;
   while (y < canvas.height) {
     const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
-    tmpCanvas.width = canvas.width;
     const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = canvas.width;
     tmpCanvas.height = sliceHeight;
     tmpCanvas.getContext('2d').drawImage(canvas, 0, y, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
     const imgData = tmpCanvas.toDataURL('image/png');
@@ -307,7 +307,7 @@ async function exportPDF(docName){
     pageIndex++;
   }
 
-  tempContainer.remove(); // Nettoyage
+  tempContainer.remove();
   pdf.save(`${docName}.pdf`);
 }
 </script>
