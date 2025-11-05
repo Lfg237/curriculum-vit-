@@ -242,36 +242,49 @@ function verifierPaiementStrict(){
 
 async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
-  
+
   const app = document.getElementById('app');
+  const clone = app.cloneNode(true); // Cloner tout le contenu
   const tempContainer = document.createElement('div');
-  document.body.appendChild(tempContainer); // Ajouter un conteneur temporaire
+  tempContainer.style.position = 'absolute';
+  tempContainer.style.left = '-9999px'; // Hors écran
+  document.body.appendChild(tempContainer);
+  tempContainer.appendChild(clone);
 
-  // 1. Cloner le contenu visible de l'application dans le conteneur temporaire
-  const clonedApp = app.cloneNode(true);
-  tempContainer.appendChild(clonedApp);
-
-  // 2. Cacher tous les éléments interactifs et de saisie (inputs, textareas, etc.) dans le clone
-  const inputs = Array.from(clonedApp.querySelectorAll('input, textarea'));
-  inputs.forEach(input => {
-    input.style.visibility = 'hidden'; // Les rendre invisibles
-    input.style.position = 'absolute'; // Éviter qu'ils soient pris en compte dans la capture
+  // 🔹 Remplacer les <input> et <textarea> par des <div> avec leur texte
+  const fields = clone.querySelectorAll('input, textarea');
+  fields.forEach(field => {
+    const div = document.createElement('div');
+    div.textContent = field.value || field.placeholder || '';
+    const style = window.getComputedStyle(field);
+    div.style.cssText = `
+      font-family:${style.fontFamily};
+      font-size:${style.fontSize};
+      font-weight:${style.fontWeight};
+      line-height:${style.lineHeight};
+      color:${style.color};
+      border:none;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+      background:transparent;
+      width:${field.offsetWidth}px;
+      min-height:${field.offsetHeight}px;
+    `;
+    field.replaceWith(div);
   });
 
-  // 3. Gérer les images en attente (attendre qu'elles soient chargées)
-  const images = Array.from(clonedApp.querySelectorAll('img'));
-  await Promise.all(images.map(img => {
+  // 🔹 Attendre le chargement complet des images
+  const images = clone.querySelectorAll('img');
+  await Promise.all(Array.from(images).map(img => {
     return new Promise(resolve => {
       if (img.complete && img.naturalHeight !== 0) resolve();
       else img.onload = img.onerror = () => resolve();
     });
   }));
 
-  // 4. Utiliser html2canvas pour capturer uniquement le contenu nécessaire
-  const canvas = await html2canvas(clonedApp, { scale: 2, useCORS: true, allowTaint: true });
-
-  // 5. Créer un PDF à partir de l'image capturée
-  const pdf = new jspdf.jsPDF('p', 'mm', 'a6');
+  // 🔹 Conversion propre avec html2canvas
+  const canvas = await html2canvas(clone, { scale:2, useCORS:true, allowTaint:true });
+  const pdf = new jspdf.jsPDF('p','mm','a6');
   const pageWidthMm = pdf.internal.pageSize.getWidth();
   const pageHeightMm = pdf.internal.pageSize.getHeight();
   const pxPerMm = canvas.width / pageWidthMm;
@@ -280,8 +293,8 @@ async function exportPDF(docName){
   let y = 0, pageIndex = 0;
   while (y < canvas.height) {
     const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
-    const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = canvas.width;
+    const tmpCanvas = document.createElement('canvas');
     tmpCanvas.height = sliceHeight;
     tmpCanvas.getContext('2d').drawImage(canvas, 0, y, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
     const imgData = tmpCanvas.toDataURL('image/png');
@@ -294,10 +307,7 @@ async function exportPDF(docName){
     pageIndex++;
   }
 
-  // 6. Supprimer le conteneur temporaire après la capture
-  tempContainer.remove();
-
-  // 7. Télécharger le PDF
+  tempContainer.remove(); // Nettoyage
   pdf.save(`${docName}.pdf`);
 }
 </script>
