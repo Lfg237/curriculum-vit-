@@ -244,13 +244,25 @@ async function exportPDF(docName){
 
   const app = document.getElementById('app');
   const clone = app.cloneNode(true);
+
+  // 🔹 Si la signature est un canvas, on la convertit en image avant de cloner
+  const originalSignatures = app.querySelectorAll('canvas');
+  const cloneSignatures = clone.querySelectorAll('canvas');
+  originalSignatures.forEach((canvas, i) => {
+    const img = document.createElement('img');
+    img.src = canvas.toDataURL('image/png');
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    cloneSignatures[i].replaceWith(img);
+  });
+
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
   tempContainer.style.left = '-9999px';
   document.body.appendChild(tempContainer);
   tempContainer.appendChild(clone);
 
-  // 🔹 Remplacer les champs par leur texte pour capture propre
+  // 🔹 Transformer les inputs/textareas en texte simple
   const fields = clone.querySelectorAll('input, textarea');
   fields.forEach(field => {
     const div = document.createElement('div');
@@ -260,11 +272,11 @@ async function exportPDF(docName){
       font-family:${style.fontFamily};
       font-size:${style.fontSize};
       font-weight:${style.fontWeight};
-      line-height:${style.lineHeight};
       color:${style.color};
-      border:none;
+      line-height:${style.lineHeight};
       white-space:pre-wrap;
       word-wrap:break-word;
+      border:none;
       background:transparent;
       width:${field.offsetWidth}px;
       min-height:${field.offsetHeight}px;
@@ -272,7 +284,7 @@ async function exportPDF(docName){
     field.replaceWith(div);
   });
 
-  // 🔹 Attendre chargement des images
+  // 🔹 Attendre le chargement complet des images (y compris signature)
   const images = clone.querySelectorAll('img');
   await Promise.all(Array.from(images).map(img => {
     return new Promise(resolve => {
@@ -281,7 +293,7 @@ async function exportPDF(docName){
     });
   }));
 
-  // ✅ Correction ici : utiliser window.jspdf
+  // ✅ Création du PDF (fixe la référence globale)
   const { jsPDF } = window.jspdf;
   const canvas = await html2canvas(clone, { scale:2, useCORS:true, allowTaint:true });
   const pdf = new jsPDF('p','mm','a6');
