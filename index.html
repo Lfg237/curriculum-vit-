@@ -243,80 +243,85 @@ async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
 
   const app = document.getElementById('app');
+
+  // CLONE propre
   const clone = app.cloneNode(true);
 
-  // Remplacer tous les inputs / textarea / contenteditable par du texte
-  clone.querySelectorAll('input, textarea, [contenteditable]').forEach(f => {
-      const div = document.createElement('div');
-      div.textContent = f.value || f.textContent || '';
-      const style = window.getComputedStyle(f);
-      div.style.cssText = `
-          font-family:${style.fontFamily};
-          font-size:${style.fontSize};
-          font-weight:${style.fontWeight};
-          color:${style.color};
-          line-height:${style.lineHeight};
-          white-space:pre-wrap;
-          word-wrap:break-word;
-          margin-bottom:4px;
-      `;
-      f.replaceWith(div);
+  // --- 1) Supprimer tous les styles bloquants ---
+  clone.style.background = "#ffffff";     // Remplace le gradient
+  clone.style.overflow = "visible";
+  clone.style.height = "auto";
+  clone.style.width = app.scrollWidth + "px";
+  clone.style.position = "static";
+
+  clone.querySelectorAll('*').forEach(el=>{
+      el.style.overflow = "visible";
+      el.style.background = el.style.background.includes("linear-gradient") ? "#fff" : el.style.background;
+      el.style.position = el.style.position === "relative" ? "static" : el.style.position;
   });
 
-  // Convertir canvas signature en image
-  clone.querySelectorAll('canvas').forEach(c => {
-      const img = document.createElement('img');
-      img.src = c.toDataURL('image/png');
-      img.style.maxWidth = '100%';
-      img.style.height = 'auto';
+  // --- 2) Remplacer inputs / textarea → texte stable ---
+  clone.querySelectorAll('textarea,input,[contenteditable]').forEach(f=>{
+      const d=document.createElement('div');
+      d.textContent=f.value||f.textContent;
+      const cs=getComputedStyle(f);
+      d.style.cssText=`
+        font-size:${cs.fontSize};
+        font-family:${cs.fontFamily};
+        font-weight:${cs.fontWeight};
+        line-height:${cs.lineHeight};
+        color:${cs.color};
+        white-space:pre-wrap;
+        margin-bottom:4px;
+      `;
+      f.replaceWith(d);
+  });
+
+  // --- 3) Remplacer canvas signature par image ---
+  clone.querySelectorAll('canvas').forEach(c=>{
+      const img=document.createElement('img');
+      img.src=c.toDataURL('image/png');
+      img.style.maxWidth='100%';
       c.replaceWith(img);
   });
 
-  // Forcer affichage complet
-  clone.style.background = '#fff';
-  clone.style.overflow = 'visible';
-  clone.style.height = 'auto';
-  clone.style.width = app.scrollWidth + 'px';
+  // --- 4) Injecter le clone hors de l’écran ---
+  const temp=document.createElement('div');
+  temp.style.position='absolute';
+  temp.style.left='-9999px';
+  document.body.appendChild(temp);
+  temp.appendChild(clone);
 
-  const tempContainer = document.createElement('div');
-  tempContainer.style.position = 'absolute';
-  tempContainer.style.left = '-9999px';
-  tempContainer.appendChild(clone);
-  document.body.appendChild(tempContainer);
+  // --- 5) Attendre chargement de toutes les images ---
+  await Promise.all([...clone.querySelectorAll("img")].map(img=>{
+      return new Promise(res=>{
+          if(img.complete) res();
+          else img.onload=img.onerror=()=>res();
+      })
+  }));
 
-  // Attendre le chargement complet des images
-  await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => new Promise(resolve => {
-      if(img.complete) resolve(); else img.onload=img.onerror=()=>resolve();
-  })));
+  // --- 6) html2canvas propre ---
+  const canvas = await html2canvas(clone, {
+      scale:2,
+      backgroundColor:"#ffffff",
+      useCORS:true
+  });
 
-  // Générer canvas et PDF
-  const canvas = await html2canvas(clone, { scale:2, useCORS:true, allowTaint:true });
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p','mm','a6');
-  const pageWidthMm = pdf.internal.pageSize.getWidth();
-  const pageHeightMm = pdf.internal.pageSize.getHeight();
-  const pxPerMm = canvas.width / pageWidthMm;
-  const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
+  // --- 7) Génération PDF ---
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF('p','mm','a6');
+  const pw=pdf.internal.pageSize.getWidth();
+  const ph=pdf.internal.pageSize.getHeight();
 
-  let y=0, pageIndex=0;
-  while(y < canvas.height){
-      const sliceHeight = Math.min(pageHeightPx, canvas.height-y);
-      const tmpCanvas = document.createElement('canvas');
-      tmpCanvas.width = canvas.width;
-      tmpCanvas.height = sliceHeight;
-      tmpCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
-      const imgData = tmpCanvas.toDataURL('image/png');
-      const sliceHeightMm = sliceHeight/pxPerMm;
-      if(pageIndex>0) pdf.addPage();
-      pdf.addImage(imgData,'PNG',0,0,pageWidthMm,sliceHeightMm);
-      pdf.setFontSize(8);
-      pdf.text("© LesFacilitateurs WhatsApp 651475255",5,pageHeightMm-5);
-      y+=sliceHeight;
-      pageIndex++;
-  }
+  pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,pw,ph);
 
-  tempContainer.remove();
-  pdf.save(docName||'Document.pdf');
+  // Signature obligatoire
+  pdf.setFontSize(8);
+  pdf.text("© LesFacilitateurs Groupe - WhatsApp 651475255",4,ph-4);
+
+  temp.remove();
+
+  pdf.save(docName + ".pdf");
 }
 </script>
 </body>
