@@ -243,31 +243,27 @@ async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
 
   const app = document.getElementById('app');
+
+  // Cloner le contenu pour ne pas toucher à l'affichage original
   const clone = app.cloneNode(true);
 
-  // 🔹 Si la signature est un canvas, on la convertit en image avant de cloner
-  const originalSignatures = app.querySelectorAll('canvas');
-  const cloneSignatures = clone.querySelectorAll('canvas');
-  originalSignatures.forEach((canvas, i) => {
+  // Masquer tous les éléments interactifs
+  clone.querySelectorAll('button, input, textarea, select').forEach(el => el.remove());
+
+  // Convertir canvas signature en image
+  clone.querySelectorAll('canvas').forEach(c => {
     const img = document.createElement('img');
-    img.src = canvas.toDataURL('image/png');
+    img.src = c.toDataURL('image/png');
     img.style.maxWidth = '100%';
     img.style.height = 'auto';
-    cloneSignatures[i].replaceWith(img);
+    c.replaceWith(img);
   });
 
-  const tempContainer = document.createElement('div');
-  tempContainer.style.position = 'absolute';
-  tempContainer.style.left = '-9999px';
-  document.body.appendChild(tempContainer);
-  tempContainer.appendChild(clone);
-
-  // 🔹 Transformer les inputs/textareas en texte simple
-  const fields = clone.querySelectorAll('input, textarea');
-  fields.forEach(field => {
+  // Convertir les champs texte en div
+  clone.querySelectorAll('[contenteditable], input, textarea').forEach(f => {
     const div = document.createElement('div');
-    div.textContent = field.value || field.placeholder || '';
-    const style = window.getComputedStyle(field);
+    div.textContent = f.value || f.textContent || '';
+    const style = window.getComputedStyle(f);
     div.style.cssText = `
       font-family:${style.fontFamily};
       font-size:${style.fontSize};
@@ -276,26 +272,30 @@ async function exportPDF(docName){
       line-height:${style.lineHeight};
       white-space:pre-wrap;
       word-wrap:break-word;
-      border:none;
-      background:transparent;
-      width:${field.offsetWidth}px;
-      min-height:${field.offsetHeight}px;
+      margin-bottom:4px;
     `;
-    field.replaceWith(div);
+    f.replaceWith(div);
   });
 
-  // 🔹 Attendre le chargement complet des images (y compris signature)
-  const images = clone.querySelectorAll('img');
-  await Promise.all(Array.from(images).map(img => {
-    return new Promise(resolve => {
-      if (img.complete && img.naturalHeight !== 0) resolve();
-      else img.onload = img.onerror = () => resolve();
-    });
-  }));
+  // Placer le clone temporairement hors écran
+  const tempContainer = document.createElement('div');
+  tempContainer.style.position = 'absolute';
+  tempContainer.style.left = '-9999px';
+  document.body.appendChild(tempContainer);
+  tempContainer.appendChild(clone);
 
-  // ✅ Création du PDF (fixe la référence globale)
+  // Générer le PDF avec html2canvas
+  const canvas = await html2canvas(clone, {
+    scale:2,
+    useCORS:true,
+    allowTaint:true,
+    scrollX:0,
+    scrollY:0,
+    windowWidth:clone.scrollWidth,
+    windowHeight:clone.scrollHeight
+  });
+
   const { jsPDF } = window.jspdf;
-  const canvas = await html2canvas(clone, { scale:2, useCORS:true, allowTaint:true });
   const pdf = new jsPDF('p','mm','a6');
   const pageWidthMm = pdf.internal.pageSize.getWidth();
   const pageHeightMm = pdf.internal.pageSize.getHeight();
@@ -303,24 +303,27 @@ async function exportPDF(docName){
   const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
 
   let y = 0, pageIndex = 0;
-  while (y < canvas.height) {
+  while(y < canvas.height){
     const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
     const tmpCanvas = document.createElement('canvas');
     tmpCanvas.width = canvas.width;
     tmpCanvas.height = sliceHeight;
-    tmpCanvas.getContext('2d').drawImage(canvas, 0, y, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+    tmpCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
     const imgData = tmpCanvas.toDataURL('image/png');
     const sliceHeightMm = sliceHeight / pxPerMm;
-    if (pageIndex > 0) pdf.addPage();
-    pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMm, sliceHeightMm);
+    if(pageIndex > 0) pdf.addPage();
+    pdf.addImage(imgData,'PNG',0,0,pageWidthMm,sliceHeightMm);
     pdf.setFontSize(8);
-    pdf.text("© LesFacilitateurs Middleman 651475255", 5, pageHeightMm - 5);
+    pdf.text("© LesFacilitateurs WhatsApp 651475255",5,pageHeightMm - 5);
     y += sliceHeight;
     pageIndex++;
   }
 
+  // Supprimer le clone temporaire
   tempContainer.remove();
-  pdf.save(`${docName}.pdf`);
+
+  // Télécharger
+  pdf.save(docName || 'Document.pdf');
 }
 </script>
 </body>
