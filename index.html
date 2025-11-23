@@ -243,63 +243,54 @@ async function exportPDF(docName){
   if(!paiementValide){ ouvrirPopup(); return; }
 
   const app = document.getElementById('app');
-
-  // 🔹 Cloner le contenu
   const clone = app.cloneNode(true);
 
-  // 🔹 Supprimer les éléments interactifs
-  clone.querySelectorAll('button, input, textarea, select').forEach(el => el.remove());
+  // Remplacer tous les inputs / textarea / contenteditable par du texte
+  clone.querySelectorAll('input, textarea, [contenteditable]').forEach(f => {
+      const div = document.createElement('div');
+      div.textContent = f.value || f.textContent || '';
+      const style = window.getComputedStyle(f);
+      div.style.cssText = `
+          font-family:${style.fontFamily};
+          font-size:${style.fontSize};
+          font-weight:${style.fontWeight};
+          color:${style.color};
+          line-height:${style.lineHeight};
+          white-space:pre-wrap;
+          word-wrap:break-word;
+          margin-bottom:4px;
+      `;
+      f.replaceWith(div);
+  });
 
-  // 🔹 Convertir canvas signature en image
+  // Convertir canvas signature en image
   clone.querySelectorAll('canvas').forEach(c => {
-    const img = document.createElement('img');
-    img.src = c.toDataURL('image/png');
-    img.style.maxWidth = '100%';
-    img.style.height = 'auto';
-    c.replaceWith(img);
+      const img = document.createElement('img');
+      img.src = c.toDataURL('image/png');
+      img.style.maxWidth = '100%';
+      img.style.height = 'auto';
+      c.replaceWith(img);
   });
 
-  // 🔹 Convertir inputs et textareas en div
-  clone.querySelectorAll('[contenteditable], input, textarea').forEach(f => {
-    const div = document.createElement('div');
-    div.textContent = f.value || f.textContent || '';
-    const style = window.getComputedStyle(f);
-    div.style.cssText = `
-      font-family:${style.fontFamily};
-      font-size:${style.fontSize};
-      font-weight:${style.fontWeight};
-      color:${style.color};
-      line-height:${style.lineHeight};
-      white-space:pre-wrap;
-      word-wrap:break-word;
-      margin-bottom:4px;
-    `;
-    f.replaceWith(div);
-  });
-
-  // 🔹 Forcer le clone à montrer tout le contenu
+  // Forcer affichage complet
+  clone.style.background = '#fff';
   clone.style.overflow = 'visible';
   clone.style.height = 'auto';
   clone.style.width = app.scrollWidth + 'px';
 
-  // 🔹 Ajouter clone temporaire hors écran
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
   tempContainer.style.left = '-9999px';
   tempContainer.appendChild(clone);
   document.body.appendChild(tempContainer);
 
-  // 🔹 Générer le canvas avec html2canvas
-  const canvas = await html2canvas(clone, {
-    scale:2,
-    useCORS:true,
-    allowTaint:true,
-    scrollX:0,
-    scrollY:0,
-    windowWidth:clone.scrollWidth,
-    windowHeight:clone.scrollHeight
-  });
+  // Attendre le chargement complet des images
+  await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => new Promise(resolve => {
+      if(img.complete) resolve(); else img.onload=img.onerror=()=>resolve();
+  })));
 
+  // Générer canvas et PDF
+  const canvas = await html2canvas(clone, { scale:2, useCORS:true, allowTaint:true });
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a6');
   const pageWidthMm = pdf.internal.pageSize.getWidth();
@@ -307,28 +298,25 @@ async function exportPDF(docName){
   const pxPerMm = canvas.width / pageWidthMm;
   const pageHeightPx = Math.floor(pageHeightMm * pxPerMm);
 
-  let y = 0, pageIndex = 0;
+  let y=0, pageIndex=0;
   while(y < canvas.height){
-    const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
-    const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = canvas.width;
-    tmpCanvas.height = sliceHeight;
-    tmpCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
-    const imgData = tmpCanvas.toDataURL('image/png');
-    const sliceHeightMm = sliceHeight / pxPerMm;
-    if(pageIndex > 0) pdf.addPage();
-    pdf.addImage(imgData,'PNG',0,0,pageWidthMm,sliceHeightMm);
-    pdf.setFontSize(8);
-    pdf.text("© LesFacilitateurs WhatsApp 651475255",5,pageHeightMm - 5);
-    y += sliceHeight;
-    pageIndex++;
+      const sliceHeight = Math.min(pageHeightPx, canvas.height-y);
+      const tmpCanvas = document.createElement('canvas');
+      tmpCanvas.width = canvas.width;
+      tmpCanvas.height = sliceHeight;
+      tmpCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
+      const imgData = tmpCanvas.toDataURL('image/png');
+      const sliceHeightMm = sliceHeight/pxPerMm;
+      if(pageIndex>0) pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,0,pageWidthMm,sliceHeightMm);
+      pdf.setFontSize(8);
+      pdf.text("© LesFacilitateurs WhatsApp 651475255",5,pageHeightMm-5);
+      y+=sliceHeight;
+      pageIndex++;
   }
 
-  // 🔹 Supprimer clone temporaire
   tempContainer.remove();
-
-  // 🔹 Télécharger
-  pdf.save(docName || 'Document.pdf');
+  pdf.save(docName||'Document.pdf');
 }
 </script>
 </body>
