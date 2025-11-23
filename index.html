@@ -244,13 +244,13 @@ async function exportPDF(docName){
 
   const app = document.getElementById('app');
 
-  // Cloner le contenu pour ne pas toucher à l'affichage original
+  // 🔹 Cloner le contenu
   const clone = app.cloneNode(true);
 
-  // Masquer tous les éléments interactifs
+  // 🔹 Supprimer les éléments interactifs
   clone.querySelectorAll('button, input, textarea, select').forEach(el => el.remove());
 
-  // Convertir canvas signature en image
+  // 🔹 Convertir canvas signature en image
   clone.querySelectorAll('canvas').forEach(c => {
     const img = document.createElement('img');
     img.src = c.toDataURL('image/png');
@@ -259,7 +259,7 @@ async function exportPDF(docName){
     c.replaceWith(img);
   });
 
-  // Convertir les champs texte en div
+  // 🔹 Convertir inputs et textareas en div
   clone.querySelectorAll('[contenteditable], input, textarea').forEach(f => {
     const div = document.createElement('div');
     div.textContent = f.value || f.textContent || '';
@@ -277,14 +277,19 @@ async function exportPDF(docName){
     f.replaceWith(div);
   });
 
-  // Placer le clone temporairement hors écran
+  // 🔹 Forcer le clone à montrer tout le contenu
+  clone.style.overflow = 'visible';
+  clone.style.height = 'auto';
+  clone.style.width = app.scrollWidth + 'px';
+
+  // 🔹 Ajouter clone temporaire hors écran
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
   tempContainer.style.left = '-9999px';
-  document.body.appendChild(tempContainer);
   tempContainer.appendChild(clone);
+  document.body.appendChild(tempContainer);
 
-  // Générer le PDF avec html2canvas
+  // 🔹 Générer le canvas avec html2canvas
   const canvas = await html2canvas(clone, {
     scale:2,
     useCORS:true,
@@ -319,10 +324,10 @@ async function exportPDF(docName){
     pageIndex++;
   }
 
-  // Supprimer le clone temporaire
+  // 🔹 Supprimer clone temporaire
   tempContainer.remove();
 
-  // Télécharger
+  // 🔹 Télécharger
   pdf.save(docName || 'Document.pdf');
 }
 </script>
