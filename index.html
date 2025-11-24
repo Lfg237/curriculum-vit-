@@ -13,25 +13,14 @@ body{font-family:Inter,sans-serif;background:linear-gradient(120deg,var(--bg1),v
 .brand{display:flex;align-items:center;gap:12px;}
 .brand .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(45deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;font-size:28px;}
 .brand h1{font-family:Dancing Script,cursive;margin:0;font-size:20px;color:var(--accent);}
-.navbar{overflow-x:auto;white-space:nowrap;padding:10px;background:rgba(255,255,255,0.6);backdrop-filter:blur(6px);}
-.navbar button{display:inline-block;margin-right:8px;padding:10px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,#fff,rgba(255,255,255,0.6));box-shadow:0 4px 8px rgba(0,0,0,0.06);cursor:pointer;font-size:11px;}
 .container{padding:8px;display:flex;justify-content:center;flex-direction:column;align-items:center;}
 .main{background:rgba(255,255,255,0.9);padding:8mm;border-radius:12px;width:95%;max-width:600px;min-height:105mm;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;font-size:12px;line-height:1.4;word-wrap: break-word;}
 .doc-title{font-family:Dancing Script,cursive;font-size:18px;margin:6px 0;}
 .handwritten{font-family:'Dancing Script',cursive;font-weight:700;font-size:16px;color:#2c3e50;}
 .doc-photo{width:60px;height:60px;object-fit:cover;border-radius:50%;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;margin:4px;float:left;}
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:11px;color:#555;margin-bottom:4px;font-weight:600;}
-.field textarea{width:100%;min-height:250px;max-height:600px;padding:8px;border:1px solid #eee;border-radius:6px;font-size:12px;line-height:1.4;resize:vertical;overflow-y:auto;background-color:#fff8dc;}
 .btn{padding:6px 10px;border-radius:8px;border:0;cursor:pointer;margin-top:4px;font-size:12px;}
 .btn-primary{background:linear-gradient(90deg,#4facfe,#00f2fe);color:white;}
 .btn-ghost{background:transparent;border:1px solid #ddd;margin-left:6px;font-size:12px;}
-#previewContainer{width:95%;max-width:600px;margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;}
-.preview-doc{border:1px solid #ccc;padding:10px;margin-bottom:12px;border-radius:8px;background:#fffbe6;}
-.preview-doc img{width:60px;height:60px;border-radius:50%;margin-right:4px;float:left;}
-#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
-#paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:400px;width:100%;}
-#pmMsg{margin-top:8px;color:crimson;}
 .signature-pad{border:1px solid #ccc;border-radius:8px;width:100%;height:50px;background:#fff;margin-top:8px;}
 input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8px;}
 .photo-flottante{float:left;margin:4px;padding:4px;border:1px solid #aaa;border-radius:6px;background:#fff;max-width:200px;display:inline-block;}
@@ -40,6 +29,20 @@ input.editable{font-weight:bold;font-size:14px;text-align:center;margin-bottom:8
 .fiche70{display:flex; flex-wrap:wrap; gap:12px;}
 .colonne{flex:1; min-width:45%;}
 textarea, input{font-family:Inter,sans-serif;}
+/* Hamburger et menu */
+.hamburger { width: 35px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; margin: 15px; z-index: 1001; position: relative; }
+.hamburger div { height: 4px; background: #000; border-radius: 3px; transition: .3s; }
+.side-menu { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #fff; padding-top: 80px; display: flex; flex-direction: column; gap: 15px; transition: right .4s ease; box-shadow: -4px 0 10px rgba(0,0,0,0.1); z-index: 1000; overflow-y:auto; }
+.side-menu a { font-size: 16px; padding: 8px 16px; color: #000; text-decoration: none; }
+.side-menu a:hover { background: #f5f5f5; }
+.side-menu.open { right: 0; }
+.hamburger.active div:nth-child(1) { transform: translateY(10px) rotate(45deg); }
+.hamburger.active div:nth-child(2) { opacity: 0; }
+.hamburger.active div:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
+/* Popup paiement */
+#paymentModal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000;}
+#paymentModal > div{background:white;border-radius:12px;padding:18px;max-width:400px;width:100%;}
+#pmMsg{margin-top:8px;color:crimson;}
 </style>
 </head>
 <body>
@@ -48,105 +51,34 @@ textarea, input{font-family:Inter,sans-serif;}
     <div class="logo">LF</div>
     <h1>Mini Secrétariat</h1>
   </div>
-  
-<!-- Police écriture à la main -->
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-
-<!-- Hamburger -->
-<div class="hamburger" onclick="toggleMenu()">
-  <div></div>
-  <div></div>
-  <div></div>
-</div>
-
-<!-- Menu Slide Right -->
-<div class="side-menu" id="sideMenu">
-  <a href="https://module-paiement.vercel.app" target="_blank">calendrier personnalisé</a>
-  <a href="https://google.com" target="_blank">Google</a>
-  <a href="https://youtube.com" target="_blank">YouTube</a>
-  <a href="https://facebook.com" target="_blank">Facebook</a>
-</div>
-
-<style>
-  body { font-family: 'Dancing Script', cursive; }
-
-  .hamburger {
-    width: 35px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 15px;
-    z-index: 1001;
-    position: relative;
-  }
-
-  .hamburger div {
-    height: 4px;
-    background: #000;
-    border-radius: 3px;
-    transition: .3s;
-  }
-
-  /* Menu qui glisse depuis la droite */
-  .side-menu {
-    position: fixed;
-    top: 0;
-    right: -250px;
-    width: 250px;
-    height: 100%;
-    background: #fff;
-    padding-top: 80px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    transition: right .4s ease;
-    box-shadow: -4px 0 10px rgba(0,0,0,0.1);
-    z-index: 1000;
-  }
-
-  .side-menu a {
-    font-size: 28px;
-    padding: 10px 20px;
-    color: #000;
-    text-decoration: none;
-  }
-
-  .side-menu a:hover {
-    background: #f5f5f5;
-  }
-
-  .side-menu.open {
-    right: 0;
-  }
-
-  /* Animation hamburger -> croix */
-  .hamburger.active div:nth-child(1) {
-    transform: translateY(10px) rotate(45deg);
-  }
-  .hamburger.active div:nth-child(2) {
-    opacity: 0;
-  }
-  .hamburger.active div:nth-child(3) {
-    transform: translateY(-10px) rotate(-45deg);
-  }
-</style>
-
-<script>
-  function toggleMenu() {
-    document.querySelector('.hamburger').classList.toggle('active');
-    document.getElementById('sideMenu').classList.toggle('open');
-  }
-</script>
+  <div class="hamburger" id="hamburger">
+    <div></div><div></div><div></div>
+  </div>
 </header>
-<nav class="navbar" id="mainNav"></nav>
+
+<div class="side-menu" id="sideMenu">
+  <a href="#" onclick="ouvrirDoc('CV'); closeMenu(); return false;">CV</a>
+  <a href="#" onclick="ouvrirDoc('CarteVisite'); closeMenu(); return false;">Carte Visite</a>
+  <a href="#" onclick="ouvrirDoc('LettreMotivation'); closeMenu(); return false;">Lettre Motivation</a>
+  <a href="#" onclick="ouvrirDoc('CNI'); closeMenu(); return false;">CNI</a>
+  <a href="#" onclick="ouvrirDoc('ProtocoleAccord'); closeMenu(); return false;">Protocole Accord</a>
+  <a href="#" onclick="ouvrirDoc('ContratTravail'); closeMenu(); return false;">Contrat Travail</a>
+  <a href="#" onclick="ouvrirDoc('PlanLocalisation'); closeMenu(); return false;">Plan Localisation</a>
+  <a href="#" onclick="ouvrirDoc('Fiche70Noms'); closeMenu(); return false;">Fiche 70 Noms</a>
+  <a href="#" onclick="ouvrirDoc('Rapport'); closeMenu(); return false;">Rapport</a>
+  <a href="#" onclick="ouvrirDoc('GaleriePhotos'); closeMenu(); return false;">Galerie Photos</a>
+  <a href="https://module-paiement.vercel.app" target="_blank">Calendrier personnalisé</a>
+  <a href="https://example.com" target="_blank">Lien supplémentaire</a>
+  <a href="https://example2.com" target="_blank">Deuxième lien</a>
+</div>
+
 <div class="container">
   <main class="main" id="app">
     <p>Bienvenue dans le Mini Secrétariat. Choisissez un document pour commencer ✨</p>
   </main>
-  <div id="previewContainer"></div>
 </div>
 
+<!-- Popup paiement -->
 <div id="paymentModal">
   <div>
     <h3>Paiement requis</h3>
@@ -177,121 +109,12 @@ let paiementValide=false;
 let nomSignataire='Nom Signataire';
 const noms=Array.from({length:70},(_,i)=>'Nom '+(i+1));
 
-const nav=document.getElementById('mainNav');
-documents.forEach(doc=>{
-  const btn=document.createElement('button');
-  btn.textContent=doc.replace(/([A-Z])/g," $1").trim();
-  btn.onclick=()=>ouvrirDoc(doc);
-  nav.appendChild(btn);
-});
+const hamburger = document.getElementById('hamburger');
+const sideMenu = document.getElementById('sideMenu');
+hamburger.addEventListener('click', ()=> { hamburger.classList.toggle('active'); sideMenu.classList.toggle('open'); });
+function closeMenu(){ hamburger.classList.remove('active'); sideMenu.classList.remove('open'); }
 
-function ouvrirDoc(doc){
-  const app=document.getElementById('app');
-  const photoHTML=(id,title)=>`
-    <input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/>
-    <label for="${id}"><img id="img${id}" class="doc-photo" title="${title}" src=""/></label>`;
-  
-  let content='';
-
-  if(doc==='CNI'){
-    content=`
-      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
-        <input type="file" id="CNIrecto" accept="image/*" style="display:none" onchange="afficherPhoto('CNIrecto','imgCNIrecto')"/>
-        <label for="CNIrecto">
-          <img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
-        </label>
-      </div>
-      <div style="margin-bottom:12px; border:1px solid #000; padding:4px;">
-        <input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/>
-        <label for="CNIverso">
-          <img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/>
-        </label>
-      </div>`;
-  } else if(doc==='Fiche70Noms'){
-    content='<div class="fiche70">';
-    content+='<div class="colonne">'+noms.slice(0,35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
-    content+='<div class="colonne">'+noms.slice(35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div>';
-    content+='</div>';
-  } else if(doc==='GaleriePhotos'){
-    content=`<div id="galleryContainer"></div>
-             <button class="btn btn-ghost" onclick="ajouterPhotoFlottante()">➕ Ajouter photo</button>`;
-  } else if(doc==='ProtocoleAccord'){
-    content=`
-      <textarea style="width:100%; min-height:150px;">Contenu du protocole...</textarea>
-      <div id="signatairesContainer" style="margin-top:12px;">
-        <h4>Signataires :</h4>
-        <div><input placeholder="Nom signataire 1" style="width:100%; margin-bottom:4px;"/></div>
-      </div>
-      <button class="btn btn-ghost" onclick="ajouterSignataire()">➕ Ajouter signataire</button>
-    `;
-  } else {
-    content=`${photoHTML(doc+'Photo',doc)}<textarea>Votre contenu...</textarea>`;
-  }
-
-  content+=`<canvas id="signaturePad" class="signature-pad"></canvas>
-<input class="editable" id="signataireInput" placeholder="Nom signataire"/>
-<button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button>
-<button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button>
-<button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
-app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
-
-const canvas=document.getElementById('signaturePad');
-window.signaturePad=new SignaturePad(canvas);
-
-const signInput=document.getElementById('signataireInput');
-signInput.value=nomSignataire;
-signInput.addEventListener('input',()=>{nomSignataire=signInput.value;});
-
-document.querySelectorAll('textarea').forEach(t=>{
-  t.addEventListener('input',()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px';});
-});
-}
-
-function ajouterSignataire(){
-  const container = document.getElementById('signatairesContainer');
-  const count = container.querySelectorAll('input').length + 1;
-  const div = document.createElement('div');
-  div.innerHTML = `<input placeholder="Nom signataire ${count}" style="width:100%; margin-bottom:4px;"/>`;
-  container.appendChild(div);
-}
-
-function afficherPhoto(inputId,imgId){
-  const input=document.getElementById(inputId);
-  const img=document.getElementById(imgId);
-  if(input.files && input.files[0]){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      img.src = e.target.result; // Base64 pour html2canvas
-    }
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-function ajouterPhotoFlottante(){
-  const container=document.getElementById('galleryContainer');
-  const id='photo'+Date.now();
-  const div=document.createElement('div');
-  div.className='photo-flottante';
-  div.innerHTML=`
-    <input type="file" accept="image/*" onchange="chargerImageFlottante(event,'${id}')">
-    <img id="img${id}" src=""/>
-    <div contenteditable="true">Commentaire...</div>`;
-  container.appendChild(div);
-}
-
-function chargerImageFlottante(e,id){
-  const img=document.getElementById('img'+id);
-  const file=e.target.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      img.src = ev.target.result;
-    }
-    reader.readAsDataURL(file);
-  }
-}
-
-function clearSignature(){window.signaturePad.clear();}
+// --- Paiement strict ---
 function ouvrirPopup(){document.getElementById('paymentModal').style.display='flex'; document.getElementById('pmMsg').textContent='';}
 function fermerPopup(){document.getElementById('paymentModal').style.display='none';}
 function verifierPaiementStrict(){
@@ -301,115 +124,81 @@ function verifierPaiementStrict(){
   pmMsg.textContent = '';
   let valide = false;
 
-  if (vip === VIP_CODE) {
-    valide = true;
-  } else {
-    const regex = /kono\s+ Michel|651475255|656050097/i;
+  if (vip === VIP_CODE) { valide = true; }
+  else {
+    const regex = /kono\s+Michel|651475255|656050097/i;
     const regexMontant = /\b\d{3,}\s?(F|FCFA|XAF)\b/i;
     const regexId = /(ID|TID)\s?[:\-]?\s?\w+/i;
     const regexDate = /\d{2}\/\d{2}\/\d{4}|\d{2}:\d{2}/;
-
-    if (
-      regex.test(msg) &&
-      regexMontant.test(msg) &&
-      regexId.test(msg) &&
-      regexDate.test(msg)
-    ) {
-      valide = true;
-    }
+    if (regex.test(msg) && regexMontant.test(msg) && regexId.test(msg) && regexDate.test(msg)) valide=true;
   }
 
-  if (valide) {
-    paiementValide = true;
-    fermerPopup();
-    alert('Paiement validé ✅');
-  } else {
-    paiementValide = false;
-    pmMsg.textContent = 'Message ou code invalide ❌. Vérifiez le nom, le numéro, le montant, l’ID et la date.';
-  }
+  if (valide){ paiementValide = true; fermerPopup(); alert('Paiement validé ✅'); }
+  else{ paiementValide = false; pmMsg.textContent = 'Message ou code invalide ❌. Vérifiez le nom, le numéro, le montant, l’ID et la date.'; }
 }
+
+// --- Documents ---
+function ouvrirDoc(doc){
+  const app=document.getElementById('app');
+  const photoHTML=(id,title)=>`<input type="file" id="${id}" accept="image/*" style="display:none" onchange="afficherPhoto('${id}','img${id}')"/><label for="${id}"><img id="img${id}" class="doc-photo" title="${title}" src=""/></label>`;
+  
+  let content='';
+  if(doc==='CNI'){ content=`<div style="margin-bottom:12px;border:1px solid #000;padding:4px;"><input type="file" id="CNIrecto" accept="image/*" style="display:none" onchange="afficherPhoto('CNIrecto','imgCNIrecto')"/><label for="CNIrecto"><img id="imgCNIrecto" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/></label></div><div style="margin-bottom:12px;border:1px solid #000;padding:4px;"><input type="file" id="CNIverso" accept="image/*" style="display:none" onchange="afficherPhoto('CNIverso','imgCNIverso')"/><label for="CNIverso"><img id="imgCNIverso" style="width:100%; height:50mm; object-fit:cover; display:block;" src=""/></label></div>`;}
+  else if(doc==='Fiche70Noms'){ content='<div class="fiche70"><div class="colonne">'+noms.slice(0,35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div><div class="colonne">'+noms.slice(35).map(n=>`<input value="${n}" style="width:100%;margin-bottom:2px"/>`).join('')+'</div></div>'; }
+  else if(doc==='GaleriePhotos'){ content=`<div id="galleryContainer"></div><button class="btn btn-ghost" onclick="ajouterPhotoFlottante()">➕ Ajouter photo</button>`;}
+  else if(doc==='ProtocoleAccord'){ content=`<textarea style="width:100%; min-height:150px;">Contenu du protocole...</textarea><div id="signatairesContainer" style="margin-top:12px;"><h4>Signataires :</h4><div><input placeholder="Nom signataire 1" style="width:100%; margin-bottom:4px;"/></div></div><button class="btn btn-ghost" onclick="ajouterSignataire()">➕ Ajouter signataire</button>`;}
+  else{ content=`${photoHTML(doc+'Photo',doc)}<textarea>Votre contenu...</textarea>`; }
+
+  content+=`<canvas id="signaturePad" class="signature-pad"></canvas><input class="editable" id="signataireInput" placeholder="Nom signataire"/><button class="btn btn-ghost" onclick="clearSignature()">Effacer signature</button><button class="btn btn-primary" onclick="exportPDF('${doc}')">📄 Télécharger PDF</button><button class="btn btn-ghost" onclick="app.innerHTML='<p>Bienvenue dans le Mini Secrétariat...</p>'">Retour</button>`;
+
+  app.innerHTML=`<h2 class="doc-title handwritten">${doc.replace(/([A-Z])/g," $1").trim()}</h2>`+content;
+
+  const canvas=document.getElementById('signaturePad');
+  window.signaturePad=new SignaturePad(canvas);
+
+  const signInput=document.getElementById('signataireInput');
+  signInput.value=nomSignataire;
+  signInput.addEventListener('input',()=>{nomSignataire=signInput.value;});
+
+  document.querySelectorAll('textarea').forEach(t=>{t.addEventListener('input',()=>{t.style.height='auto';t.style.height=t.scrollHeight+'px';});});
+}
+
+// --- Fonctions auxiliaires ---
+function ajouterSignataire(){const container=document.getElementById('signatairesContainer');const count=container.querySelectorAll('input').length+1;const div=document.createElement('div');div.innerHTML=`<input placeholder="Nom signataire ${count}" style="width:100%; margin-bottom:4px;"/>`;container.appendChild(div);}
+function afficherPhoto(inputId,imgId){const input=document.getElementById(inputId);const img=document.getElementById(imgId);if(input.files && input.files[0]){const reader=new FileReader();reader.onload=function(e){img.src=e.target.result;};reader.readAsDataURL(input.files[0]);}}
+function ajouterPhotoFlottante(){const container=document.getElementById('galleryContainer');const id='photo'+Date.now();const div=document.createElement('div');div.className='photo-flottante';div.innerHTML=`<input type="file" accept="image/*" onchange="chargerImageFlottante(event,'${id}')"><img id="img${id}" src=""/><div contenteditable="true">Commentaire...</div>`;container.appendChild(div);}
+function chargerImageFlottante(e,id){const img=document.getElementById('img'+id);const file=e.target.files[0];if(file){const reader=new FileReader();reader.onload=function(ev){img.src=ev.target.result;};reader.readAsDataURL(file);}}
+function clearSignature(){window.signaturePad.clear();}
+
+// --- Export PDF avec paiement ---
 async function exportPDF(docName){
-  if(!paiementValide){ ouvrirPopup(); return; }
+  if(!paiementValide){ouvrirPopup(); return;}
+  const app=document.getElementById('app');
+  const clone=app.cloneNode(true);
+  clone.style.background="#ffffff"; clone.style.padding="10px"; clone.style.width="100%"; clone.style.maxWidth="480px"; clone.style.position="static"; clone.style.overflow="visible";
+  clone.querySelectorAll("*").forEach(el=>{ el.style.overflow="visible"; el.style.background=(el.style.background||"").includes("linear-gradient")?"#ffffff":el.style.background; el.style.backdropFilter="none"; el.style.position=el.style.position==="relative"?"static":el.style.position;});
+  clone.querySelectorAll('textarea,input,[contenteditable]').forEach(f=>{const d=document.createElement('div'); d.textContent=f.value||f.textContent; d.style.cssText=`font-size:12px; margin-bottom:4px; white-space:pre-wrap;`; f.replaceWith(d);});
+  clone.querySelectorAll('canvas').forEach(c=>{const img=document.createElement('img'); img.src=c.toDataURL("image/png"); img.style.maxWidth="100%"; c.replaceWith(img);});
+  const temp=document.createElement("div"); temp.style.position="absolute"; temp.style.left="-9999px"; document.body.appendChild(temp); temp.appendChild(clone);
+  await Promise.all([...clone.querySelectorAll("img")].map(img=>new Promise(res=>{ if(img.complete) res(); else img.onload=img.onerror=res; })));
+  const canvas=await html2canvas(clone,{scale:2,backgroundColor:"#ffffff",useCORS:true,scrollX:0,scrollY:0});
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a6");
 
-  const app = document.getElementById('app');
+  const pw = pdf.internal.pageSize.getWidth();
+  const ph = pdf.internal.pageSize.getHeight();
 
-  // CLONE propre
-  const clone = app.cloneNode(true);
+  // Ajouter l'image du document capturé
+  pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pw, ph);
 
-  // --- 1) Supprimer tous les styles bloquants ---
-  clone.style.background = "#ffffff";     // Remplace le gradient
-  clone.style.overflow = "visible";
-  clone.style.height = "auto";
-  clone.style.width = app.scrollWidth + "px";
-  clone.style.position = "static";
-
-  clone.querySelectorAll('*').forEach(el=>{
-      el.style.overflow = "visible";
-      el.style.background = el.style.background.includes("linear-gradient") ? "#fff" : el.style.background;
-      el.style.position = el.style.position === "relative" ? "static" : el.style.position;
-  });
-
-  // --- 2) Remplacer inputs / textarea → texte stable ---
-  clone.querySelectorAll('textarea,input,[contenteditable]').forEach(f=>{
-      const d=document.createElement('div');
-      d.textContent=f.value||f.textContent;
-      const cs=getComputedStyle(f);
-      d.style.cssText=`
-        font-size:${cs.fontSize};
-        font-family:${cs.fontFamily};
-        font-weight:${cs.fontWeight};
-        line-height:${cs.lineHeight};
-        color:${cs.color};
-        white-space:pre-wrap;
-        margin-bottom:4px;
-      `;
-      f.replaceWith(d);
-  });
-
-  // --- 3) Remplacer canvas signature par image ---
-  clone.querySelectorAll('canvas').forEach(c=>{
-      const img=document.createElement('img');
-      img.src=c.toDataURL('image/png');
-      img.style.maxWidth='100%';
-      c.replaceWith(img);
-  });
-
-  // --- 4) Injecter le clone hors de l’écran ---
-  const temp=document.createElement('div');
-  temp.style.position='absolute';
-  temp.style.left='-9999px';
-  document.body.appendChild(temp);
-  temp.appendChild(clone);
-
-  // --- 5) Attendre chargement de toutes les images ---
-  await Promise.all([...clone.querySelectorAll("img")].map(img=>{
-      return new Promise(res=>{
-          if(img.complete) res();
-          else img.onload=img.onerror=()=>res();
-      })
-  }));
-
-  // --- 6) html2canvas propre ---
-  const canvas = await html2canvas(clone, {
-      scale:2,
-      backgroundColor:"#ffffff",
-      useCORS:true
-  });
-
-  // --- 7) Génération PDF ---
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF('p','mm','a6');
-  const pw=pdf.internal.pageSize.getWidth();
-  const ph=pdf.internal.pageSize.getHeight();
-
-  pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,pw,ph);
-
-  // Signature obligatoire
+  // Ajouter la mention LesFacilitateurs en bas
   pdf.setFontSize(8);
-  pdf.text("© LesFacilitateurs Groupe - WhatsApp 651475255",4,ph-4);
+  pdf.text("© LesFacilitateurs Groupe - WhatsApp 651475255", 4, ph - 4);
 
+  // Retirer le clone temporaire du DOM
   temp.remove();
 
+  // Télécharger le PDF
   pdf.save(docName + ".pdf");
 }
 </script>
