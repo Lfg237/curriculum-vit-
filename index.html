@@ -48,7 +48,96 @@ textarea, input{font-family:Inter,sans-serif;}
     <div class="logo">LF</div>
     <h1>Mini Secrétariat</h1>
   </div>
-  <div class="small">✨ Tous les documents • Photos flottantes • Fiche 70 noms éditable • Paiement strict</div>
+  
+<!-- Police écriture à la main -->
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+<!-- Hamburger -->
+<div class="hamburger" onclick="toggleMenu()">
+  <div></div>
+  <div></div>
+  <div></div>
+</div>
+
+<!-- Menu Slide Right -->
+<div class="side-menu" id="sideMenu">
+  <a href="https://module-paiement.vercel.app" target="_blank">calendrier personnalisé</a>
+  <a href="https://google.com" target="_blank">Google</a>
+  <a href="https://youtube.com" target="_blank">YouTube</a>
+  <a href="https://facebook.com" target="_blank">Facebook</a>
+</div>
+
+<style>
+  body { font-family: 'Dancing Script', cursive; }
+
+  .hamburger {
+    width: 35px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 15px;
+    z-index: 1001;
+    position: relative;
+  }
+
+  .hamburger div {
+    height: 4px;
+    background: #000;
+    border-radius: 3px;
+    transition: .3s;
+  }
+
+  /* Menu qui glisse depuis la droite */
+  .side-menu {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background: #fff;
+    padding-top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: right .4s ease;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+
+  .side-menu a {
+    font-size: 28px;
+    padding: 10px 20px;
+    color: #000;
+    text-decoration: none;
+  }
+
+  .side-menu a:hover {
+    background: #f5f5f5;
+  }
+
+  .side-menu.open {
+    right: 0;
+  }
+
+  /* Animation hamburger -> croix */
+  .hamburger.active div:nth-child(1) {
+    transform: translateY(10px) rotate(45deg);
+  }
+  .hamburger.active div:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.active div:nth-child(3) {
+    transform: translateY(-10px) rotate(-45deg);
+  }
+</style>
+
+<script>
+  function toggleMenu() {
+    document.querySelector('.hamburger').classList.toggle('active');
+    document.getElementById('sideMenu').classList.toggle('open');
+  }
+</script>
 </header>
 <nav class="navbar" id="mainNav"></nav>
 <div class="container">
